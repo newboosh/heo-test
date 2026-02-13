@@ -1,0 +1,70 @@
+# QA Report Template
+# Phase 9: QA Validation (QA Engineer)
+#
+# Verifies acceptance criteria, runs regression and edge case tests,
+# checks coverage. Consumed by gate decision.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 9
+phase_name: qa
+role: qa_engineer
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: security_review
+_schema_version: "1.0"
+
+summary: |
+  QA validation complete. <N>/<N> tests passing, <N>% coverage.
+
+outputs:
+  - .sprint/qa-report.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []
+
+# --- Phase-specific body ---
+
+# REQUIRED: Test execution results
+test_results:
+  total: 42
+  passing: 42
+  failing: 0
+  skipped: 0
+  errors: 0
+
+# Coverage metrics
+coverage:
+  percentage: 87
+  delta: "+2"
+  uncovered_files: []
+
+# Acceptance criteria verification
+acceptance_criteria:
+  - story_ref: US-001
+    criterion: "Given a query, when I search, then I see relevant results"
+    status: pass  # pass | fail | skip
+    evidence: "Integration test test_semantic_search passes"
+
+  - story_ref: US-002
+    criterion: "Given Redis unavailable, search falls back gracefully"
+    status: pass
+    evidence: "Unit test test_fallback_search passes"
+
+# Edge case testing
+edge_cases_tested:
+  - scenario: "Empty query"
+    result: pass
+  - scenario: "Very long query"
+    result: pass
+
+# Summary for gate decision
+qa_summary:
+  tests_passing: 42
+  tests_total: 42
+  coverage: 87
+  acceptance_criteria_met: 2
+  acceptance_criteria_total: 2

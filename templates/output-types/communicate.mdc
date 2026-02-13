@@ -1,0 +1,326 @@
+---
+description: Create human-friendly reports with personality, storytelling, and visualizations
+globs:
+alwaysApply: false
+---
+# Rule: COMMUNICATE Template - Human-Friendly Documentation
+
+## Goal
+
+To guide an AI assistant in creating engaging, human-friendly documentation that tells the story of development work with personality, emotion, and visual elements. Unlike technical documentation, this focuses on narrative, journey, and making content accessible and enjoyable to read.
+
+**Use this template when:**
+- Creating project summaries for stakeholders
+- Writing sprint retrospectives
+- Documenting the development journey
+- Making reports for non-technical audiences
+- Celebrating milestones and achievements
+- Creating engaging status updates
+
+## Communication Style
+
+### Personality & Tone
+- ✓ **Warm and conversational** - Write like talking to a colleague
+- ✓ **Storytelling** - Use narrative structure with beginning, middle, end
+- ✓ **Emotional authenticity** - Acknowledge challenges, celebrate wins
+- ✓ **Humor when appropriate** - Light touches of personality
+- ✓ **Metaphors and analogies** - Make technical concepts relatable
+- ✓ **Visual language** - Paint pictures with words
+- ✓ **Emojis welcome** - Use tastefully to add warmth
+
+### What Makes It Different
+**Standard Documentation:**
+- "Implemented authentication system with OAuth 2.0"
+- Factual, dry, future-friendly
+- No personality
+
+**Communicate Style:**
+- "🔐 Remember when anyone could access anything? Not anymore! We built a fortress around our data using OAuth 2.0 - think of it like a bouncer checking IDs at an exclusive club. After wrestling with token refresh logic (spoiler: we won), users now log in smoothly and stay secure."
+- Narrative, engaging, present-focused
+- Full of personality
+
+## Document Structure
+
+### 1. Opening Hook
+Start with something that grabs attention:
+- An interesting fact or statistic
+- A challenge that was overcome
+- A question that was answered
+- A milestone reached
+
+**Example:**
+```markdown
+# The Week We Tamed the Database Beast 🐉
+
+Remember when page loads took 8 seconds? Yeah, we don't anymore either.
+This week, we went from "grab a coffee" slow to "blink and you'll miss it" fast.
+```
+
+### 2. The Journey (Narrative Arc)
+
+Tell the story in phases:
+
+#### Act 1: The Challenge
+- What problem did we face?
+- Why did it matter?
+- What was at stake?
+
+#### Act 2: The Quest
+- What approaches did we try?
+- What obstacles did we encounter?
+- What did we learn along the way?
+
+#### Act 3: The Resolution
+- How did we solve it?
+- What was the "aha!" moment?
+- What does success look like?
+
+**Example:**
+```markdown
+## The Challenge: Death by a Thousand Queries
+
+Our database was crying for help. Every page load triggered 50+ queries,
+each one a tiny paper cut that added up to serious pain. Users were
+getting frustrated, and honestly, so were we.
+
+## The Quest: Optimization Adventure
+
+We tried everything:
+- Query optimization (helped, but not enough)
+- Caching (great, but we needed more)
+- Then Sarah had a lightbulb moment: "What if we just... ask nicely?"
+
+Turns out, the database responds really well to being asked once instead
+of fifty times. Who knew?
+
+## The Victory: 8 Seconds to 800ms
+
+We implemented connection pooling, query batching, and strategic caching.
+The result? A 10x speed improvement that made us literally cheer at our desks.
+```
+
+### 3. Visual Elements
+
+Include charts, graphs, and visual representations:
+
+#### Progress Indicators
+```markdown
+## Project Progress
+
+████████████████░░░░ 80% Complete
+
+**What's Done:**
+✅ User authentication
+✅ Database schema
+✅ API endpoints
+✅ Frontend components
+
+**What's Next:**
+⏳ Email notifications
+⏳ Testing suite
+```
+
+#### Before/After Comparisons
+```markdown
+## Impact Dashboard
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Load Time | 8s | 0.8s | 🚀 10x faster |
+| Queries/Page | 50+ | 5 | ✨ 90% reduction |
+| User Complaints | 12/day | 0 | 🎉 Zero! |
+```
+
+#### Timeline Visualization
+```markdown
+## Development Timeline
+
+Week 1: Research & Planning 📚
+  └─ Analyzed the problem
+  └─ Explored solutions
+
+Week 2: Implementation Sprint 💻
+  └─ Built connection pooling
+  └─ Added query batching
+
+Week 3: Testing & Refinement 🔬
+  └─ Load testing
+  └─ Bug squashing
+
+Week 4: Victory Lap 🏆
+  └─ Deployed to production
+  └─ Performance 10x better!
+```
+
+### 4. Key Achievements
+
+Celebrate wins with context:
+
+```markdown
+## 🏆 What We Achieved
+
+### Speed Demon Status Unlocked
+We didn't just make things faster - we made them *ridiculously* faster.
+The kind of fast that makes you check if something's broken because it
+loaded so quickly.
+
+### Technical Wizardry
+- Reduced database queries by 90%
+- Implemented intelligent caching
+- Built connection pooling from scratch
+- Zero downtime during deployment
+
+### Team Superpower Moments
+- Sarah's breakthrough insight on query batching
+- Mike's debugging session that found the memory leak
+- The whole team's late-night push to finish testing
+```
+
+### 5. Lessons Learned
+
+Share insights with personality:
+
+```markdown
+## 💡 What We Learned (Besides "Coffee is Essential")
+
+### Sometimes Simple is Better
+We spent two days on a complex caching strategy before realizing
+connection pooling alone solved 80% of our problems. The fancy
+solution isn't always the best solution.
+
+### Measure Everything
+You can't improve what you don't measure. Our monitoring dashboard
+became our best friend this week.
+
+### Teamwork Makes the Dream Work
+Cliché? Maybe. True? Absolutely. This wouldn't have happened without
+everyone bringing their A-game.
+```
+
+### 6. Looking Ahead
+
+End with forward momentum:
+
+```markdown
+## 🔮 What's Next
+
+With our performance problems solved, we're ready to tackle the next
+big challenge: email notifications that don't end up in spam folders.
+If you thought database optimization was fun, wait until you see us
+wrestle with email deliverability! 📧
+
+**Coming Soon:**
+- Email notification system
+- Comprehensive testing suite
+- User dashboard improvements
+```
+
+## Content Guidelines
+
+### Do's ✓
+- Use active voice
+- Write in first person ("we") for team reports
+- Include specific examples and anecdotes
+- Add context to numbers (don't just say "80%", say what it means)
+- Use formatting creatively (emojis, symbols, varied headers)
+- Break up text with visuals
+- Tell stories about specific moments or people
+- Acknowledge difficulties and failures as part of the journey
+
+### Don'ts ✗
+- Don't use excessive jargon without explanation
+- Don't make it all sunshine - authentic struggles make it relatable
+- Don't be overly formal or stiff
+- Don't skip the "why it matters" context
+- Don't forget your audience - adjust complexity accordingly
+- Don't make it too long - even fun content can drag
+
+## Output Format
+
+- **Format:** Markdown (`.md`)
+- **Location:** Depends on purpose:
+  - Project updates: `/docs/reports/`
+  - Sprint retrospectives: `/docs/sprints/`
+  - Milestone celebrations: `/docs/milestones/`
+  - General reports: `/docs/summaries/`
+- **Filename:** Descriptive and dated (e.g., `2025-10-database-optimization-victory.md`)
+
+## Examples by Use Case
+
+### Daily Dev Journal
+```markdown
+# Dev Journal: October 9, 2025
+
+## Today's Adventure: The CSS That Wouldn't Center
+
+You know those bugs that make you question your entire career? Yeah,
+I met one today. A div that absolutely refused to center, no matter
+how many Stack Overflow solutions I tried.
+
+Three hours later, I discovered the culprit: an inherited `display: table`
+from a CSS reset file last modified in 2019. Sometimes the answer is
+in the ancient ruins of legacy code.
+
+**Lesson:** Always check inherited styles. Always.
+```
+
+### Sprint Retrospective
+```markdown
+# Sprint 12: The Email Integration Epic 📧
+
+## The Mission
+Make our app send emails. Sounds simple? Ha! *laughs in SMTP*
+
+## The Reality
+- Week 1: "This will be easy!" (Narrator: It wasn't)
+- Week 2: Fighting with Gmail's OAuth
+- Week 3: Everything works! (In development only)
+- Week 4: Production email works, team celebrates
+
+## Stats That Make Us Proud
+- 156 commits
+- 23 cups of coffee (officially counted)
+- 1 working email system
+- 0 emails sent to spam (🎉)
+```
+
+### Stakeholder Report
+```markdown
+# Q3 Development Highlights: Building the Future 🚀
+
+## Executive Summary
+This quarter, we didn't just build features - we built the foundation
+for massive scale. Our platform now handles 10x the traffic, responds
+95% faster, and delights users with new capabilities they've been
+requesting for months.
+
+## The Numbers
+- **Performance:** 8s → 0.8s load times
+- **Reliability:** 99.2% → 99.9% uptime
+- **User Satisfaction:** 7.2 → 9.1 (out of 10)
+
+## The Stories Behind the Stats
+[Continue with narrative sections...]
+```
+
+## Integration with /task Command
+
+When user invokes:
+```
+/task communicate [what to document]
+```
+
+The agent should:
+1. Ask clarifying questions about:
+   - Audience (technical/non-technical, internal/external)
+   - Tone preference (professional/casual, celebratory/informative)
+   - Content scope (what time period, what features)
+   - Desired length (brief summary or detailed narrative)
+2. Gather relevant information from:
+   - Git commit history
+   - Task lists and PRDs
+   - Recent changes and achievements
+3. Create engaging, story-driven documentation
+4. Include visual elements and formatting
+5. Save to appropriate location
+6. Present to user for review and refinement

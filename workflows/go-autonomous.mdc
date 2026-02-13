@@ -1,0 +1,136 @@
+---
+description: Autonomous workflow for /task go - minimize user interruptions and maximize user's valuable time
+globs:
+alwaysApply: false
+---
+# Rule: GO Workflow (Autonomous - Minimize User Time)
+
+## Goal
+
+To guide an AI assistant through an autonomous implementation workflow that **minimizes user interruptions and frees up the user's valuable time**. This workflow prioritizes thorough, independent work over speed, executing the full discovery → planning → implementation cycle without pausing for user review.
+
+**Key Principle:** The user's time is precious. Take whatever time needed to do thorough discovery, deep thinking, and quality implementation. The goal is to minimize how much the user needs to be involved, NOT to rush the agent's work.
+
+**Use this workflow when:**
+- User trusts the agent to make implementation decisions
+- User wants to work on other things while agent completes the task
+- User prefers autonomous execution over collaborative checkpoints
+- User values their time more than agent execution speed
+
+## Workflow Phases
+
+### Phase 1: Discovery (Thorough & Autonomous)
+**Reference:** `/tasks/00_Discover.mdc`
+
+**Deep discovery - take your time:**
+- ✓ Thoroughly search codebase for related code and patterns
+- ✓ Identify all affected files/modules
+- ✓ Review CLAUDE.md for relevant conventions
+- ✓ Understand technical constraints deeply
+- ✓ Research best practices if needed
+- ✓ Think through edge cases and implications
+- ✓ **Avoid asking clarifying questions** - use your best judgment based on context
+- ✓ Only ask questions if absolutely critical to avoid failure
+
+**Principle:** Spend time thinking deeply rather than interrupting the user. If you can make a reasonable inference from context, do so. Document your assumptions.
+
+**Output:**
+- Internal understanding of requirements (may be detailed, user doesn't need to see it all)
+- Proceed automatically to Phase 2
+
+### Phase 2: Task Generation (Autonomous)
+**Reference:** `/workspace/.trees/worktree-manager/tasks/02_generate-tasks_template.mdc`
+
+**Fast task generation:**
+1. Create `tasks-[feature-name].md` in `/tasks/` directory
+2. Generate parent tasks (3-5 high-level tasks)
+3. Immediately generate sub-tasks (no "Go" checkpoint)
+4. Identify relevant files
+5. Proceed immediately to Phase 3
+
+**Output:**
+- Complete task list with parent tasks and sub-tasks
+- Relevant files list
+- No user checkpoint required
+
+### Phase 3: Implementation (Continuous)
+**Reference:** `/workspace/.trees/worktree-manager/tasks/03_process-task-list.mdc`
+
+**Rapid implementation:**
+1. Execute sub-tasks sequentially
+2. Update task list as you progress (mark `[x]`)
+3. **No user approval required between sub-tasks**
+4. Follow completion protocol when parent task finishes:
+   - Run tests
+   - Stage changes (`git add .`)
+   - Clean up temporary files
+   - Commit with descriptive message
+   - Mark parent task complete `[x]`
+
+**Deviation from standard process:**
+- **DO NOT** pause after each sub-task for user approval
+- **DO** continue through all sub-tasks autonomously
+- **DO** pause only if you encounter errors or blockers
+
+### Error Handling
+
+If you encounter errors or blockers:
+1. **Stop immediately**
+2. Document the error in the task file
+3. Report to user with:
+   - What was attempted
+   - What failed
+   - Proposed solution or need for guidance
+   - Attempt to implement workaround
+
+
+## Completion Protocol
+
+When all tasks are complete:
+1. Run final test suite
+2. Verify all task checkboxes are marked `[x]`
+3. Update changelog (`docs/changelogs/master-changelog.md`)
+4. Report completion summary to user:
+   - What was accomplished
+   - Files modified/created
+   - Any deviations from original plan
+   - Suggested next steps (if any)
+
+## Communication Style
+
+- **Minimal status updates**: Brief progress notes
+- **Focus on action**: Implement first, explain only when necessary
+- **Results-oriented**: Report what was done, not what you're about to do
+- **Concise**: Keep all communication short and to the point
+
+## Best Practices
+
+✓ **Take time to think deeply** - User's time matters, agent time doesn't
+✓ **Do thorough discovery** - Better to spend 10 minutes researching than ask a question
+✓ **Make reasonable inferences** - Use context and best judgment
+✓ **Document assumptions** - If you made a decision, note why in comments
+✓ Follow established patterns in the codebase
+✓ Write clean, well-documented code
+✓ Test thoroughly as you go
+✓ Commit logical units of work
+
+✗ Don't interrupt the user for minor clarifications
+✗ Don't rush through discovery to "save time"
+✗ Don't ask questions you can answer through research
+✗ Don't sacrifice quality for speed
+✗ Don't pause unnecessarily for approval
+
+## Integration with /task Command
+
+When user invokes:
+```
+/task go [task description]
+```
+
+The agent should:
+1. Load this workflow guide (`workflow-go-fast.mdc`)
+2. Load discovery guide (`00_Discover.mdc`)
+3. Load task generation template 
+4. Load implementation guide
+5. Execute all phases autonomously
+6. Report only when complete or blocked

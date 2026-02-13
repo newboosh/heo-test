@@ -1,0 +1,240 @@
+# Sprint Backlog Template
+# Phase 5: Backlog
+#
+# Creates ordered, estimable tasks ready for execution.
+# Each task is self-contained with clear acceptance criteria.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 5
+phase_name: backlog
+role: tech_lead
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: technical_planning
+_schema_version: "1.0"
+
+summary: |
+  Created ordered, estimable task list with dependencies and acceptance criteria.
+
+# --- Phase-specific body ---
+
+# Sprint metadata
+sprint:
+  name: "Feature Name Sprint"
+  goal: "Deliver feature X to enable Y"
+  started: null  # Set when execution begins
+  completed: null
+
+# Task list
+sprint_backlog:
+  # Infrastructure/Setup tasks first
+  - id: TASK-001
+    title: "Create database migration"
+    type: chore  # feature | chore | test | docs | fix
+    story_ref: US-001
+    description: |
+      Create Alembic migration to add the new_models table.
+      Include all fields defined in technical spec.
+    acceptance_criteria:
+      - "Migration runs without errors"
+      - "Migration is reversible"
+      - "Table has correct schema"
+    technical_notes: |
+      Reference: src/models/existing_model.py for pattern
+      Run: flask db migrate -m "Add new_models table"
+    files:
+      read:
+        - "src/models/existing_model.py"
+      write:
+        - "migrations/versions/xxx_add_new_models.py"
+        - "src/models/new_model.py"
+    dependencies:
+      blocked_by: []
+      blocks: [TASK-002, TASK-003]
+    estimate: S  # XS | S | M | L | XL
+
+  # Model/Data layer
+  - id: TASK-002
+    title: "Create NewModel"
+    type: feature
+    story_ref: US-001
+    description: |
+      Create SQLAlchemy model for new_models table.
+      Follow existing model patterns in codebase.
+    acceptance_criteria:
+      - "Model has all required fields"
+      - "Relationships are properly defined"
+      - "Model can be imported without errors"
+    technical_notes: |
+      Include: id (UUID), name (String), user_id (FK), created_at
+      Add to __init__.py exports
+    files:
+      read:
+        - "src/models/__init__.py"
+        - "src/models/existing_model.py"
+      write:
+        - "src/models/new_model.py"
+        - "src/models/__init__.py"
+    dependencies:
+      blocked_by: [TASK-001]
+      blocks: [TASK-004]
+    estimate: S
+
+  # Service/Business logic
+  - id: TASK-003
+    title: "Write unit tests for NewService"
+    type: test
+    story_ref: US-001
+    description: |
+      Write unit tests BEFORE implementing NewService (TDD).
+      Cover happy path and error cases.
+    acceptance_criteria:
+      - "Tests cover create, read, update, delete"
+      - "Tests cover error scenarios"
+      - "Tests are independent (no shared state)"
+    technical_notes: |
+      Use pytest fixtures from conftest.py
+      Mock external dependencies
+    files:
+      read:
+        - "tests/conftest.py"
+        - "tests/unit/test_existing_service.py"
+      write:
+        - "tests/unit/test_new_service.py"
+    dependencies:
+      blocked_by: [TASK-001]
+      blocks: [TASK-004]
+    estimate: M
+
+  - id: TASK-004
+    title: "Implement NewService"
+    type: feature
+    story_ref: US-001
+    description: |
+      Implement service layer for new feature.
+      Make all unit tests pass.
+    acceptance_criteria:
+      - "All unit tests pass"
+      - "Follows existing service patterns"
+      - "Proper error handling"
+    technical_notes: |
+      Reference: src/services/existing_service.py
+      Use dependency injection for testability
+    files:
+      read:
+        - "src/services/existing_service.py"
+        - "tests/unit/test_new_service.py"
+      write:
+        - "src/services/new_service.py"
+        - "src/services/__init__.py"
+    dependencies:
+      blocked_by: [TASK-002, TASK-003]
+      blocks: [TASK-005, TASK-006]
+    estimate: M
+
+  # API layer
+  - id: TASK-005
+    title: "Write integration tests for API"
+    type: test
+    story_ref: US-001
+    description: |
+      Write integration tests for new API endpoints (TDD).
+      Test authentication, validation, and responses.
+    acceptance_criteria:
+      - "Tests cover all endpoints"
+      - "Tests verify auth requirements"
+      - "Tests check error responses"
+    files:
+      read:
+        - "tests/integration/test_existing_api.py"
+      write:
+        - "tests/integration/test_new_api.py"
+    dependencies:
+      blocked_by: [TASK-004]
+      blocks: [TASK-006]
+    estimate: M
+
+  - id: TASK-006
+    title: "Implement API endpoints"
+    type: feature
+    story_ref: US-001
+    description: |
+      Create REST endpoints for new feature.
+      Make all integration tests pass.
+    acceptance_criteria:
+      - "All integration tests pass"
+      - "Endpoints follow REST conventions"
+      - "Proper authentication"
+      - "Validation errors return 400"
+    files:
+      read:
+        - "src/api/existing_endpoint.py"
+        - "tests/integration/test_new_api.py"
+      write:
+        - "src/api/new_endpoint.py"
+        - "src/routes.py"
+    dependencies:
+      blocked_by: [TASK-004, TASK-005]
+      blocks: [TASK-007]
+    estimate: M
+
+  # Documentation
+  - id: TASK-007
+    title: "Update API documentation"
+    type: docs
+    story_ref: US-001
+    description: |
+      Document new endpoints in API docs.
+      Include request/response examples.
+    acceptance_criteria:
+      - "All new endpoints documented"
+      - "Examples are accurate"
+      - "Auth requirements noted"
+    files:
+      write:
+        - "docs/api.md"
+    dependencies:
+      blocked_by: [TASK-006]
+      blocks: []
+    estimate: S
+
+# Execution order (respects dependencies)
+task_order:
+  - TASK-001  # Migration (no deps)
+  - TASK-002  # Model (after migration)
+  - TASK-003  # Unit tests (after migration, parallel with model)
+  - TASK-004  # Service (after model + tests)
+  - TASK-005  # Integration tests (after service)
+  - TASK-006  # API (after service + integration tests)
+  - TASK-007  # Docs (after API)
+
+# Task statistics
+task_summary:
+  total_tasks: 7
+  by_type:
+    feature: 3
+    chore: 1
+    test: 2
+    docs: 1
+  by_estimate:
+    XS: 0
+    S: 3
+    M: 4
+    L: 0
+    XL: 0
+  critical_path:
+    - TASK-001
+    - TASK-002
+    - TASK-004
+    - TASK-006
+
+# --- Standard handoff footer ---
+outputs:
+  - .sprint/backlog.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []

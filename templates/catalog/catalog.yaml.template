@@ -1,0 +1,104 @@
+# Catalog Configuration Template
+# Copy this to .claude/catalog/config.yaml and customize for your project
+#
+# The catalog system classifies files and tracks dependencies to help
+# AI agents navigate your codebase efficiently.
+
+version: "1.0"
+
+# Directories to index (relative to project root)
+index_dirs: [src, lib, app, scripts]
+
+# Documentation directories
+doc_dirs: [docs]
+
+# Directories to skip
+skip_dirs: [__pycache__, .git, node_modules, .venv, .trees, .pytest_cache, dist, build]
+
+# Skip content scanning for files larger than this (bytes)
+max_file_size: 1048576  # 1MB
+
+# Whether to follow symbolic links
+follow_symlinks: true
+
+# Output configuration
+output:
+  index_dir: .claude/catalog/indexes
+  classification_file: file_classification.json
+  dependencies_file: module_dependencies.json
+
+# File classification rules
+# Categories are checked in priority_order; first match wins for primary_category
+classification:
+  categories:
+    # Tests - highest priority
+    - name: test
+      rules:
+        - {type: directory, pattern: "**/tests/**"}
+        - {type: directory, pattern: "**/test/**"}
+        - {type: filename, pattern: "test_*.py"}
+        - {type: filename, pattern: "*_test.py"}
+        - {type: filename, pattern: "*.test.ts"}
+        - {type: filename, pattern: "*.test.js"}
+        - {type: filename, pattern: "*.spec.ts"}
+        - {type: filename, pattern: "*.spec.js"}
+
+    # API routes/endpoints
+    - name: api
+      rules:
+        - {type: directory, pattern: "**/api/**"}
+        - {type: directory, pattern: "pages/api/**"}
+        - {type: filename, pattern: "*_routes.py"}
+        - {type: filename, pattern: "*Router.ts"}
+
+    # Services/business logic
+    - name: service
+      rules:
+        - {type: directory, pattern: "**/services/**"}
+        - {type: filename, pattern: "*_service.py"}
+        - {type: filename, pattern: "*Service.ts"}
+
+    # Models/entities
+    - name: model
+      rules:
+        - {type: directory, pattern: "**/models/**"}
+        - {type: directory, pattern: "**/entities/**"}
+        - {type: ast_content, condition: "class_inherits:BaseModel"}
+        - {type: ast_content, condition: "class_inherits:Model"}
+
+    # UI Components (React/Vue/etc)
+    - name: component
+      rules:
+        - {type: directory, pattern: "**/components/**"}
+        - {type: content, pattern: "React\\.FC|useState|useEffect", filetypes: [".tsx", ".jsx"]}
+
+    # Utilities/helpers
+    - name: util
+      rules:
+        - {type: directory, pattern: "**/utils/**"}
+        - {type: directory, pattern: "**/helpers/**"}
+
+    # Configuration files
+    - name: config
+      rules:
+        - {type: filename, pattern: "*.config.js"}
+        - {type: filename, pattern: "*.config.ts"}
+        - {type: filename, pattern: "tsconfig*.json"}
+        - {type: filename, pattern: ".env*"}
+
+    # Database migrations
+    - name: migration
+      rules:
+        - {type: directory, pattern: "**/migrations/**"}
+        - {type: content, pattern: "CREATE TABLE|ALTER TABLE", filetypes: [".sql", ".py"]}
+
+    # CLI/scripts with main blocks
+    - name: cli
+      rules:
+        - {type: ast_content, condition: "has_main_block"}
+
+  # Files matching no rules get this category
+  default_category: "uncategorized"
+
+  # Priority order for determining primary_category when multiple match
+  priority_order: [test, migration, api, service, model, component, cli, util, config]

@@ -1,0 +1,81 @@
+# Feedback Intake Template
+# Phase 13b: Feedback Synthesis (Scrum Master)
+#
+# Transforms monitoring signals and retrospective insights into
+# actionable intake items for the next sprint. Closes the loop
+# from Phase 13 back to Phase 1.
+#
+# Produced by: skills/feedback-synthesizer/SKILL.md
+# Consumed by: Phase 1 (intake) of the next sprint cycle
+
+# --- Handoff envelope (standard for all 13 phases) ---
+#
+# NOTE: This is Phase 13b (feedback synthesis), a secondary output of
+# Phase 13. The validator enforces phase_name "retrospective" and
+# depends_on "monitoring" for all phase-13 files. Conceptually this
+# artifact is produced *after* the retrospective and depends on it,
+# but the one-name-per-phase constraint requires these values.
+phase: 13
+phase_name: retrospective
+role: scrum_master
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: monitoring
+_schema_version: "1.0"
+
+summary: |
+  Synthesized 2 feedback items from monitoring and retrospective data.
+
+outputs:
+  - .sprint/feedback-intake.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []
+
+# --- Phase-specific body ---
+
+synthesis:
+  source_sprint: "sprint-abc123"
+  synthesis_version: "1.0"
+
+  items:
+    - id: INTAKE-001
+      type: improvement  # bug | improvement | tech_debt | process
+      title: "Add tests for uncovered modules"
+      description: |
+        Coverage regression detected in auth module after merge.
+        Add unit tests for the three uncovered functions.
+      source: monitoring  # monitoring | retrospective | review_feedback
+      evidence: |
+        Coverage delta: -2% (87% → 85%) in src/auth/
+      priority: high  # critical | high | medium | low
+      escalated: false
+      suggested_constraints:
+        - "Target 90% coverage for auth module"
+
+    - id: INTAKE-002
+      type: process
+      title: "Recalibrate estimation for test tasks"
+      description: |
+        Test-writing tasks consistently underestimated by one size.
+        Adjust estimation guidance for test-type tasks.
+      source: retrospective
+      evidence: |
+        Estimation accuracy for test tasks: 60% (3 of 5 underestimated)
+      priority: medium
+      escalated: false
+      suggested_constraints: []
+
+  process_improvements:
+    - target: "Phase 5 (backlog)"
+      change: "Add estimation calibration note for test tasks"
+      rationale: "Retrospective showed consistent underestimation bias"
+
+  sprint_health_trend:
+    current: healthy  # from monitoring health_assessment.overall
+    previous: unknown  # from previous sprint's feedback, else "unknown"
+    direction: unknown  # improving | stable | declining | unknown

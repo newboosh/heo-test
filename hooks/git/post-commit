@@ -1,0 +1,18 @@
+#!/bin/bash
+# Git post-commit hook: Rebuild catalog incrementally after each commit.
+#
+# Install: cp hooks/git/post-commit .git/hooks/post-commit && chmod +x .git/hooks/post-commit
+# Or: ln -sf ../../hooks/git/post-commit .git/hooks/post-commit
+
+# Only run if catalog config exists
+if [ -f ".claude/catalog/config.yaml" ] || [ -f "catalog.yaml" ]; then
+    # Run catalog build in background to not block commit
+    (
+        lock_dir=".claude/cache/catalog-build.lock"
+        mkdir -p "$(dirname "$lock_dir")"
+        if mkdir "$lock_dir" 2>/dev/null; then
+            trap 'rmdir "$lock_dir"' EXIT
+            python3 -m scripts.catalog.cli build --incremental > /dev/null 2>&1
+        fi
+    ) &
+fi

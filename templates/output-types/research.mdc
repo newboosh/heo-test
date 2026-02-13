@@ -1,0 +1,548 @@
+---
+description: Extended research and technology evaluation with comprehensive findings
+globs:
+alwaysApply: false
+---
+# Rule: RESEARCH Template - Comprehensive Investigation & Evaluation
+
+## Goal
+
+To guide an AI assistant in conducting thorough research on technologies, libraries, best practices, or solutions. This template focuses on gathering information, comparing options, and providing evidence-based recommendations without implementation.
+
+**Use this template when:**
+- Evaluating new technologies or frameworks
+- Comparing libraries or tools
+- Researching best practices for a specific problem
+- Investigating solutions to complex challenges
+- Exploring industry standards or patterns
+- Assessing feasibility of approaches
+- Learning about new concepts or techniques
+
+## Core Principle
+
+**RESEARCH ONLY - NO IMPLEMENTATION**
+
+The agent should:
+- ✓ Search online for current information
+- ✓ Review documentation and guides
+- ✓ Compare multiple options
+- ✓ Analyze pros/cons and trade-offs
+- ✓ Provide evidence-based recommendations
+- ✓ Cite sources and examples
+
+The agent should NOT:
+- ✗ Install packages or dependencies
+- ✗ Write implementation code
+- ✗ Make system changes
+- ✗ Create production-ready solutions
+
+## Research Process
+
+### 1. Research Scope Definition
+
+First, clarify the research question:
+- What needs to be researched?
+- What decision will this inform?
+- What are the constraints (budget, time, compatibility)?
+- What are the success criteria?
+
+**Present to user:**
+```
+I'll research [topic] for you.
+
+My research will focus on:
+- [Question/aspect 1]
+- [Question/aspect 2]
+- [Question/aspect 3]
+
+Constraints I'll consider:
+- [Constraint 1]
+- [Constraint 2]
+
+Is this the right direction?
+```
+
+### 2. Information Gathering
+
+Conduct comprehensive research:
+
+#### Online Research
+- Search for latest documentation (2024-2025)
+- Review official docs and guides
+- Check GitHub repositories and issues
+- Read blog posts and tutorials
+- Review Stack Overflow discussions
+- Check community forums and discussions
+
+#### Codebase Research
+- Search for similar patterns in current code
+- Check existing dependencies
+- Review current tech stack
+- Identify integration points
+
+#### Best Practices Research
+- Industry standards
+- Security guidelines
+- Performance benchmarks
+- Scalability patterns
+
+### 3. Comparative Analysis
+
+Evaluate multiple options systematically.
+
+## Research Report Structure
+
+### Executive Summary
+```markdown
+## Executive Summary
+
+**Research Question:** [What was investigated]
+
+**Key Findings:**
+- [Finding 1]
+- [Finding 2]
+- [Finding 3]
+
+**Recommendation:** [Bottom-line advice]
+
+**Confidence Level:** [High/Medium/Low] based on [evidence quality]
+```
+
+### Research Context
+```markdown
+## Research Context
+
+**Problem Statement:**
+[What problem are we trying to solve?]
+
+**Current Situation:**
+[What do we have now?]
+
+**Goals:**
+- [Goal 1]
+- [Goal 2]
+
+**Constraints:**
+- Budget: [If applicable]
+- Timeline: [If applicable]
+- Technical: [Compatibility requirements, etc.]
+- Team: [Skill level, learning curve considerations]
+```
+
+### Options Evaluated
+
+Present each option comprehensively:
+
+```markdown
+## Option 1: [Name]
+
+### Overview
+[Brief description and what it does]
+
+### Key Features
+- Feature 1: [Description]
+- Feature 2: [Description]
+- Feature 3: [Description]
+
+### Pros ✅
+- [Advantage 1 with context]
+- [Advantage 2 with context]
+- [Advantage 3 with context]
+
+### Cons ❌
+- [Disadvantage 1 with context]
+- [Disadvantage 2 with context]
+- [Disadvantage 3 with context]
+
+### Technical Details
+- **Language/Framework:** [Details]
+- **Dependencies:** [What it requires]
+- **Learning Curve:** [Easy/Medium/Steep]
+- **Documentation Quality:** [Excellent/Good/Fair/Poor]
+- **Community Support:** [Active/Moderate/Limited]
+- **Maintenance Status:** [Actively maintained/Stable/Legacy]
+
+### Performance Characteristics
+- Speed: [Benchmark data if available]
+- Scalability: [How well it scales]
+- Resource usage: [Memory, CPU, etc.]
+
+### Security Considerations
+- Known vulnerabilities: [CVE checks]
+- Security track record: [History]
+- Security features: [Built-in protections]
+
+### Cost Analysis
+- **License:** [Open source/Commercial/Freemium]
+- **Pricing:** [If applicable]
+- **Hidden costs:** [Training, maintenance, hosting, etc.]
+
+### Real-world Usage
+- **Used by:** [Notable companies/projects]
+- **Popularity:** [GitHub stars, downloads, etc.]
+- **Maturity:** [Years in production, version number]
+
+### Code Example
+```[language]
+// Simple example showing typical usage
+```
+
+### Sources
+- Official docs: [URL]
+- GitHub: [URL]
+- Community discussions: [URL]
+- Benchmark/comparison: [URL]
+
+---
+
+[Repeat for each option evaluated]
+```
+
+### Detailed Comparison
+
+Side-by-side comparison:
+
+```markdown
+## Detailed Comparison
+
+### Feature Matrix
+
+| Feature | Option A | Option B | Option C | Winner |
+|---------|----------|----------|----------|--------|
+| Performance | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | A |
+| Ease of use | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | B |
+| Documentation | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | C |
+| Community | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | A |
+| Cost | Free | $99/mo | Free | A/C |
+
+### Compatibility Analysis
+
+| Criteria | Option A | Option B | Option C |
+|----------|----------|----------|----------|
+| Python 3.11 | ✅ Yes | ✅ Yes | ❌ 3.9 only |
+| Flask | ✅ Yes | ⚠️ Limited | ✅ Yes |
+| PostgreSQL | ✅ Yes | ✅ Yes | ✅ Yes |
+| Docker | ✅ Yes | ❌ No | ✅ Yes |
+
+### Use Case Fit
+
+**Option A best for:**
+- [Scenario 1]
+- [Scenario 2]
+
+**Option B best for:**
+- [Scenario 1]
+- [Scenario 2]
+
+**Option C best for:**
+- [Scenario 1]
+- [Scenario 2]
+```
+
+### Risk Assessment
+
+```markdown
+## Risk Assessment
+
+### Option A Risks
+- **Technical Risk:** [Medium] - [Description]
+- **Vendor Risk:** [Low] - [Description]
+- **Learning Curve:** [High] - [Description]
+- **Maintenance Risk:** [Low] - [Description]
+
+### Option B Risks
+[Same structure]
+
+### Risk Mitigation Strategies
+- [Risk]: [How to mitigate]
+```
+
+### Best Practices Found
+
+```markdown
+## Best Practices & Patterns
+
+### Industry Standards
+- [Standard 1]: [Description and source]
+- [Standard 2]: [Description and source]
+
+### Common Patterns
+1. **[Pattern name]**
+   - When to use: [Context]
+   - Benefits: [Why it works]
+   - Example: [Brief example or link]
+
+### Anti-patterns to Avoid
+- **[Anti-pattern]:** [Why to avoid, what to do instead]
+
+### Security Best Practices
+- [Practice 1]: [Details]
+- [Practice 2]: [Details]
+```
+
+### Implementation Considerations
+
+```markdown
+## Implementation Considerations
+
+### If Choosing Option A
+
+**Setup Complexity:** [Easy/Medium/Hard]
+
+**Prerequisites:**
+- [Requirement 1]
+- [Requirement 2]
+
+**Estimated Timeline:**
+- Initial setup: [X hours/days]
+- Learning curve: [X hours/days]
+- Full integration: [X days/weeks]
+
+**Required Skills:**
+- [Skill 1]
+- [Skill 2]
+
+**Migration Path:**
+[If replacing existing solution]
+
+**Integration Points:**
+- [System 1]: [How it integrates]
+- [System 2]: [How it integrates]
+```
+
+### Recommendations
+
+Provide clear, justified recommendations:
+
+```markdown
+## Recommendations
+
+### Primary Recommendation: [Option Name]
+
+**Rationale:**
+I recommend [Option] because:
+1. [Reason 1 with evidence]
+2. [Reason 2 with evidence]
+3. [Reason 3 with evidence]
+
+**This choice prioritizes:** [What this optimizes for]
+
+**Trade-offs accepted:** [What we're giving up]
+
+### Alternative Recommendations
+
+**For different priorities:**
+
+- **If performance is critical:** Choose [Option]
+  - Why: [Justification]
+
+- **If ease of use matters most:** Choose [Option]
+  - Why: [Justification]
+
+- **If budget is tight:** Choose [Option]
+  - Why: [Justification]
+
+### Decision Framework
+
+Use this to make your own choice:
+
+| Priority | Choose Option A | Choose Option B | Choose Option C |
+|----------|----------------|----------------|----------------|
+| Speed to market | | ✅ | |
+| Long-term maintainability | ✅ | | |
+| Team expertise | | | ✅ |
+| Cost sensitivity | ✅ | | ✅ |
+```
+
+### Next Steps
+
+```markdown
+## Recommended Next Steps
+
+### Before Implementation
+
+1. **Proof of Concept** (1-2 days)
+   - [ ] Create minimal working example
+   - [ ] Test with our data structure
+   - [ ] Verify performance claims
+   - [ ] Check integration compatibility
+
+2. **Team Review** (1 day)
+   - [ ] Share this research with team
+   - [ ] Discuss concerns and questions
+   - [ ] Get buy-in from stakeholders
+   - [ ] Confirm decision
+
+3. **Planning** (1 day)
+   - [ ] Create implementation plan
+   - [ ] Identify resources needed
+   - [ ] Set timeline
+   - [ ] Define success metrics
+
+### If Moving Forward with [Recommended Option]
+
+**Immediate actions:**
+- [ ] [Action 1]
+- [ ] [Action 2]
+
+**First week:**
+- [ ] [Milestone 1]
+- [ ] [Milestone 2]
+
+**First month:**
+- [ ] [Milestone 3]
+```
+
+### Research Sources
+
+```markdown
+## Sources & References
+
+### Official Documentation
+- [Name]: [URL] - [Brief description]
+- [Name]: [URL] - [Brief description]
+
+### Comparisons & Benchmarks
+- [Title]: [URL] - [What it covers]
+- [Title]: [URL] - [What it covers]
+
+### Community Resources
+- [Title]: [URL] - [Type: tutorial/discussion/etc.]
+- [Title]: [URL] - [Type: tutorial/discussion/etc.]
+
+### Case Studies
+- [Company] using [Option]: [URL/description]
+- [Company] using [Option]: [URL/description]
+
+### Research Date
+This research was conducted on: [Date]
+**Note:** Technology evolves quickly. Verify current status before implementation.
+```
+
+## Research Types & Templates
+
+### Library/Framework Comparison
+```markdown
+## Framework Comparison: [Framework A] vs [Framework B] vs [Framework C]
+
+[Follow full research structure above]
+
+**Special focus areas:**
+- API design and developer experience
+- Performance benchmarks
+- Ecosystem and plugins
+- Long-term support and roadmap
+```
+
+### Best Practice Research
+```markdown
+## Best Practices Research: [Topic]
+
+### Current Industry Standards
+[What's considered best practice now]
+
+### Evolution of Practices
+[How practices have changed over time]
+
+### Recommended Approach for Our Context
+[What makes sense for our specific situation]
+
+### Implementation Guide
+[How to apply these practices]
+```
+
+### Feasibility Study
+```markdown
+## Feasibility Study: [Proposed Solution]
+
+### Technical Feasibility
+- Can it be done with our stack? [Yes/No/Partially]
+- Required changes: [List]
+- Technical risks: [List]
+
+### Resource Feasibility
+- Time estimate: [X weeks/months]
+- Team capacity: [Available/Stretched/Insufficient]
+- Budget required: [If applicable]
+
+### Strategic Feasibility
+- Alignment with goals: [High/Medium/Low]
+- ROI: [Estimated value vs cost]
+- Opportunity cost: [What we won't do instead]
+
+### Recommendation
+[Go/No-go with justification]
+```
+
+## Output Guidelines
+
+### Format
+- **Format:** Markdown (`.md`)
+- **Location:** `/docs/research/`
+- **Filename:** `research-[topic]-[date].md`
+
+### Quality Standards
+- **Evidence-based:** Every claim backed by sources
+- **Balanced:** Show pros and cons fairly
+- **Current:** Use latest information (2024-2025)
+- **Actionable:** Provide clear recommendations
+- **Comprehensive:** Cover all relevant aspects
+- **Honest:** Include confidence levels and uncertainties
+
+## Integration with /task Command
+
+When user invokes:
+```
+/task research [what to research]
+```
+
+The agent should:
+1. Clarify research scope and priorities
+2. Conduct comprehensive online and codebase research
+3. Evaluate multiple options systematically
+4. Create detailed research report
+5. Provide evidence-based recommendations
+6. Save to `/docs/research/`
+7. Present findings to user
+8. **DO NOT implement anything**
+9. Offer to create a proof of concept if user wants to proceed
+
+## Example Prompts
+
+```
+/task research best Python testing frameworks for our Flask app
+
+/task research whether we should use REST or GraphQL for our API
+
+/task research document storage solutions (local vs cloud)
+
+/task research authentication libraries compatible with Flask
+
+/task research the best way to handle background jobs in Python
+```
+
+## Final Reminder
+
+**THIS IS RESEARCH ONLY**
+
+At the end of research, always include:
+
+```markdown
+---
+
+## Next Steps
+
+This research is complete. No code or system changes have been made.
+
+**If you'd like to proceed:**
+- I can create a proof of concept with the recommended option
+- I can create a detailed implementation plan
+- I can help with `/task go [implement recommendation]`
+
+**If you need more research:**
+- Let me know what additional information would be helpful
+- I can dig deeper into specific aspects
+- I can research alternative options
+
+What would you like to do next?
+```

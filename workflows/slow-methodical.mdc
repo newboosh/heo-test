@@ -1,0 +1,274 @@
+# Rule: SLOW Workflow (Methodical with User Review)
+
+## Goal
+
+To guide an AI assistant through a thorough, methodical implementation workflow with multiple user review checkpoints. This workflow prioritizes accuracy, user involvement, and collaborative decision-making over speed.
+
+**Use this workflow when:**
+- User wants to review and approve major decisions
+- Requirements need clarification and discussion
+- Task is complex or has significant impact
+- User wants to learn and understand the process
+- High stakes or critical functionality
+
+## Workflow Phases
+
+### Phase 1: Discovery (Thorough)
+**Reference:** `/tasks/00_Discover-slow.mdc`
+
+**Comprehensive discovery checklist:**
+- ✓ Thoroughly search codebase for related code
+- ✓ Identify all affected files/modules
+- ✓ Review CLAUDE.md for conventions
+- ✓ Document technical constraints
+- ✓ Ask comprehensive clarifying questions
+- ✓ Present findings for user review
+
+**Checkpoints:**
+1. **Initial Understanding** - Present interpretation of request → Wait for confirmation
+2. **Discovery Findings** - Present search results and context → Wait for feedback
+3. **Clarifying Questions** - Ask detailed questions → Wait for answers
+4. **Discovery Summary** - Present complete summary → Wait for approval
+
+**Output:**
+- Comprehensive discovery summary
+- User-approved understanding
+- Proceed to Phase 2 only after approval
+
+### Phase 2: PRD Creation (Collaborative)
+**Reference:** `/tasks/01_create-prd_template.mdc`
+
+**Collaborative PRD generation:**
+1. Generate initial PRD based on discovery
+2. Create `prd-[feature-name].md` in `/tasks/` directory
+3. Include all sections from PRD template
+4. Present PRD to user for review
+
+**Checkpoint:**
+```
+I've created a Product Requirements Document based on our discovery.
+
+Location: /tasks/prd-[feature-name].md
+
+Please review the PRD. Key sections to check:
+- Functional Requirements: Are these complete and accurate?
+- Non-Goals: Is anything missing from out-of-scope?
+- Success Metrics: Do these align with your goals?
+
+Would you like me to make any changes before proceeding to task generation?
+```
+
+**STOP and wait for user review/approval**
+
+### Phase 3: Task Generation (Reviewed)
+**Reference:** `/workspace/.trees/worktree-manager/tasks/02_generate-tasks_template.mdc`
+
+**Methodical task generation:**
+1. Create `tasks-[prd-name].md` in `/tasks/` directory
+2. Generate parent tasks (3-5 high-level tasks)
+3. Present parent tasks to user
+
+**Checkpoint 1:**
+```
+I've generated the high-level tasks based on the PRD:
+
+[List parent tasks]
+
+Do these parent tasks cover all requirements? Should I adjust the breakdown?
+
+Reply 'Go' when you're ready for me to generate the detailed sub-tasks.
+```
+
+**STOP and wait for user approval**
+
+4. Generate sub-tasks for each parent task
+5. Identify relevant files
+6. Present complete task list to user
+
+**Checkpoint 2:**
+```
+I've generated the complete task list with all sub-tasks.
+
+Location: /tasks/tasks-[prd-name].md
+
+Please review:
+- Are the sub-tasks logical and complete?
+- Is anything missing?
+- Should any tasks be reordered?
+
+Reply 'Go' when you're ready for me to start implementation.
+```
+
+**STOP and wait for user approval to begin implementation**
+
+### Phase 4: Implementation (Controlled)
+**Reference:** `/workspace/.trees/worktree-manager/tasks/03_process-task-list.mdc`
+
+**Methodical implementation:**
+1. Execute ONE sub-task at a time
+2. Update task list (mark `[x]`)
+3. **Pause after EACH sub-task**
+
+**Sub-task Completion Template:**
+```
+✓ Completed: [sub-task description]
+
+Changes made:
+- [Brief list of changes]
+
+Files modified:
+- [Files changed]
+
+Ready to proceed to next sub-task: [next sub-task description]
+
+Reply 'yes' or 'y' to continue.
+```
+
+**STOP and wait for user approval before next sub-task**
+
+4. When all sub-tasks in a parent task are complete:
+   - Run tests
+   - Stage changes (`git add .`)
+   - Clean up temporary files
+   - Present commit message for approval
+
+**Parent Task Completion Template:**
+```
+✓ All sub-tasks completed for: [parent task title]
+
+Proposed commit message:
+---
+[Conventional commit message]
+---
+
+Tests: [Pass/Fail status]
+Files modified: [Count and list]
+
+Approve commit? (yes/no)
+```
+
+**STOP and wait for commit approval**
+
+5. After approval, commit and mark parent task complete `[x]`
+
+### Error Handling
+
+If you encounter errors or blockers:
+1. **Stop immediately**
+2. Document the error in the task file
+3. Report to user with detailed information:
+   - What was attempted
+   - Full error message
+   - Root cause analysis (if known)
+   - Proposed solutions (multiple options if possible)
+4. Wait for user decision on how to proceed
+
+**Error Report Template:**
+```
+⚠️ Error encountered in: [sub-task description]
+
+**What happened:**
+[Detailed explanation]
+
+**Error message:**
+```
+[Full error output]
+```
+
+**Potential causes:**
+1. [Cause 1]
+2. [Cause 2]
+
+**Proposed solutions:**
+A) [Solution A - pros/cons]
+B) [Solution B - pros/cons]
+
+How would you like me to proceed?
+```
+
+**STOP and wait for user direction**
+
+## Completion Protocol
+
+When all tasks are complete:
+1. Run final comprehensive test suite
+2. Verify all task checkboxes are marked `[x]`
+3. Update changelog (`docs/changelogs/master-changelog.md`)
+4. Generate completion report
+
+**Completion Report Template:**
+```
+🎉 Project Complete: [Feature Name]
+
+**Summary:**
+[Overview of what was accomplished]
+
+**Files Created:**
+- [List new files]
+
+**Files Modified:**
+- [List modified files]
+
+**Tests:**
+- Total: [count]
+- Passing: [count]
+- Coverage: [percentage if available]
+
+**Commits Made:**
+- [List commit messages]
+
+**Documentation Updated:**
+- [List documentation changes]
+
+**Next Steps (Suggestions):**
+- [Optional recommendations]
+
+**Review Checklist for You:**
+- [ ] Functionality works as expected
+- [ ] All tests pass
+- [ ] Code quality meets standards
+- [ ] Documentation is complete
+- [ ] Ready for PR/deployment
+
+Would you like me to create a pull request or make any final adjustments?
+```
+
+**STOP and wait for user final review**
+
+## Communication Style
+
+- **Detailed explanations**: Explain what and why for each action
+- **Transparent decision-making**: Share reasoning behind choices
+- **Educational**: Help user understand the process
+- **Collaborative**: Treat user as partner in decisions
+- **Patient**: Take time to ensure understanding
+
+## Best Practices
+
+✓ Present options when multiple approaches exist
+✓ Explain trade-offs clearly
+✓ Ask before making significant decisions
+✓ Document reasoning in code comments
+✓ Keep user informed at every step
+✓ Validate understanding before proceeding
+
+✗ Don't proceed without user approval at checkpoints
+✗ Don't make assumptions on critical decisions
+✗ Don't skip explanations
+✗ Don't rush through phases
+
+## Integration with /task Command
+
+When user invokes:
+```
+/task slow [task description]
+```
+
+The agent should:
+1. Load this workflow guide (`workflow-slow-methodical.mdc`)
+2. Load slow discovery guide (`00_Discover-slow.mdc`)
+3. Load PRD creation template (`01_create-prd_template.mdc`)
+4. Load task generation template (from worktree-manager)
+5. Load implementation guide (from worktree-manager)
+6. Execute all phases with mandatory user checkpoints
+7. Stop at each checkpoint and wait for explicit user approval

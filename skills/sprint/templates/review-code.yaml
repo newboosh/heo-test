@@ -1,0 +1,69 @@
+# Code Review Template
+# Phase 7: Code Review (Senior Developer / Peer Review)
+#
+# Aggregates review findings from multiple reviewers (code-reviewer,
+# qa-agent, CodeRabbit). Each finding includes severity and status.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 7
+phase_name: code_review
+role: senior_developer
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: implementation
+_schema_version: "1.0"
+
+summary: |
+  Code review completed by <N> reviewers with <N> findings.
+
+outputs:
+  - .sprint/review-code.yaml
+
+open_issues: []
+
+signals:
+  pass: false
+  confidence: high
+  blockers:
+    - "1 unresolved review finding"
+
+# --- Phase-specific body ---
+
+# REQUIRED: List of review findings from all reviewers
+findings:
+  - reviewer: code-reviewer
+    severity: info  # info | warning | error | critical
+    category: style  # style | logic | performance | security | other
+    file: "src/example.py"
+    line: 42
+    description: "Consider using a more descriptive variable name"
+    status: resolved  # open | resolved | wont_fix
+    resolution: "Renamed variable to 'market_query'"
+
+  - reviewer: qa-agent
+    severity: warning
+    category: logic
+    file: "src/services/service.py"
+    line: 100
+    description: "Missing edge case handling for empty input"
+    status: open
+    resolution: null
+
+# Aggregate review status per reviewer
+reviewers:
+  - name: code-reviewer
+    approved: true
+    findings_count: 3
+    unresolved_count: 0
+
+  - name: qa-agent
+    approved: false
+    findings_count: 1
+    unresolved_count: 1
+
+# Summary metrics for gate decision consumption
+review_summary:
+  total_findings: 4
+  unresolved_issues: 1
+  severity_max: warning  # highest severity across all findings
+  all_approved: false

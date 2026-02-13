@@ -1,0 +1,202 @@
+# Sprint Technical Template
+# Phase 4: Technical Planning
+#
+# Translates product and design requirements into implementation plan.
+# Identifies files to create/modify, dependencies, and risks.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 4
+phase_name: technical_planning
+role: tech_lead
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: design
+_schema_version: "1.0"
+
+summary: |
+  Planned implementation architecture with <N> new files, <N> modified files, <N> risks.
+
+outputs:
+  - .sprint/technical.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []
+
+# --- Phase-specific body ---
+
+# Architecture: How it will be built
+architecture:
+  approach: |
+    High-level description of the implementation approach.
+    Reference existing patterns in the codebase where applicable.
+
+  patterns:
+    - name: "Pattern Name"
+      usage: "How it applies here"
+      reference: "path/to/existing/example.py"
+
+  decisions:
+    - id: ADR-001
+      decision: "Use X approach instead of Y"
+      rationale: |
+        Why this decision was made.
+        Consider performance, maintainability, consistency.
+      alternatives_considered:
+        - alternative: "Alternative approach"
+          rejected_because: "Reason for rejection"
+      consequences:
+        - "Positive: Faster development"
+        - "Negative: Slightly more complex"
+
+# Changes: What files are affected
+changes:
+  new_files:
+    - path: "src/services/new_service.py"
+      purpose: "Handles new business logic"
+      template: "src/services/existing_service.py"
+      contents_summary: |
+        - Class: NewService
+        - Methods: create(), update(), delete()
+
+    - path: "src/api/new_endpoint.py"
+      purpose: "API endpoint for new feature"
+      template: "src/api/existing_endpoint.py"
+
+  modified_files:
+    - path: "src/models/existing_model.py"
+      changes:
+        - "Add new_field column"
+        - "Add relationship to NewModel"
+      reason: "Support new feature data"
+      lines_affected: "~20-30"
+
+    - path: "src/routes.py"
+      changes:
+        - "Register new blueprint"
+      reason: "Expose new endpoints"
+
+  deleted_files: []  # Rarely needed, but document if so
+
+# Dependencies: What this relies on
+dependencies:
+  internal:
+    - module: "src/services/auth_service.py"
+      usage: "User authentication"
+      changes_needed: false
+
+    - module: "src/models/user.py"
+      usage: "User relationship"
+      changes_needed: false
+
+  external:
+    - package: "package-name"
+      version: "^1.2.3"
+      justification: "Needed for X functionality"
+      alternatives: "Could also use Y, but X is better because..."
+
+# API: New or modified endpoints
+api:
+  endpoints:
+    - method: POST
+      path: "/api/v1/resource"
+      auth: required  # required | optional | none
+      description: "Create new resource"
+      request:
+        content_type: "application/json"
+        body:
+          required:
+            - field: "name"
+              type: "string"
+              description: "Resource name"
+          optional:
+            - field: "description"
+              type: "string"
+              description: "Optional description"
+      response:
+        success:
+          status: 201
+          body: '{"id": "uuid", "name": "string", "created_at": "datetime"}'
+        errors:
+          - status: 400
+            condition: "Invalid input"
+            body: '{"error": "Validation failed", "details": [...]}'
+          - status: 401
+            condition: "Not authenticated"
+          - status: 409
+            condition: "Resource already exists"
+
+# Data: Database changes
+data:
+  models:
+    - name: "NewModel"
+      table: "new_models"
+      fields:
+        - name: "id"
+          type: "UUID"
+          primary_key: true
+        - name: "name"
+          type: "String(100)"
+          nullable: false
+          index: true
+        - name: "created_at"
+          type: "DateTime"
+          default: "utcnow"
+      relationships:
+        - name: "user"
+          type: "many-to-one"
+          target: "User"
+          foreign_key: "user_id"
+
+  migrations:
+    - description: "Add new_models table"
+      type: "create_table"
+      reversible: true
+    - description: "Add index on name column"
+      type: "create_index"
+
+# Testing: What tests are needed
+testing:
+  unit_tests:
+    - file: "tests/unit/test_new_service.py"
+      covers: "src/services/new_service.py"
+      cases:
+        - "test_create_with_valid_data"
+        - "test_create_with_invalid_data"
+        - "test_handles_duplicate"
+
+  integration_tests:
+    - file: "tests/integration/test_new_api.py"
+      covers: "/api/v1/resource endpoints"
+      cases:
+        - "test_create_resource"
+        - "test_unauthorized_access"
+
+# Risks: What could go wrong
+risks:
+  - id: RISK-001
+    risk: "Database migration may lock table"
+    likelihood: low  # high | medium | low
+    impact: medium   # high | medium | low
+    mitigation: "Run migration during low-traffic period"
+
+  - id: RISK-002
+    risk: "New dependency may have security issues"
+    likelihood: low
+    impact: high
+    mitigation: "Pin exact version, review changelog"
+
+# Implementation Order
+implementation_order:
+  - phase: 1
+    description: "Database and models"
+    tasks: ["Create migration", "Create model"]
+  - phase: 2
+    description: "Business logic"
+    tasks: ["Create service", "Write unit tests"]
+  - phase: 3
+    description: "API layer"
+    tasks: ["Create endpoints", "Write integration tests"]

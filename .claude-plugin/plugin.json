@@ -1,11 +1,17 @@
 {
   "name": "heo-test",
   "version": "0.1.0",
-  "description": "Claude Code testing plugin for the heo project.",
+  "description": "Comprehensive Claude Code testing toolkit. Includes worktree management, TDD workflow, code review, security review, and deployment scripts.",
   "author": {
     "name": "newboosh",
     "email": "newboosh.clientmanagement@gmail.com"
   },
   "repository": "https://github.com/newboosh/heo-test",
-  "keywords": []
+  "keywords": [
+    "worktree",
+    "tdd",
+    "code-review",
+    "security",
+    "deployment"
+  ]
 }

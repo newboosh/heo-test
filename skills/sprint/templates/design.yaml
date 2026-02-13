@@ -1,0 +1,137 @@
+# Sprint Design Template
+# Phase 3: Design
+#
+# Defines UX requirements, interaction flows, and component specifications.
+# For CLI tools, focus on command flows rather than visual components.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 3
+phase_name: design
+role: ux_designer
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: refinement
+_schema_version: "1.0"
+
+summary: |
+  Defined interaction patterns, component specs, validation rules, and edge case handling.
+
+design_mode: frontend
+
+# --- Phase-specific body ---
+
+ux_requirements:
+  # Interaction Flows: How users accomplish tasks
+  flows:
+    - name: "Primary Flow Name"
+      description: "What this flow accomplishes"
+      trigger: "What initiates this flow"
+      preconditions:
+        - "User is authenticated"
+        - "Data exists"
+      steps:
+        - step: 1
+          actor: user
+          action: "User does something"
+          system_response: "System responds"
+          next: 2
+        - step: 2
+          actor: user
+          action: "User continues"
+          system_response: "System completes"
+          next: end
+      postconditions:
+        - "State is updated"
+        - "User sees confirmation"
+
+    - name: "Error Flow"
+      description: "What happens when things go wrong"
+      trigger: "Error condition"
+      steps:
+        - step: 1
+          actor: system
+          action: "Detects error"
+          system_response: "Shows error message"
+
+  # Components: UI elements or CLI outputs
+  components:
+    - name: "Component Name"
+      type: form | display | navigation | modal | notification | command
+      purpose: "What it does"
+      location: "Where it appears"
+      states:
+        default:
+          description: "Initial state"
+          display: "What user sees"
+        loading:
+          description: "While processing"
+          display: "Loading indicator"
+        error:
+          description: "On failure"
+          display: "Error message with recovery options"
+        success:
+          description: "On completion"
+          display: "Success confirmation"
+      interactions:
+        - trigger: "User action"
+          result: "What happens"
+
+  # Validations: Input rules and feedback
+  validations:
+    - field: "field_name"
+      type: string | number | email | date | custom
+      rules:
+        required: true
+        min_length: 1
+        max_length: 100
+        pattern: "^[a-zA-Z]+$"
+        custom: "Description of custom validation"
+      error_messages:
+        required: "This field is required"
+        invalid: "Please enter a valid value"
+        too_short: "Must be at least {min} characters"
+
+  # Accessibility: WCAG and usability requirements
+  accessibility:
+    - requirement: "Keyboard navigation"
+      implementation: "All actions accessible via keyboard"
+    - requirement: "Screen reader support"
+      implementation: "Proper ARIA labels"
+    - requirement: "Color contrast"
+      implementation: "WCAG AA compliant"
+
+  # Edge Cases: Unusual but valid scenarios
+  edge_cases:
+    - scenario: "Empty state"
+      condition: "No data exists yet"
+      handling: "Show helpful empty state with CTA"
+    - scenario: "Large dataset"
+      condition: "> 1000 items"
+      handling: "Paginate results, show count"
+    - scenario: "Concurrent edit"
+      condition: "Two users edit same item"
+      handling: "Last-write-wins with notification"
+
+# Content: Text and messaging
+content:
+  headings:
+    - context: "Page title"
+      text: "Feature Name"
+  labels:
+    - context: "Submit button"
+      text: "Save Changes"
+  messages:
+    success: "Your changes have been saved"
+    error: "Something went wrong. Please try again."
+    empty: "No items found. Create your first item."
+
+# --- Standard handoff footer ---
+outputs:
+  - .sprint/design.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []

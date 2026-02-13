@@ -1,0 +1,80 @@
+# Retrospective Template
+# Phase 13: Retrospective (Scrum Master)
+#
+# Data-driven analysis of the completed sprint. Every observation
+# must cite evidence from sprint artifacts. No subjective filler.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 13
+phase_name: retrospective
+role: scrum_master
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: monitoring
+_schema_version: "1.0"
+
+summary: |
+  Sprint retrospective complete. <N> observations, <N> patterns extracted.
+
+outputs:
+  - .sprint/retrospective.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []
+
+# --- Phase-specific body ---
+
+# REQUIRED: Dimension 1 - Sprint summary
+sprint_summary:
+  started: "2026-01-28T10:00:00Z"
+  completed: "2026-01-28T11:30:00Z"
+  duration_hours: 1.5
+  velocity_mode: autonomous
+  tasks_planned: 4
+  tasks_completed: 4
+  tasks_deferred: 0
+  needs_work_loops: 0
+
+# Dimension 2 - What worked
+what_worked:
+  - observation: "TDD process produced clean implementation"
+    evidence: "All 42 tests passing on first CI run"
+    recommendation: keep
+
+# Dimension 3 - What didn't work
+what_didnt_work: []
+
+# Dimension 4 - Phase-by-phase analysis
+phase_analysis:
+  - phase: 1
+    phase_name: intake
+    handoff_exists: true
+    issues_flagged_downstream: 0
+    notes: "Requirements clear and well-scoped"
+
+# Dimension 5 - Review effectiveness
+review_effectiveness:
+  - reviewer: code-reviewer
+    issues_found: 3
+    issues_that_mattered: 1
+    signal_to_noise: 0.33
+
+# Dimension 6 - Estimation accuracy
+estimation_accuracy:
+  planned_vs_actual:
+    - task_id: TASK-001
+      title: "Write unit tests"
+      estimated: M
+      actual_effort: M
+  overall_accuracy: 100
+  bias: balanced  # underestimate | overestimate | balanced
+
+# Dimension 7 - Pattern extraction
+patterns_extracted: []
+
+# Dimension 8 - New intake items
+new_intake_items: []

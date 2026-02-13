@@ -1,0 +1,184 @@
+# Sprint Design Template — Backend / API Mode
+# Phase 3: Design (Backend-Only Variant)
+#
+# For work with no user interface: APIs, services, CLI tools, data pipelines.
+# Produces API contracts, data flows, and operational specs instead of UX flows.
+
+phase: 3
+phase_name: design
+role: api_designer
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: refinement
+_schema_version: "1.0"
+
+summary: |
+  Defined API contracts, data flows, error handling, and operational requirements.
+
+design_mode: backend
+
+# --- Phase-specific content ---
+
+# API Contract: Endpoint specifications
+api_contract:
+  base_path: "/api/v1"
+  authentication: "Bearer token | API key | none"
+
+  endpoints:
+    - method: POST
+      path: "/resource"
+      description: "Create a new resource"
+      auth: required  # required | optional | none
+      rate_limit: "100/min"
+      request:
+        content_type: "application/json"
+        headers:
+          - name: "Authorization"
+            required: true
+        body:
+          required:
+            - field: "name"
+              type: "string"
+              description: "Resource name"
+              validation: "1-100 chars, alphanumeric"
+          optional:
+            - field: "metadata"
+              type: "object"
+              description: "Arbitrary key-value pairs"
+      response:
+        success:
+          status: 201
+          body:
+            id: "uuid"
+            name: "string"
+            created_at: "ISO datetime"
+        errors:
+          - status: 400
+            condition: "Invalid input"
+            body: '{"error": "validation_failed", "details": [...]}'
+          - status: 401
+            condition: "Missing or invalid auth"
+          - status: 409
+            condition: "Resource already exists"
+          - status: 429
+            condition: "Rate limit exceeded"
+
+# Data Flow: How data moves through the system
+data_flows:
+  - name: "Primary Data Flow"
+    description: "How data enters, transforms, and exits the system"
+    steps:
+      - step: 1
+        component: "API endpoint"
+        action: "Receive request"
+        data_in: "Raw request payload"
+        data_out: "Validated input DTO"
+      - step: 2
+        component: "Service layer"
+        action: "Apply business logic"
+        data_in: "Validated input DTO"
+        data_out: "Domain entity"
+      - step: 3
+        component: "Repository"
+        action: "Persist to database"
+        data_in: "Domain entity"
+        data_out: "Stored record with ID"
+
+# Error Handling: System-level error strategy
+error_handling:
+  strategy: "Fail fast with structured error responses"
+  error_format:
+    structure: |
+      {
+        "error": "<error_code>",
+        "message": "<human-readable message>",
+        "details": [<field-level errors>],
+        "request_id": "<uuid>"
+      }
+  categories:
+    - category: "Validation errors"
+      status: 400
+      handling: "Return all field errors at once, don't fail on first"
+    - category: "Auth errors"
+      status: 401/403
+      handling: "Generic message, don't leak whether resource exists"
+    - category: "Not found"
+      status: 404
+      handling: "Return after auth check to prevent enumeration"
+    - category: "Server errors"
+      status: 500
+      handling: "Log full trace, return generic message to client"
+  retry_policy:
+    idempotent_methods: ["GET", "PUT", "DELETE"]
+    non_idempotent: ["POST"]
+    client_guidance: "Include Retry-After header on 429/503"
+
+# Data Contracts: Input/output schemas
+data_contracts:
+  models:
+    - name: "ResourceDTO"
+      purpose: "API input/output representation"
+      fields:
+        - name: "id"
+          type: "UUID"
+          direction: "output only"
+        - name: "name"
+          type: "string"
+          direction: "input + output"
+          validation: "required, 1-100 chars"
+        - name: "created_at"
+          type: "ISO datetime"
+          direction: "output only"
+
+  transformations:
+    - from: "RequestPayload"
+      to: "DomainEntity"
+      rules:
+        - "Validate all required fields"
+        - "Normalize strings (trim, lowercase where appropriate)"
+        - "Generate UUID for new entities"
+
+# Operational Requirements
+operational:
+  logging:
+    - "Log all API requests with request_id, method, path, status, duration"
+    - "Log business events (created, updated, deleted) with entity ID"
+    - "Never log sensitive data (passwords, tokens, PII)"
+  monitoring:
+    - metric: "Request latency (p50, p95, p99)"
+      alert_threshold: "p99 > 500ms"
+    - metric: "Error rate"
+      alert_threshold: "> 1% of requests"
+    - metric: "Request volume"
+      alert_threshold: "Spike > 3x baseline"
+  performance:
+    - requirement: "API response time < 200ms (p95)"
+      strategy: "Database indexing, connection pooling"
+    - requirement: "Support 100 concurrent requests"
+      strategy: "Async processing for heavy operations"
+
+# Edge Cases
+edge_cases:
+  - scenario: "Empty collection"
+    condition: "No resources exist yet"
+    handling: "Return empty array, not 404"
+  - scenario: "Large payload"
+    condition: "Request body > 1MB"
+    handling: "Return 413 with size limit in error"
+  - scenario: "Concurrent writes"
+    condition: "Two clients update same resource"
+    handling: "Optimistic locking with ETag / If-Match"
+  - scenario: "Partial failure"
+    condition: "Batch operation with some failures"
+    handling: "Return 207 Multi-Status with per-item results"
+
+# --- Standard handoff footer ---
+outputs:
+  - .sprint/design.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []

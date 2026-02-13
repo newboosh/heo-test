@@ -1,0 +1,195 @@
+# Rule: Discovery Phase - Thorough Analysis with User Review (SLOW)
+
+## Goal
+
+To guide an AI assistant through a comprehensive discovery process with user review checkpoints. This ensures the user understands the process and is involved in key decisions and validates understanding before proceeding.
+
+## Discovery Process
+
+### 1. Initial Request Analysis
+
+When receiving a task request, first analyze:
+- **What** is being requested (the core requirement)
+- **Why** it's needed (business/user value)
+- **Scope** (how large/complex is this)
+- **Urgency** (timeline expectations)
+
+**Present to user:**
+```
+I understand you want to: [restate requirement]
+The goal seems to be: [business value]
+Estimated complexity: [simple/moderate/complex]
+
+Is this understanding correct?
+```
+
+**STOP and wait for user confirmation**
+
+### 2. Context Gathering
+
+Systematically gather context about:
+
+#### Codebase Context
+- Search for related code already in the project
+- Identify relevant modules, components, or systems
+- Check for similar patterns or implementations
+- Review existing documentation
+
+#### Technical Context
+- Identify technical constraints (language, framework, dependencies)
+- Check for architectural patterns to follow
+- Review coding standards and conventions (CLAUDE.md)
+- Identify integration points with existing systems
+
+#### Data Context
+- Understand data models and schemas involved
+- Identify database tables or data structures affected
+- Check for data validation requirements
+- Review data flow and transformations needed
+
+**Present findings to user:**
+```
+## Discovery Findings
+Be clear about what the findings me in general, and within the context of the specific project. Your job is to educate the user.
+**Relevant existing code:**
+- [List files/modules found]
+
+**Technical approach:**
+- [Proposed technical approach]
+
+**Data/schema impact:**
+- [Database or data structure changes]
+
+**Integration points:**
+- [Systems this will integrate with]
+
+Would you like me to explore any of these areas further?
+```
+
+**STOP and wait for user feedback**
+
+### 3. Clarifying Questions
+
+Ask comprehensive questions to eliminate ambiguity:
+
+**Functional Questions:**
+- "What should happen when [edge case]?"
+- "Are there any specific workflows or user journeys to follow?"
+- "What are the acceptance criteria for completion?"
+- "Are there any existing features this should integrate with?"
+- "What's the expected user experience?"
+
+**Technical Questions:**
+- "Are there any performance requirements?"
+- "What error handling is expected?"
+- "Are there security considerations?"
+- "What testing coverage is expected?"
+- "Should we follow any specific design patterns?"
+
+**Scope Questions:**
+- "What are the non-goals (out of scope)?"
+- "Are there any constraints or limitations?"
+- "What's the priority if we need to make trade-offs?"
+- "Are there any compliance or regulatory requirements?"
+
+**Present questions in organized groups:**
+```
+I have some questions to ensure I fully understand the requirements:
+
+**Functionality:**
+1. [Question]
+2. [Question]
+
+**Technical Details:**
+1. [Question]
+2. [Question]
+
+**Scope & Priorities:**
+1. [Question]
+2. [Question]
+
+Please answer what you can - I'll work with reasonable assumptions for anything unclear.
+```
+
+**STOP and wait for user answers**
+
+### 4. Environment Analysis
+
+Check the development environment:
+- Review project structure
+- Check available tools and utilities
+- Identify testing frameworks
+- Review deployment/build processes
+- Check for pre-commit hooks or automation
+
+### 5. Discovery Summary
+
+After discovery, provide comprehensive summary:
+
+```
+## Discovery Summary
+
+**Requirement:**
+[Detailed restatement of what will be built]
+
+**Business Value:**
+[Why this matters]
+
+**Technical Approach:**
+[High-level technical strategy]
+
+**Affected Components:**
+- [List of files/modules]
+
+**Dependencies:**
+- [External dependencies or systems]
+
+**Risks & Challenges:**
+- [Potential issues identified]
+
+**Assumptions:**
+- [Any assumptions being made]
+
+**Out of Scope:**
+- [What will NOT be included]
+
+Does this align with your expectations? Any corrections or additions?
+```
+
+**STOP and wait for user approval before proceeding to task generation**
+
+## Discovery Best Practices
+
+- **Verify everything** - Confirm your understanding at each step
+- **Search thoroughly** - Leave no stone unturned in the codebase
+- **Ask comprehensive questions** - Better to over-clarify than under-deliver
+- **Document thoroughly** - Keep detailed notes on discoveries
+- **Present clearly** - Organize findings for easy user review
+- **Identify all risks** - Surface potential problems early
+
+## User Checkpoint Protocol
+
+At each checkpoint:
+1. Present findings clearly and concisely
+2. Ask specific questions for user feedback
+3. Wait for explicit user response (don't proceed automatically)
+4. Acknowledge user input and adjust accordingly
+5. Confirm understanding before moving to next phase
+
+## When Discovery is Complete
+
+Only proceed to task generation when:
+- ✓ User has reviewed and approved discovery summary
+- ✓ All critical questions have been answered
+- ✓ Technical approach is validated
+- ✓ Scope is clearly defined and agreed upon
+
+Then say:
+```
+Discovery phase complete! Ready to generate the implementation plan.
+Proceeding to task generation...
+```
+
+## Integration with /task slow Workflow
+
+This discovery phase is the first step in the slow workflow. After user approves discovery summary, automatically proceed to the task generation phase with user review checkpoints.

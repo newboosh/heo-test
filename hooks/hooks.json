@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-validate-tools.py\"",
+            "timeout": 10
+          }
+        ],
+        "description": "[frosty] Validate project has required dev tools installed"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-ensure-git-hooks.py\"",
+            "timeout": 10
+          }
+        ],
+        "description": "[frosty] Ensure project has git hooks configured"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-setup-github-auth.py\"",
+            "timeout": 30
+          }
+        ],
+        "description": "[frosty] Setup GitHub auth from .env.local (worktree-aware)"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-catalog-build.py\"",
+            "timeout": 60
+          }
+        ],
+        "description": "[frosty] Build catalog incrementally for fresh AI indexes"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-git-safety-check.py\"",
+            "timeout": 10
+          }
+        ],
+        "description": "[frosty] Git safety: block --no-verify and direct push to main"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(flask run|python.*run|make run|uvicorn|gunicorn)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] Consider running dev server in tmux for log access' >&2\n  echo '[Hook] tmux new -s dev  |  tmux attach -t dev' >&2\nfi",
+            "timeout": 5
+          }
+        ],
+        "description": "Reminder to use tmux for dev server"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(pip install|pytest|make test|make ci|celery)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] Consider running in tmux for long-running commands' >&2\nfi",
+            "timeout": 5
+          }
+        ],
+        "description": "Reminder to use tmux for long-running commands"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.py$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/post-python-format.py\"",
+            "timeout": 15
+          }
+        ],
+        "description": "[frosty] Auto-format Python files and warn about print() statements"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"gh pr create\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\noutput=$(echo \"$input\" | jq -r '.tool_output.output // \"\"')\npr_url=$(echo \"$output\" | grep -oE 'https://github.com/[^/]+/[^/]+/pull/[0-9]+' || true)\n\nif [ -n \"$pr_url\" ]; then\n  echo \"[Hook] PR created: $pr_url\" >&2\nfi\n\necho \"$input\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Log PR URL after creation"
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sentinel-detect.py\"",
+            "timeout": 10
+          }
+        ],
+        "description": "[frosty] Sentinel: scan for emerging issues (mocks, TODOs, hardcoded values, workarounds)"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.html$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\n\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  # Check for |safe filter usage\n  safe_usage=$(grep -n '|safe' \"$file_path\" 2>/dev/null | grep -v 'tojson|safe' || true)\n  \n  if [ -n \"$safe_usage\" ]; then\n    echo \"[Hook] WARNING: |safe filter found in $file_path\" >&2\n    echo \"$safe_usage\" | head -3 >&2\n    echo \"[Hook] Ensure content is sanitized with bleach before |safe\" >&2\n  fi\n  \n  # Check for inline scripts without nonce\n  no_nonce=$(grep -n '<script>' \"$file_path\" 2>/dev/null | grep -v 'nonce=' || true)\n  \n  if [ -n \"$no_nonce\" ]; then\n    echo \"[Hook] WARNING: <script> without nonce in $file_path\" >&2\n    echo \"$no_nonce\" | head -2 >&2\n    echo \"[Hook] Add nonce=\\\"{{ csp_nonce }}\\\" for CSP compliance\" >&2\n  fi\nfi\n\necho \"$input\"",
+            "timeout": 10
+          }
+        ],
+        "description": "Check Jinja2 templates for security issues after edits"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n# Final check for print() in modified files\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  modified=$(git diff --name-only HEAD 2>/dev/null | grep '\\.py$' || true)\n  \n  if [ -n \"$modified\" ]; then\n    has_print=false\n    while IFS= read -r file; do\n      if [ -f \"$file\" ]; then\n        if grep -q \"print(\" \"$file\" 2>/dev/null; then\n          echo \"[Hook] WARNING: print() found in $file\" >&2\n          has_print=true\n        fi\n      fi\n    done <<< \"$modified\"\n    \n    if [ \"$has_print\" = true ]; then\n      echo \"[Hook] Remove print() statements before committing\" >&2\n    fi\n  fi\nfi",
+            "timeout": 15
+          }
+        ],
+        "description": "Final audit for print() in modified Python files"
+      }
+    ]
+  }
+}

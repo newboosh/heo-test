@@ -1,0 +1,75 @@
+# Merge Report Template
+# Phase 11: Merge & Deploy (Release Manager)
+#
+# Contains the gate decision verdict and merge results.
+# Written by the orchestrate command after gate decision.
+
+# --- Handoff envelope (standard for all 13 phases) ---
+phase: 11
+phase_name: merge
+role: release_manager
+status: complete
+timestamp: "2026-01-28T00:00:00Z"
+depends_on: ci_cd
+_schema_version: "1.0"
+
+summary: |
+  Gate decision: SHIP. PR merged successfully.
+
+outputs:
+  - .sprint/merge-report.yaml
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high
+  blockers: []
+
+# --- Phase-specific body ---
+
+# REQUIRED: Gate decision (from skills/gate-decision/)
+gate_decision:
+  verdict: SHIP  # SHIP | NEEDS_WORK | BLOCKED
+  timestamp: "2026-01-28T00:00:00Z"
+  rationale: |
+    All signals green. Code review approved, no security findings,
+    all tests passing with 87% coverage, CI pipeline clean.
+
+  signal_summary:
+    code_review:
+      pass: true
+      unresolved_issues: 0
+      severity_max: info
+    security_review:
+      pass: true
+      vulnerabilities: 0
+      severity_max: none
+    qa:
+      pass: true
+      tests_passing: "42/42"
+      coverage: 87
+      acceptance_criteria_met: "2/2"
+    ci:
+      pass: true
+      build_status: success
+      lint_clean: true
+      type_check_clean: true
+
+  blockers: []
+  action: "Proceed to merge"
+
+# Merge details
+merge:
+  pr_number: 42
+  pr_url: "https://github.com/org/repo/pull/42"
+  merge_commit: "abc123def456"
+  target_branch: main
+  merged_at: "2026-01-28T00:00:00Z"
+
+# Files changed summary
+files_changed:
+  - "src/services/market_service.py"
+  - "src/api/markets.py"
+  - "tests/unit/test_market_service.py"
+  - "tests/integration/test_markets_api.py"

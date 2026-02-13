@@ -1,0 +1,15 @@
+{
+  "name": "heo-test-marketplace",
+  "owner": {
+    "name": "newboosh",
+    "email": "newboosh.clientmanagement@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "heo-test",
+      "source": "./",
+      "description": "Comprehensive Claude Code testing toolkit with worktree management, TDD, code review, security, and deployment",
+      "version": "0.1.0"
+    }
+  ]
+}
