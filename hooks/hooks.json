@@ -11,7 +11,7 @@
             "timeout": 10
           }
         ],
-        "description": "[frosty] Validate project has required dev tools installed"
+        "description": "[heo] Validate project has required dev tools installed"
       },
       {
         "matcher": "*",
@@ -22,7 +22,7 @@
             "timeout": 10
           }
         ],
-        "description": "[frosty] Ensure project has git hooks configured"
+        "description": "[heo] Ensure project has git hooks configured"
       },
       {
         "matcher": "*",
@@ -33,7 +33,7 @@
             "timeout": 30
           }
         ],
-        "description": "[frosty] Setup GitHub auth from .env.local (worktree-aware)"
+        "description": "[heo] Setup GitHub auth from .env.local (worktree-aware)"
       },
       {
         "matcher": "*",
@@ -44,7 +44,7 @@
             "timeout": 60
           }
         ],
-        "description": "[frosty] Build catalog incrementally for fresh AI indexes"
+        "description": "[heo] Build catalog incrementally for fresh AI indexes"
       }
     ],
     "PreToolUse": [
@@ -57,7 +57,7 @@
             "timeout": 10
           }
         ],
-        "description": "[frosty] Git safety: block --no-verify and direct push to main"
+        "description": "[heo] Git safety: block --no-verify and direct push to main"
       },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"(flask run|python.*run|make run|uvicorn|gunicorn)\"",
@@ -92,7 +92,7 @@
             "timeout": 15
           }
         ],
-        "description": "[frosty] Auto-format Python files and warn about print() statements"
+        "description": "[heo] Auto-format Python files and warn about print() statements"
       },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"gh pr create\"",
@@ -114,7 +114,7 @@
             "timeout": 10
           }
         ],
-        "description": "[frosty] Sentinel: scan for emerging issues (mocks, TODOs, hardcoded values, workarounds)"
+        "description": "[heo] Sentinel: scan for emerging issues (mocks, TODOs, hardcoded values, workarounds)"
       },
       {
         "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.html$\"",

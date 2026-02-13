@@ -36,7 +36,7 @@ except ImportError:
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
-                    print(f"[frosty] Hook error: {e}", file=sys.stderr)
+                    print(f"[heo] Hook error: {e}", file=sys.stderr)
                     sys.exit(0)
 
             return wrapper
@@ -47,10 +47,10 @@ except ImportError:
         return Path(os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()))
 
     def log_info(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
     def log_warning(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
 
 try:

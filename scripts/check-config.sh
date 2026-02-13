@@ -1,5 +1,5 @@
 #!/bin/bash
-# Check if required configuration exists for frosty plugin features
+# Check if required configuration exists for heo plugin features
 # Usage: check-config.sh <feature>
 # Features: production, github
 
@@ -28,7 +28,7 @@ check_production() {
     [ -z "$PRODUCTION_SERVER_IP" ] && missing+=("PRODUCTION_SERVER_IP")
 
     if [ ${#missing[@]} -gt 0 ]; then
-        echo -e "${YELLOW}[Frosty] Production features require configuration${NC}" >&2
+        echo -e "${YELLOW}[Heo] Production features require configuration${NC}" >&2
         echo "" >&2
         echo "Missing environment variables:" >&2
         for var in "${missing[@]}"; do
@@ -50,7 +50,7 @@ check_production() {
 check_github() {
     # Check for new variable name first, then legacy
     if [ -z "$REPO_ORIGIN_PAT" ] && [ -z "$GITHUB_PAT" ]; then
-        echo -e "${YELLOW}[Frosty] GitHub features require configuration${NC}" >&2
+        echo -e "${YELLOW}[Heo] GitHub features require configuration${NC}" >&2
         echo "" >&2
         echo "Missing: REPO_ORIGIN_PAT" >&2
         echo "" >&2

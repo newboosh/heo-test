@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import List, Optional
 
 # Hook output prefix - use this constant for consistent messaging
-HOOK_PREFIX = "[frosty]"
+HOOK_PREFIX = "[heo]"
 
 # Minimum Python version required
 MIN_PYTHON_VERSION = (3, 9)
@@ -39,7 +39,7 @@ class HookContext:
 # Thread-safe context variable (replaces module-level globals)
 _hook_context: ContextVar[HookContext] = ContextVar(
     'hook_context',
-    default=HookContext(log_file=os.environ.get("FROSTY_LOG_FILE"))
+    default=HookContext(log_file=os.environ.get("HEO_LOG_FILE"))
 )
 
 
@@ -58,13 +58,13 @@ def init_context(log_file: Optional[str] = None) -> HookContext:
     Initialize a new hook context.
 
     Args:
-        log_file: Path to structured log file, or None to use FROSTY_LOG_FILE env var.
+        log_file: Path to structured log file, or None to use HEO_LOG_FILE env var.
 
     Returns:
         The initialized context.
     """
     ctx = HookContext(
-        log_file=log_file if log_file is not None else os.environ.get("FROSTY_LOG_FILE"),
+        log_file=log_file if log_file is not None else os.environ.get("HEO_LOG_FILE"),
     )
     _hook_context.set(ctx)
     return ctx
@@ -123,7 +123,7 @@ def graceful_hook(blocking: bool = False, name: Optional[str] = None):
             except Exception as e:
                 # Log error but don't crash
                 log_error(f"Hook error: {e}", exception=str(e))
-                if "--debug" in sys.argv or os.environ.get("FROSTY_DEBUG"):
+                if "--debug" in sys.argv or os.environ.get("HEO_DEBUG"):
                     traceback.print_exc(file=sys.stderr)
                 log_hook_end(blocked=blocking)
                 # Fail open (allow) unless explicitly blocking
@@ -205,7 +205,7 @@ def _write_to_log_file(entry: dict) -> None:
             f.write(json.dumps(entry) + "\n")
     except (IOError, OSError) as e:
         # Log to stderr in debug mode
-        if os.environ.get("FROSTY_DEBUG"):
+        if os.environ.get("HEO_DEBUG"):
             print(f"{HOOK_PREFIX} Log write failed: {e}", file=sys.stderr)
 
 

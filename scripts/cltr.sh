@@ -8,9 +8,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Get frosty plugin directory (parent of this script's directory)
+# Get heo plugin directory (parent of this script's directory)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FROSTY_PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+HEO_PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Find the current worktree root
 WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
@@ -69,9 +69,9 @@ echo ""
 
 # Build plugin args if plugin exists
 PLUGIN_ARGS=""
-if [ -f "$FROSTY_PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
-    PLUGIN_ARGS="--add-dir $FROSTY_PLUGIN_DIR"
-    echo -e "${BLUE}Plugin:${NC} $FROSTY_PLUGIN_DIR"
+if [ -f "$HEO_PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
+    PLUGIN_ARGS="--add-dir $HEO_PLUGIN_DIR"
+    echo -e "${BLUE}Plugin:${NC} $HEO_PLUGIN_DIR"
 fi
 
 claude $PLUGIN_ARGS --dangerously-skip-permissions \

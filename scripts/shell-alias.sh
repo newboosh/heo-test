@@ -1,13 +1,13 @@
 #!/bin/bash
-# Frosty Plugin Shell Alias
+# Heo Plugin Shell Alias
 # Source this file in your .bashrc or .zshrc:
-#   source /path/to/frosty/scripts/shell-alias.sh
+#   source /path/to/heo/scripts/shell-alias.sh
 
 # Detect plugin directory (where this script lives)
-FROSTY_PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
+HEO_PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 
 # Main alias function
-claude-frosty() {
+claude-heo() {
     local args=()
     local skip_permissions=false
     local prompt=""
@@ -34,7 +34,7 @@ claude-frosty() {
     local cmd=(claude)
 
     # Add plugin
-    cmd+=(--add-dir "$FROSTY_PLUGIN_DIR")
+    cmd+=(--add-dir "$HEO_PLUGIN_DIR")
 
     # Add skip permissions if requested
     if $skip_permissions; then
@@ -54,10 +54,10 @@ claude-frosty() {
 }
 
 # Short alias
-alias cf='claude-frosty'
+alias cf='claude-heo'
 
 # Worktree-aware variant (auto-loads task context)
-claude-frosty-tree() {
+claude-heo-tree() {
     local worktree_root
     worktree_root=$(git rev-parse --show-toplevel 2>/dev/null)
 
@@ -88,25 +88,25 @@ IMPORTANT: Focus on this worktree's specific purpose."
 
     # Launch with context
     if [[ -n "$system_prompt" ]]; then
-        claude-frosty --yes --append-system-prompt "$system_prompt" "$@"
+        claude-heo --yes --append-system-prompt "$system_prompt" "$@"
     else
-        claude-frosty "$@"
+        claude-heo "$@"
     fi
 }
 
 # Short alias for tree variant
-alias cft='claude-frosty-tree'
+alias cft='claude-heo-tree'
 
 # Print help on first source
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "Frosty Plugin Aliases"
+    echo "Heo Plugin Aliases"
     echo "====================="
     echo ""
     echo "Usage:"
-    echo "  claude-frosty [options]    Launch Claude with frosty plugin"
-    echo "  cf                         Short alias for claude-frosty"
-    echo "  claude-frosty-tree         Launch in worktree with task context"
-    echo "  cft                        Short alias for claude-frosty-tree"
+    echo "  claude-heo [options]    Launch Claude with heo plugin"
+    echo "  cf                         Short alias for claude-heo"
+    echo "  claude-heo-tree         Launch in worktree with task context"
+    echo "  cft                        Short alias for claude-heo-tree"
     echo ""
     echo "Options:"
     echo "  -y, --yes                  Skip permission prompts"
@@ -114,5 +114,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo ""
     echo "Installation:"
     echo "  Add to ~/.bashrc or ~/.zshrc:"
-    echo "    source $FROSTY_PLUGIN_DIR/scripts/shell-alias.sh"
+    echo "    source $HEO_PLUGIN_DIR/scripts/shell-alias.sh"
 fi

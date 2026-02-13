@@ -103,7 +103,7 @@ def main():
 
     if not allowed:
         cmd_display = command[:100] + "..." if len(command) > 100 else command
-        print(f"[frosty] Command: {cmd_display}", file=sys.stderr)
+        print(f"[heo] Command: {cmd_display}", file=sys.stderr)
         result.block(message, command=command)
 
     result.exit()

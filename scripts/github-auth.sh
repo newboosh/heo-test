@@ -18,8 +18,8 @@
 #   GITHUB_AUTH_NO_SYNC=1  - Don't sync gh CLI automatically
 #
 # After sourcing:
-#   - GITHUB_REPO_OWNER  - Repository owner (e.g., "FrostyTeeth")
-#   - GITHUB_REPO_NAME   - Repository name (e.g., "claude_plugin_source")
+#   - GITHUB_REPO_OWNER  - Repository owner (e.g., "newboosh")
+#   - GITHUB_REPO_NAME   - Repository name (e.g., "heo")
 #   - GITHUB_REPO_URL    - Clean URL (without embedded token)
 #   - GITHUB_PAT         - Token for authentication
 #   - gh CLI will be authenticated with the same token (if synced)

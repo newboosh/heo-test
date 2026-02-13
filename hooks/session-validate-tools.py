@@ -30,7 +30,7 @@ except ImportError:
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
-                    print(f"[frosty] Hook error: {e}", file=sys.stderr)
+                    print(f"[heo] Hook error: {e}", file=sys.stderr)
                     sys.exit(0)
             return wrapper
         return decorator
@@ -39,10 +39,10 @@ except ImportError:
         return Path(os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()))
 
     def log_warning(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
     def log_info(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
     def get_project_tool_requirements(p):
         return {}
@@ -66,7 +66,7 @@ try:
     from safeguards import (
         guard_hook_execution,
         safe_subprocess_run,
-        is_frosty_project,
+        is_heo_project,
         log_diagnostic,
     )
     SAFEGUARDS_AVAILABLE = True
@@ -83,7 +83,7 @@ except ImportError:
             cwd=kw.get('cwd'),
         )
         return r.returncode == 0, r.stdout, r.stderr
-    def is_frosty_project(p=None): return True, "fallback"
+    def is_heo_project(p=None): return True, "fallback"
     def log_diagnostic(msg, **_): pass
 
 
@@ -168,11 +168,11 @@ def version_compatible(required: Optional[str], installed: Optional[str]) -> boo
 
 @graceful_hook(blocking=False)  # Never block on validation errors
 def main():
-    # SAFEGUARD: Check if this is a frosty-compatible project
+    # SAFEGUARD: Check if this is a heo-compatible project
     project_dir = get_project_dir()
 
-    is_frosty, reason = is_frosty_project(project_dir)
-    if not is_frosty:
+    is_heo, reason = is_heo_project(project_dir)
+    if not is_heo:
         log_diagnostic(f"Skipping tool validation: {reason}")
         sys.exit(0)
 
@@ -214,18 +214,18 @@ def main():
 
     # Report issues
     if missing:
-        print("[frosty] Missing tools in project venv:", file=sys.stderr)
+        print("[heo] Missing tools in project venv:", file=sys.stderr)
         for tool, version in missing:
             ver_str = f" (need {version})" if version else ""
             print(f"  - {tool}{ver_str}", file=sys.stderr)
 
     if wrong_version:
-        print("[frosty] Version mismatches:", file=sys.stderr)
+        print("[heo] Version mismatches:", file=sys.stderr)
         for tool, required, installed in wrong_version:
             print(f"  - {tool}: need {required}, have {installed}", file=sys.stderr)
 
     if using_global:
-        print("[frosty] Using global (not venv) tools:", file=sys.stderr)
+        print("[heo] Using global (not venv) tools:", file=sys.stderr)
         for tool, version, required in using_global:
             req_str = f" (project needs {required})" if required else ""
             print(f"  - {tool} {version}{req_str}", file=sys.stderr)
@@ -233,10 +233,10 @@ def main():
     if missing or wrong_version:
         venv = find_venv(project_dir)
         if venv:
-            print(f"\n[frosty] To install missing tools:", file=sys.stderr)
+            print(f"\n[heo] To install missing tools:", file=sys.stderr)
             print(f"  source {venv}/bin/activate && pip install -r requirements-dev.txt", file=sys.stderr)
         else:
-            print(f"\n[frosty] No venv found. Create one:", file=sys.stderr)
+            print(f"\n[heo] No venv found. Create one:", file=sys.stderr)
             print(f"  python -m venv .venv && source .venv/bin/activate", file=sys.stderr)
 
     # Always exit 0 - this is informational, not blocking

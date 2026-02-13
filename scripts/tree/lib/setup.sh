@@ -226,13 +226,13 @@ generate_init_script() {
     cat > "$init_script" << INITSCRIPT
 #!/bin/bash
 # Auto-generated Claude initialization script
-# Launches Claude with frosty plugin and auto-sends task description
+# Launches Claude with heo plugin and auto-sends task description
 
 WORKTREE_ROOT="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 cd "\$WORKTREE_ROOT"
 
-# Frosty plugin location (embedded at build time)
-FROSTY_PLUGIN_DIR="$plugin_dir"
+# Heo plugin location (embedded at build time)
+HEO_PLUGIN_DIR="$plugin_dir"
 
 # Task details (embedded at build time)
 WORKTREE_NAME="$worktree_name"
@@ -248,8 +248,8 @@ echo "Task: \$TASK_DESCRIPTION"
 echo ""
 echo "================================================================"
 echo ""
-echo "Launching Claude Code with frosty plugin..."
-echo "   Plugin: \$FROSTY_PLUGIN_DIR"
+echo "Launching Claude Code with heo plugin..."
+echo "   Plugin: \$HEO_PLUGIN_DIR"
 echo "   Permissions: auto-approved (--dangerously-skip-permissions)"
 echo "   First prompt: auto-sent with task description"
 echo ""
@@ -265,10 +265,10 @@ fi
 # Verify plugin exists
 # Use array to safely handle paths with spaces
 PLUGIN_ARGS=()
-if [ -f "\$FROSTY_PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
-    PLUGIN_ARGS=(--add-dir "\$FROSTY_PLUGIN_DIR")
+if [ -f "\$HEO_PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
+    PLUGIN_ARGS=(--add-dir "\$HEO_PLUGIN_DIR")
 else
-    echo "Warning: Frosty plugin not found at \$FROSTY_PLUGIN_DIR"
+    echo "Warning: Heo plugin not found at \$HEO_PLUGIN_DIR"
     echo "Launching without plugin..."
 fi
 

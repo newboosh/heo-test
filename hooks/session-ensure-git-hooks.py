@@ -26,7 +26,7 @@ except ImportError:
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
-                    print(f"[frosty] Hook error: {e}", file=sys.stderr)
+                    print(f"[heo] Hook error: {e}", file=sys.stderr)
                     sys.exit(0)
             return wrapper
         return decorator
@@ -35,10 +35,10 @@ except ImportError:
         return Path(os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()))
 
     def log_warning(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
     def log_info(msg):
-        print(f"[frosty] {msg}", file=sys.stderr)
+        print(f"[heo] {msg}", file=sys.stderr)
 
     def get_hook_status(p):
         return {"tool": "none", "hooks_installed": False}
@@ -48,11 +48,11 @@ except ImportError:
 
 # Import safeguards separately - it may fail independently
 try:
-    from safeguards import is_frosty_project, log_diagnostic
+    from safeguards import is_heo_project, log_diagnostic
     SAFEGUARDS_AVAILABLE = True
 except ImportError:
     SAFEGUARDS_AVAILABLE = False
-    def is_frosty_project(p=None): return True, "fallback"
+    def is_heo_project(p=None): return True, "fallback"
     def log_diagnostic(msg, **_): pass
 
 
@@ -60,9 +60,9 @@ except ImportError:
 def main():
     project_dir = get_project_dir()
 
-    # SAFEGUARD: Skip if not a frosty-compatible project
-    is_frosty, reason = is_frosty_project(project_dir)
-    if not is_frosty:
+    # SAFEGUARD: Skip if not a heo-compatible project
+    is_heo, reason = is_heo_project(project_dir)
+    if not is_heo:
         log_diagnostic(f"Skipping git hooks check: {reason}")
         sys.exit(0)
 

@@ -15,7 +15,7 @@ To execute, run:
 bash "${PLUGIN_DIR}/scripts/tree.sh" <command> [args...]
 ```
 
-Where `${PLUGIN_DIR}` is the frosty plugin's installation directory (contains `.claude-plugin/plugin.json`).
+Where `${PLUGIN_DIR}` is the heo plugin's installation directory (contains `.claude-plugin/plugin.json`).
 
 ## Commands
 

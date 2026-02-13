@@ -333,7 +333,7 @@ git diff --cached --name-only  # Faster than git status + parsing
 ---
 **Agent Version:** 2.0
 **Last Updated:** January 25, 2026
-**Status:** Integrated into custom Frosty plugin
+**Status:** Integrated into custom Heo plugin
 
 
 **Remember**: Good source control keeps the team together by providing funnelling genius into the codebase.

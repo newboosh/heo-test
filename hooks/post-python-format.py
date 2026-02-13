@@ -25,7 +25,7 @@ try:
     from safeguards import (
         guard_hook_execution,
         safe_subprocess_run,
-        is_frosty_project,
+        is_heo_project,
         log_diagnostic,
     )
     SAFEGUARDS_AVAILABLE = True
@@ -36,7 +36,7 @@ except ImportError:
     def guard_hook_execution(): return False
     def safe_subprocess_run(cmd, **kw):
         return False, "", "blocked: safeguards unavailable"
-    def is_frosty_project(p=None): return False, "safeguards unavailable"
+    def is_heo_project(p=None): return False, "safeguards unavailable"
     def log_diagnostic(msg, **_): pass
 
 
@@ -60,14 +60,14 @@ def run_ruff(file_path: Path, project_dir: Path) -> bool:
                 log_diagnostic(f"Formatter blocked: {stderr}")
                 return False
 
-            if not success and os.environ.get("FROSTY_DEBUG"):
+            if not success and os.environ.get("HEO_DEBUG"):
                 if stderr:
-                    print(f"[frosty] ruff warning: {stderr[:100]}", file=sys.stderr)
+                    print(f"[heo] ruff warning: {stderr[:100]}", file=sys.stderr)
 
             return success
         except Exception as e:
-            if os.environ.get("FROSTY_DEBUG"):
-                print(f"[frosty] ruff error: {e}", file=sys.stderr)
+            if os.environ.get("HEO_DEBUG"):
+                print(f"[heo] ruff error: {e}", file=sys.stderr)
             log_diagnostic(f"Formatter error: {e}")
             return False
 
@@ -90,8 +90,8 @@ def run_ruff(file_path: Path, project_dir: Path) -> bool:
         return _run_formatter([global_ruff, "format", str(file_path)], tool_name="ruff")
 
     # No ruff found
-    if os.environ.get("FROSTY_DEBUG"):
-        print("[frosty] ruff not found", file=sys.stderr)
+    if os.environ.get("HEO_DEBUG"):
+        print("[heo] ruff not found", file=sys.stderr)
     log_diagnostic("ruff not found anywhere")
     return False
 
@@ -126,12 +126,12 @@ def check_print_statements(file_path: Path) -> None:
                     prints_found.append(f"  {i}: {line.rstrip()[:60]}")
 
         if prints_found:
-            print(f"[frosty] WARNING: print() found in {file_path.name}", file=sys.stderr)
+            print(f"[heo] WARNING: print() found in {file_path.name}", file=sys.stderr)
             for p in prints_found[:3]:  # Show max 3
                 print(p, file=sys.stderr)
             if len(prints_found) > 3:
                 print(f"  ... and {len(prints_found) - 3} more", file=sys.stderr)
-            print("[frosty] Remove print() before committing", file=sys.stderr)
+            print("[heo] Remove print() before committing", file=sys.stderr)
     except (IOError, UnicodeDecodeError):
         pass  # Silently skip files we can't read
 
@@ -151,10 +151,10 @@ def main():
         write_hook_output(input_data)
         sys.exit(0)
 
-    # SAFEGUARD: Check if this is a frosty-compatible project
+    # SAFEGUARD: Check if this is a heo-compatible project
     project_dir = get_project_dir()
-    is_frosty, reason = is_frosty_project(project_dir)
-    if not is_frosty:
+    is_heo, reason = is_heo_project(project_dir)
+    if not is_heo:
         log_diagnostic(f"Skipping Python format: {reason}")
         write_hook_output(input_data)
         sys.exit(0)

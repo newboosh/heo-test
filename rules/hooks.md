@@ -201,7 +201,7 @@ TaskOutput(task_id="...", block=False)
 
 ## Project-Specific Hooks
 
-For this project, hooks are auto-synced by the frosty plugin on session start.
+For this project, hooks are auto-synced by the heo plugin on session start.
 The plugin copies hook scripts to `.claude/hooks/` and merges hook config into
 `.claude/settings.json`.
 
@@ -219,11 +219,11 @@ Example of synced hooks:
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-git-safety-check.py\""
           }
         ],
-        "description": "[frosty] Git safety: block --no-verify and direct push to main"
+        "description": "[heo] Git safety: block --no-verify and direct push to main"
       }
     ]
   }
 }
 ```
 
-Hooks with `[frosty]` prefix are managed by the plugin and will be updated automatically.
+Hooks with `[heo]` prefix are managed by the plugin and will be updated automatically.

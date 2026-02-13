@@ -25,7 +25,7 @@ Add to `.claude/settings.local.json`:
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-python-format.py\""
           }
         ],
-        "description": "[frosty] Auto-format Python files with ruff (venv-aware)"
+        "description": "[heo] Auto-format Python files with ruff (venv-aware)"
       }
     ]
   }
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 chmod +x .claude/hooks/post-python-format.py
 ```
 
-**Note:** The frosty plugin automatically syncs this hook to projects on session start.
+**Note:** The heo plugin automatically syncs this hook to projects on session start.
 You don't need to manually add it if using the plugin.
 
 ---

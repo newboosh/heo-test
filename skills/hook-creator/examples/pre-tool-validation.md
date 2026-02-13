@@ -24,7 +24,7 @@ Add to `.claude/settings.local.json`:
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-git-safety-check.py\""
           }
         ],
-        "description": "[frosty] Git safety: block --no-verify and direct push to main"
+        "description": "[heo] Git safety: block --no-verify and direct push to main"
       }
     ]
   }
@@ -77,7 +77,7 @@ def main():
 
     for pattern, message in BLOCKED_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
-            print(f"[frosty] BLOCKED: {message}", file=sys.stderr)
+            print(f"[heo] BLOCKED: {message}", file=sys.stderr)
             sys.exit(2)
 
     sys.exit(0)
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 chmod +x .claude/hooks/pre-git-safety-check.py
 ```
 
-**Note:** The frosty plugin automatically syncs this hook to projects on session start.
+**Note:** The heo plugin automatically syncs this hook to projects on session start.
 You don't need to manually add it if using the plugin.
 
 ---

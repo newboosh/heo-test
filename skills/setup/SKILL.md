@@ -1,10 +1,10 @@
 ---
-description: Configure the frosty plugin for your project
+description: Configure the heo plugin for your project
 ---
 
-# Frosty Plugin Setup
+# Heo Plugin Setup
 
-Help the user configure the frosty plugin for their project.
+Help the user configure the heo plugin for their project.
 
 ## What This Skill Does
 
@@ -83,7 +83,7 @@ When the user runs `/setup`:
 ## Example Output
 
 ```
-Frosty Plugin Setup
+Heo Plugin Setup
 
 Checking existing configuration...
 No .env.local found.

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Diagnose frosty hooks issues
+# Diagnose heo hooks issues
 #
 # Run this script to check for problems with hook execution
 # and to enable/disable hooks quickly if issues occur.
@@ -25,7 +25,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo "========================================"
-echo "Frosty Hooks Diagnostic Tool"
+echo "Heo Hooks Diagnostic Tool"
 echo "========================================"
 echo ""
 
@@ -37,13 +37,13 @@ case "${1:-diagnose}" in
         echo "Note: This script runs in a subshell, so export/unset won't persist."
         echo ""
         echo "Option 1 - Run in your current shell:"
-        echo "  export FROSTY_DISABLE_HOOKS=1"
+        echo "  export HEO_DISABLE_HOOKS=1"
         echo ""
         echo "Option 2 - Add to your shell profile (~/.bashrc or ~/.zshrc):"
-        echo "  export FROSTY_DISABLE_HOOKS=1"
+        echo "  export HEO_DISABLE_HOOKS=1"
         echo ""
         echo "Option 3 - Create a skip file in the project (persists):"
-        echo "  touch .frosty-skip-hooks"
+        echo "  touch .heo-skip-hooks"
         echo ""
         exit 0
         ;;
@@ -53,21 +53,21 @@ case "${1:-diagnose}" in
         echo "Note: This script runs in a subshell, so export/unset won't persist."
         echo ""
         echo "Option 1 - Run in your current shell:"
-        echo "  unset FROSTY_DISABLE_HOOKS"
+        echo "  unset HEO_DISABLE_HOOKS"
         echo ""
         echo "Option 2 - Remove from your shell profile if added."
         echo ""
         echo "Option 3 - Remove the skip file if created:"
-        echo "  rm -f .frosty-skip-hooks"
+        echo "  rm -f .heo-skip-hooks"
         echo ""
         exit 0
         ;;
     logs)
         echo "Recent log entries:"
         echo "------------------"
-        # Honour FROSTY_LOG_FILE env var if set
-        if [ -n "$FROSTY_LOG_FILE" ] && [ -f "$FROSTY_LOG_FILE" ]; then
-            tail -50 "$FROSTY_LOG_FILE"
+        # Honour HEO_LOG_FILE env var if set
+        if [ -n "$HEO_LOG_FILE" ] && [ -f "$HEO_LOG_FILE" ]; then
+            tail -50 "$HEO_LOG_FILE"
         elif [ -d "$LOG_DIR" ]; then
             # Find most recent log file
             LOG_FILE=$(ls -t "$LOG_DIR"/hooks-*.log 2>/dev/null | head -1)
@@ -78,7 +78,7 @@ case "${1:-diagnose}" in
             fi
         else
             echo "Log directory not found: $LOG_DIR"
-            echo "Enable logging with: export FROSTY_LOG_FILE=~/.frosty/hooks.log"
+            echo "Enable logging with: export HEO_LOG_FILE=~/.heo/hooks.log"
         fi
         exit 0
         ;;
@@ -121,30 +121,30 @@ done
 # Check environment variables
 echo ""
 echo "Environment variables:"
-echo -n "  FROSTY_DISABLE_HOOKS: "
-if [ -n "$FROSTY_DISABLE_HOOKS" ]; then
+echo -n "  HEO_DISABLE_HOOKS: "
+if [ -n "$HEO_DISABLE_HOOKS" ]; then
     echo -e "${YELLOW}SET (hooks disabled)${NC}"
 else
     echo -e "${GREEN}not set${NC}"
 fi
 
-echo -n "  FROSTY_FORCE_ENABLE: "
-if [ -n "$FROSTY_FORCE_ENABLE" ]; then
+echo -n "  HEO_FORCE_ENABLE: "
+if [ -n "$HEO_FORCE_ENABLE" ]; then
     echo -e "${YELLOW}SET (forcing hooks in all projects)${NC}"
 else
     echo -e "${GREEN}not set${NC}"
 fi
 
-echo -n "  FROSTY_DEBUG: "
-if [ -n "$FROSTY_DEBUG" ]; then
+echo -n "  HEO_DEBUG: "
+if [ -n "$HEO_DEBUG" ]; then
     echo -e "${YELLOW}SET (verbose output)${NC}"
 else
     echo "not set"
 fi
 
-echo -n "  FROSTY_LOG_FILE: "
-if [ -n "$FROSTY_LOG_FILE" ]; then
-    echo -e "${GREEN}$FROSTY_LOG_FILE${NC}"
+echo -n "  HEO_LOG_FILE: "
+if [ -n "$HEO_LOG_FILE" ]; then
+    echo -e "${GREEN}$HEO_LOG_FILE${NC}"
 else
     echo "not set (logging disabled)"
 fi
@@ -164,13 +164,13 @@ for marker in "${MARKERS[@]}"; do
     fi
 done
 
-if [ -f "$CWD/.frosty-skip-hooks" ]; then
-    echo -e "  ${YELLOW}Found: .frosty-skip-hooks (hooks will be skipped)${NC}"
+if [ -f "$CWD/.heo-skip-hooks" ]; then
+    echo -e "  ${YELLOW}Found: .heo-skip-hooks (hooks will be skipped)${NC}"
 fi
 
 if [ "$FOUND_MARKER" = false ]; then
-    echo -e "  ${YELLOW}No frosty marker files found${NC}"
-    echo "  Hooks will be skipped in this directory unless FROSTY_FORCE_ENABLE=1"
+    echo -e "  ${YELLOW}No heo marker files found${NC}"
+    echo "  Hooks will be skipped in this directory unless HEO_FORCE_ENABLE=1"
 fi
 
 # Check hooks directory
@@ -222,15 +222,15 @@ echo ""
 echo "If you're experiencing issues:"
 echo ""
 echo "1. Disable hooks temporarily:"
-echo "   export FROSTY_DISABLE_HOOKS=1"
+echo "   export HEO_DISABLE_HOOKS=1"
 echo ""
 echo "2. Enable debug logging:"
-echo "   export FROSTY_DEBUG=1"
-echo "   export FROSTY_LOG_FILE=~/.frosty/hooks.log"
+echo "   export HEO_DEBUG=1"
+echo "   export HEO_LOG_FILE=~/.heo/hooks.log"
 echo ""
 echo "3. Check logs:"
 echo "   ./scripts/diagnose-hooks.sh logs"
 echo ""
 echo "4. Skip hooks in a specific project:"
-echo "   touch .frosty-skip-hooks"
+echo "   touch .heo-skip-hooks"
 echo ""

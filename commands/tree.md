@@ -20,7 +20,7 @@ Execute the tree worktree management script from this plugin.
 bash "${PLUGIN_DIR}/scripts/tree.sh" <command> [args...]
 ```
 
-Where `${PLUGIN_DIR}` is the frosty plugin's installation path (e.g., `~/.claude/plugins/frosty/` or wherever Claude Code installed this plugin).
+Where `${PLUGIN_DIR}` is the heo plugin's installation path (e.g., `~/.claude/plugins/heo/` or wherever Claude Code installed this plugin).
 
 This command provides comprehensive worktree management with full development cycle automation:
 

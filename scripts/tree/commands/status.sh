@@ -223,7 +223,7 @@ tree_refresh() {
         echo ""
         echo "  If commands still don't work:"
         echo "    Restart Claude Code CLI session"
-        echo "    Verify the frosty plugin is installed"
+        echo "    Verify the heo plugin is installed"
     fi
 
     echo ""

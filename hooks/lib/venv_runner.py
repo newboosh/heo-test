@@ -120,7 +120,7 @@ def run_tool(tool: str, args: List[str], project_dir: Path) -> int:
         result = subprocess.run(cmd, cwd=project_dir)
         return result.returncode
 
-    print(f"[frosty] Tool not found: {tool}", file=sys.stderr)
+    print(f"[heo] Tool not found: {tool}", file=sys.stderr)
     return 127  # Command not found
 
 

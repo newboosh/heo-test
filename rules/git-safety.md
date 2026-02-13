@@ -4,7 +4,7 @@ These rules apply to ALL repositories and ALL git operations.
 
 ## BLOCKED OPERATIONS - NO EXCEPTIONS
 
-The following operations are **always blocked** by the frosty plugin hooks. There are **no valid cases** for these operations. They cannot be bypassed.
+The following operations are **always blocked** by the heo plugin hooks. There are **no valid cases** for these operations. They cannot be bypassed.
 
 ### 1. `--no-verify` - ALWAYS BLOCKED
 ```
