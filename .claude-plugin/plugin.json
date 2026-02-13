@@ -1,0 +1,11 @@
+{
+  "name": "heo-test",
+  "version": "0.1.0",
+  "description": "Claude Code testing plugin for the heo project.",
+  "author": {
+    "name": "newboosh",
+    "email": "newboosh.clientmanagement@gmail.com"
+  },
+  "repository": "https://github.com/newboosh/heo-test",
+  "keywords": []
+}
