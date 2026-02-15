@@ -272,7 +272,7 @@ def main() -> None:
             print(f"  {issue['issue_type'].upper()}: `{issue['ref']}`")
             print(f"  {issue['reason']}")
 
-        print("\nTo fix these issues, run: /catalog fix")
+        print("\nTo fix these issues, run: python -m scripts.librarian.doclinks fix")
 
 
 if __name__ == "__main__":

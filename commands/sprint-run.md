@@ -44,7 +44,7 @@ phase_log:
     validated: true
 phases_failed: []
 retry_count: 0
-needs_work_loops: 0
+revision_cycles: 0
 last_error: null
 ```
 
@@ -85,38 +85,60 @@ After each phase completes:
 
 ### 3. Phase 1-5: Planning
 
-Invoke the sprint skill to run through planning stages:
+**Phase 1 always runs via the sprint skill** (human intake):
 
 ```
-/sprint <requirements>
+/sprint <requirements>    # Phases 1-5: pipeline mode (auto-continues through all planning phases)
 ```
 
-The sprint skill handles:
+**Phases 2-5 branch based on team_mode:**
+
+```text
+If team_mode is enabled (sprint-meta.yaml team_mode: true, or /sprint-run team <req>):
+  Invoke /plan-swarm [attended]
+  — Parallelizes research across Context Agent, Researcher, Technical Scout, Product Analyst
+  — Produces identical handoff files to sequential mode
+  — See commands/plan-swarm.md
+
+Otherwise (default):
+  Continue with /sprint <requirements>
+  — Sequential Phases 1-5 via sprint skill (pipeline mode)
+```
+
+The sprint skill handles (in both modes):
 - Phase 1: Intake — gather what/why/who/constraints
 - Phase 2: Refinement — user stories, acceptance criteria
 - Phase 3: Design — UX flows or API contracts
 - Phase 4: Technical Planning — architecture, file changes, risks
 - Phase 5: Backlog — ordered task list with estimates
 
+**Note:** Individual phases can also be invoked standalone via `/sprint phase <N>` (single mode — returns control after that phase). Pipeline mode (`/sprint <req>`) auto-continues through all 5 phases.
+
 **On completion:** `.sprint/backlog.yaml` exists with ordered tasks.
 
 ### 4. Phase 6-11: Execution
 
-Invoke the orchestrate command in sprint mode:
+Invoke the orchestrate command in continuous mode:
 
 ```
 /orchestrate sprint
 ```
 
-The orchestrate command handles:
+The orchestrate command runs Phases 6-11 as a continuous pipeline:
 - Phase 6: Implementation (TDD) — `tdd-guide` agent per task
-- Phase 7: Code Review — `code-reviewer`, `qa-agent`, CodeRabbit
-- Phase 8: Security Review — `security-reviewer` agent
-- Phase 9: QA Validation — `verification-loop` skill, `e2e-runner`
-- Phase 10: CI/CD Pipeline — `ci` command, `verify` command
-- Phase 11: Merge & Deploy — Gate Decision skill → `push` command
+- Phase 6.5: Test Swarm (optional) — parallel test writers when coverage < 70% or 5+ tasks
+- Phase 7+9: Review Swarm — `code-reviewer` + `qa-agent` + `security-reviewer` as Agent Team
+- Phase 8: QA Validation — `verification-loop` skill (lint, format, type check, tests, coverage), `e2e-runner`
+- Phase 10: Pull Request & CI — Gate Decision skill (reads Phase 7+9 and 8 outputs) → `push` command → GitHub CI
+- Phase 11: PR Review & Merge — CodeRabbit review loop → resolve merge conflicts → merge PR
 
-**On completion:** Code is merged. `.sprint/merge-report.yaml` exists. All phase handoffs (`.sprint/execution-status.yaml` through `.sprint/merge-report.yaml`) follow the standard handoff protocol.
+**Pause sentinel:** Even in continuous mode, sprint-run adds junction awareness. After each sub-phase completes within `/orchestrate sprint`:
+1. Read `.sprint/sprint-meta.yaml` for `current_phase`
+2. If `.sprint/pause` exists: halt and report "Sprint paused at Phase {N}. Remove `.sprint/pause` and run `/sprint-run resume` to continue."
+3. In attended mode: show phase completion checkpoint
+4. In autonomous mode: continue (no checkpoint)
+
+**On completion:** Code is merged. `.sprint/merge-report.yaml` exists. All phase handoffs follow the standard handoff protocol.
 
 ### 5. Phase 12: Monitoring
 
@@ -224,11 +246,11 @@ When a phase fails:
    - Produce a partial sprint report explaining what succeeded and what failed
    - Suggest manual intervention steps
 
-3. **NEEDS_WORK loop (Phase 11):**
-   - If Gate Decision returns `NEEDS_WORK`, loop back to Phase 6 with review findings
-   - Maximum 2 NEEDS_WORK verdicts allowed (3 total attempts: initial + 2 retries)
-   - On the 3rd NEEDS_WORK verdict, escalate to BLOCKED
-   - Track `needs_work_loops` count in `sprint-meta.yaml`
+3. **Revision cycle (Phase 10):**
+   - If Gate Decision returns `REVISE`, loop back to Phase 6 with review findings
+   - Maximum 2 revision cycles allowed (3 total attempts: initial + 2 cycles)
+   - On the 3rd `REVISE` verdict, escalate to BLOCKED
+   - Track `revision_cycles` count in `sprint-meta.yaml`
 
 ### Attended Mode
 
@@ -290,26 +312,25 @@ No mid-phase checkpointing is needed — the sprint skill's partial completion s
 $ARGUMENTS:
 - `<requirements>` — Start autonomous sprint with these requirements
 - `attended <requirements>` — Start attended sprint
+- `team <requirements>` — Start sprint with team_mode enabled (parallel planning + Agent Team reviews)
 - `resume` — Resume from last completed phase
 - `status` — Show current sprint state
 - `from <N> <requirements>` — Start or re-run from phase N (e.g., `from 7` to re-run reviews)
 
 ## Rollback
 
-Rollback is not a standalone subcommand. It is triggered within the workflow:
+Rollback is not a standalone subcommand. It is triggered by the **smart router** — when bare `/sprint` shows a blocked/failed phase, one option is "Roll back to Phase N". Rollback deletes output files for phases after the target and resets `current_phase` in sprint-meta.yaml.
 
-- **Smart router** — When bare `/sprint` shows a blocked/failed phase, one option is "Roll back to Phase N"
-- **NEEDS_WORK loop** — When the gate decision returns NEEDS_WORK, the orchestrate command rolls back to Phase 6
-
-Rollback deletes all output files for phases after the target and resets `current_phase` in sprint-meta.yaml. The `phase_log` is trimmed to only include phases at or before the target.
+**Note:** Revision cycles do not use rollback. On a REVISE verdict, the orchestrate command iterates — it re-runs Phases 6-11 with findings carried forward, overwriting each phase's output. Prior outputs remain available as context.
 
 **Validation:** `python3 -m scripts.sprint.validate .sprint/` can verify the sprint directory is in a valid state after rollback.
 
 ## Composition
 
 This command delegates to:
-- `skills/sprint/` — Phases 1-5 (planning)
-- `commands/orchestrate.md` — Phases 6-11 (execution)
+- `skills/sprint/` — Phase 1 (intake, always) + Phases 2-5 (planning, when team_mode off)
+- `commands/plan-swarm.md` — Phases 2-5 (planning, when team_mode on)
+- `commands/orchestrate.md` — Phases 6-11 (execution, includes review-swarm and optional test-swarm)
 - `commands/collect-signals.md` — Phase 12 (monitoring)
 - `skills/sprint-retrospective/` — Phase 13a (analysis)
 - `skills/feedback-synthesizer/` — Phase 13b (intake generation)

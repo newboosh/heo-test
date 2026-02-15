@@ -1,17 +1,17 @@
 ---
 name: gate-decision
-description: Automated go/no-go decision criteria for the sprint pipeline. Aggregates signals from code review, security review, QA, and CI to produce SHIP / NEEDS_WORK / BLOCKED. Used by the orchestrate command at Phase 11.
+description: Automated go/no-go decision criteria for the sprint pipeline. Aggregates signals from code review, QA, security review, and sentinel to produce SHIP / REVISE / BLOCKED. Used by the orchestrate command at Phase 10 (before PR creation).
 ---
 
 # Gate Decision Skill
 
-**You are making a ship/no-ship decision.** Read the review and CI handoff files, evaluate each signal against the criteria below, and produce a verdict.
+**You are making a ship/no-ship decision.** Read the review handoff files, evaluate each signal against the criteria below, and produce a verdict. This decision gates whether the code is ready to submit as a pull request.
 
 ## When to Use
 
-This skill is consumed by `commands/orchestrate.md` during Phase 11 (Merge & Deploy). It is not invoked directly by the user.
+This skill is consumed by `commands/orchestrate.md` during Phase 10 (Pull Request & CI). It runs before the PR is created. It is not invoked directly by the user.
 
-**Lifecycle context:** See `docs/SPRINT_LIFECYCLE.md`, Phase 11.
+**Lifecycle context:** See `docs/SPRINT_LIFECYCLE.md`, Phase 10.
 
 ## Inputs
 
@@ -20,9 +20,8 @@ Read these files from `.sprint/` (plus `.sentinel/report.md` if present):
 | File | Phase | Contains |
 |------|-------|----------|
 | `.sprint/review-code.yaml` | 7 | Code review findings, approval status |
-| `.sprint/review-security.yaml` | 8 | Security findings, severity ratings |
-| `.sprint/qa-report.yaml` | 9 | Test results, coverage, acceptance criteria |
-| `.sprint/ci-report.yaml` | 10 | Build status, lint, type check results |
+| `.sprint/qa-report.yaml` | 8 | Test results, coverage, lint, type check, acceptance criteria |
+| `.sprint/review-security.yaml` | 9 | Security findings, severity ratings |
 | `.sentinel/report.md` | — | Emerging issues: workarounds, mocks, temp code, disconnected features |
 
 If any input file is missing, treat that signal as `BLOCKED` with reason "Phase N handoff missing."
@@ -33,7 +32,7 @@ If any input file is missing, treat that signal as `BLOCKED` with reason "Phase 
 
 ## Sentinel Timing
 
-The sentinel system runs **continuously during development** (via PostToolUse hooks on Edit/Write operations) and produces `.sentinel/report.md` as a living document. By the time the gate decision runs at Phase 11, the sentinel report reflects all issues detected across the entire sprint, not just a point-in-time scan. This means the gate reads an already-complete sentinel picture rather than triggering a new scan.
+The sentinel system runs **continuously during development** (via PostToolUse hooks on Edit/Write operations) and produces `.sentinel/report.md` as a living document. By the time the gate decision runs at Phase 10, the sentinel report reflects all issues detected across the entire sprint, not just a point-in-time scan. This means the gate reads an already-complete sentinel picture rather than triggering a new scan.
 
 ## Decision Process
 
@@ -49,24 +48,20 @@ code_review:
   unresolved_issues: <count of open review comments>
   severity_max: info|warning|error|critical
 
+qa:
+  pass: <all tests passing, lint/type check clean, criteria met>
+  tests_passing: <count>
+  tests_total: <count>
+  coverage: <percentage>
+  lint_clean: true|false
+  type_check_clean: true|false
+  acceptance_criteria_met: <count>
+  acceptance_criteria_total: <count>
+
 security_review:
   pass: <no findings above threshold>
   vulnerabilities: <count>
   severity_max: none|low|medium|high|critical
-
-qa:
-  pass: <all tests passing and criteria met>
-  tests_passing: <count>
-  tests_total: <count>
-  coverage: <percentage>
-  acceptance_criteria_met: <count>
-  acceptance_criteria_total: <count>
-
-ci:
-  pass: <build green, lint clean, types clean>
-  build_status: success|failure
-  lint_clean: true|false
-  type_check_clean: true|false
 
 sentinel:
   pass: <BLOCKING section is empty>
@@ -80,43 +75,41 @@ sentinel:
 Apply criteria in this order (first match wins):
 
 **BLOCKED** — Any of these is true:
-- `ci.build_status` is `failure`
 - `security_review.severity_max` is `critical` or `high`
 - `qa.tests_passing` < `qa.tests_total`
 - `code_review.severity_max` is `critical`
 - `sentinel.blocking_count` > 0 (hardcoded secrets, critical mocks, etc.)
 - Any required input file is missing
 
-**NEEDS_WORK** — Any of these is true:
+**REVISE** — Any of these is true:
 - `code_review.unresolved_issues` > 0 (non-critical)
 - `qa.coverage` < `coverage_minimum` from config (default: 80%)
+- `qa.lint_clean` is `false` or `qa.type_check_clean` is `false`
 - `security_review.severity_max` is `medium` or `low`
-- `ci.lint_clean` is `false` or `ci.type_check_clean` is `false`
 - `qa.acceptance_criteria_met` < `qa.acceptance_criteria_total`
 - `sentinel.total_issues` > 0 and `sentinel.blocking_count` == 0 (non-blocking emerging issues)
 
 **SHIP** — All of these are true:
 - `code_review.pass` is `true`
-- `security_review.pass` is `true`
 - `qa.pass` is `true`
-- `ci.pass` is `true`
+- `security_review.pass` is `true`
 - `sentinel.pass` is `true` (or no sentinel report exists)
 
 ### Step 3: Determine Action
 
 | Verdict | Action |
 |---------|--------|
-| `SHIP` | Proceed to merge. Invoke `push` command. |
-| `NEEDS_WORK` | Return to Phase 6 with findings attached. The orchestrate command loops. |
+| `SHIP` | Create pull request. Push branch, open PR, run CI on GitHub. |
+| `REVISE` | Return to Phase 6 with findings attached. The orchestrate command loops. |
 | `BLOCKED` | Halt the sprint. Report blockers. Require manual intervention. |
 
 ### Step 4: Write Decision
 
-Write the gate decision as part of `.sprint/merge-report.yaml` (or as a preceding check before the merge report is written):
+Write the gate decision to `.sprint/ci-report.yaml` (Phase 10) and carry it forward to `.sprint/merge-report.yaml` (Phase 11):
 
 ```yaml
 gate_decision:
-  verdict: SHIP|NEEDS_WORK|BLOCKED
+  verdict: SHIP|REVISE|BLOCKED
   timestamp: <ISO timestamp>
   rationale: |
     <1-3 sentence explanation of why this verdict was reached>
@@ -126,20 +119,17 @@ gate_decision:
       pass: true|false
       unresolved_issues: <count>
       severity_max: <level>
-    security_review:
-      pass: true|false
-      vulnerabilities: <count>
-      severity_max: <level>
     qa:
       pass: true|false
       tests_passing: <count>/<total>
       coverage: <percentage>
-      acceptance_criteria_met: <count>/<total>
-    ci:
-      pass: true|false
-      build_status: <status>
       lint_clean: true|false
       type_check_clean: true|false
+      acceptance_criteria_met: <count>/<total>
+    security_review:
+      pass: true|false
+      vulnerabilities: <count>
+      severity_max: <level>
     sentinel:
       pass: true|false
       blocking_count: <count>
@@ -149,7 +139,7 @@ gate_decision:
   blockers:
     - <item preventing SHIP, if any>
 
-  action: "Proceed to merge"|"Loop back to Phase 6"|"Halt sprint"
+  action: "Create pull request"|"Loop back to Phase 6"|"Halt sprint"
 ```
 
 ## Configuration
@@ -158,10 +148,10 @@ Thresholds can be adjusted per project. Defaults:
 
 | Threshold | Default | Notes |
 |-----------|---------|-------|
-| Coverage minimum | 80% | NEEDS_WORK if below |
+| Coverage minimum | 80% | REVISE if below |
 | Security severity ceiling | medium | BLOCKED if high or critical |
-| Max NEEDS_WORK verdicts | 2 | 3 total attempts (initial + 2 retries), then BLOCKED |
-| Lint/type check | must pass | NEEDS_WORK if dirty |
+| Max revision cycles | 2 | 3 total attempts (initial + 2 cycles), then BLOCKED |
+| Lint/type check (from QA) | must pass | REVISE if dirty |
 
 To override, add a `.sprint/config.yaml`:
 
@@ -169,7 +159,7 @@ To override, add a `.sprint/config.yaml`:
 gate_thresholds:
   coverage_minimum: 70
   security_ceiling: high
-  max_needs_work_verdicts: 3
+  max_revision_cycles: 3
 ```
 
 ## Manual Override (Attended Mode)
@@ -179,7 +169,7 @@ When the sprint is running in **attended mode** (`velocity_mode: attended` in `s
 ### Override Process
 
 ```text
-1. Compute the automated verdict (SHIP / NEEDS_WORK / BLOCKED) using Steps 1-3 above
+1. Compute the automated verdict (SHIP / REVISE / BLOCKED) using Steps 1-3 above
 2. Present the verdict and signal summary to the developer
 3. Ask using AskUserQuestion:
 
@@ -191,7 +181,7 @@ When the sprint is running in **attended mode** (`velocity_mode: attended` in `s
    Options:
      - "Accept verdict" → proceed with automated decision
      - "Override to SHIP" → force ship despite findings
-     - "Override to NEEDS_WORK" → force another implementation pass
+     - "Override to REVISE" → force another implementation pass
      - "Override to BLOCKED" → halt the sprint
 
 4. If override selected:
@@ -206,10 +196,10 @@ When a manual override is applied, add an `override` section to the gate decisio
 ```yaml
 gate_decision:
   verdict: SHIP  # The overridden verdict
-  automated_verdict: NEEDS_WORK  # What the algorithm computed
+  automated_verdict: REVISE  # What the algorithm computed
   override:
     applied: true
-    from: NEEDS_WORK
+    from: REVISE
     to: SHIP
     reason: |
       Developer override in attended mode.
@@ -223,25 +213,27 @@ gate_decision:
 - Overrides are **only available in attended mode**. In autonomous mode, the automated verdict is final.
 - Overrides are **logged for audit** — the `automated_verdict` and `override` fields create a paper trail.
 - Overriding to SHIP when BLOCKED still requires the developer to acknowledge the blockers.
-- Override count is not tracked against `max_needs_work_verdicts` — only automated NEEDS_WORK verdicts count toward the loop limit.
+- Override count is not tracked against `max_revision_cycles` — only automated REVISE verdicts count toward the cycle limit.
 
-## NEEDS_WORK Loop Tracking
+## Revision Cycle Tracking
 
-The orchestrate command tracks loop count in `.sprint/sprint-meta.yaml`:
+The orchestrate command tracks cycle count in `.sprint/sprint-meta.yaml`:
 
 ```yaml
-needs_work_loops: 0  # Incremented each time gate returns NEEDS_WORK
+revision_cycles: 0  # Incremented each time gate returns REVISE
 ```
 
-When `needs_work_loops` >= `max_needs_work_verdicts` (default: 2):
-- Escalate from `NEEDS_WORK` to `BLOCKED`
-- This means 3 total execution attempts (initial + 2 retries) before halting
+On a REVISE verdict, the orchestrate command iterates — it re-runs Phases 6-11 with prior review findings carried forward as context. Each phase overwrites its output file on the next pass.
+
+When `revision_cycles` >= `max_revision_cycles` (default: 2):
+- Escalate from `REVISE` to `BLOCKED`
+- This means 3 total execution attempts (initial + 2 cycles) before halting
 - Include all accumulated findings in the blocker list
 - Require manual intervention
 
 ## Composition
 
 - **Pattern:** Gate Pattern (#3 from `skills/composition-patterns/`)
-- **Consumed by:** `commands/orchestrate.md` (Phase 11)
-- **Reads from:** Phases 7-10 handoff files + `.sentinel/report.md` (emerging issues)
-- **Writes to:** `.sprint/merge-report.yaml` (gate_decision section)
+- **Consumed by:** `commands/orchestrate.md` (Phase 10)
+- **Reads from:** Phases 7-9 handoff files + `.sentinel/report.md` (emerging issues)
+- **Writes to:** `.sprint/ci-report.yaml` (gate_decision section, Phase 10) and `.sprint/merge-report.yaml` (carried forward, Phase 11)

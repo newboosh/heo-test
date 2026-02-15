@@ -38,11 +38,11 @@ except ImportError:
 
 # Import safeguards separately
 try:
-    from safeguards import is_heo_project, log_diagnostic
+    from safeguards import is_frosty_project, log_diagnostic
     SAFEGUARDS_AVAILABLE = True
 except ImportError:
     SAFEGUARDS_AVAILABLE = False
-    def is_heo_project(p=None): return True, "fallback"
+    def is_frosty_project(p=None): return True, "fallback"
     def log_diagnostic(msg, **_): pass
 
 
@@ -95,9 +95,9 @@ def run_catalog_build(project_dir: Path) -> bool:
 def main():
     project_dir = get_project_dir()
 
-    # SAFEGUARD: Skip if not a heo-compatible project
-    is_heo, reason = is_heo_project(project_dir)
-    if not is_heo:
+    # SAFEGUARD: Skip if not a frosty-compatible project
+    is_frosty, reason = is_frosty_project(project_dir)
+    if not is_frosty:
         log_diagnostic(f"Skipping catalog build: {reason}")
         sys.exit(0)
 

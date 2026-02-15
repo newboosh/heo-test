@@ -1,7 +1,7 @@
 ---
 name: sentinel
 description: Surface emerging issues discovered during work — workarounds, mocks, temporary code, disconnected features, deferred bugs, and ideas. Use at end-of-cycle, before gate decisions, or anytime to check what might have been forgotten.
-argument-hint: [report|log|check|clear]
+argument-hint: [report|log|check|clear|export-issues]
 allowed-tools: Read, Grep, Glob, Bash(*), Write, Edit, Task
 ---
 
@@ -19,6 +19,7 @@ Parse `$ARGUMENTS` to determine which command to run:
 | `log <observation>` | Quickly log an explicit observation to `.sentinel/observations.md` |
 | `check` | Quick scan — show current counts without full consolidation |
 | `clear` | Archive the current report and reset for a new cycle |
+| `export-issues` | Export unresolved findings to GitHub issues (strict criteria) |
 
 ---
 
@@ -29,9 +30,9 @@ Parse `$ARGUMENTS` to determine which command to run:
 Invoke the sentinel agent to produce a consolidated report:
 
 1. **Spawn the sentinel agent** using the Task tool. The agent definition
-   at `agents/sentinel.md` specifies `model: haiku` and `tools: Read, Grep, Glob, Bash, Write`.
-   Use `subagent_type="general-purpose"` with `model="haiku"` so the agent has
-   full tool access matching its definition:
+   is at `agents/sentinel.md` with `tools: Read, Grep, Glob, Bash, Write`.
+   Use `subagent_type="general-purpose"` with `model="haiku"` (single source
+   of truth for the sentinel model):
    ```
    Task(subagent_type="general-purpose", model="haiku", prompt=<see below>)
    ```
@@ -135,6 +136,125 @@ Archive and reset for a new cycle:
 
 ---
 
+## Command: `export-issues`
+
+**Trigger:** `/sentinel export-issues`
+
+Export unresolved sentinel findings to GitHub issues. This is the **last resort** — most issues should be fixed inline or resolved before the gate. Only findings that genuinely cannot be addressed in the current worktree should ever reach GitHub.
+
+### Philosophy: Fix Inline First
+
+Agentic coding is not human coding. An agent that discovers a problem mid-stream has the file open, the context loaded, and can fix it in seconds. The traditional issue-tracking workflow — file a ticket, context-switch away, rebuild context later — is pure waste when an agent can resolve it now.
+
+**The sentinel escalation ladder:**
+
+```text
+1. Fix inline         — Agent fixes it immediately. No issue. Just part of the commit.
+2. Local tracking     — .sentinel/report.md captures it. Resolved before the gate.
+3. Export to GitHub   — Only if it survives the gate AND meets export criteria.
+```
+
+Most findings should never leave step 1. Step 3 is rare.
+
+### Export Criteria
+
+A finding qualifies for GitHub export **only if** it meets one or more of these criteria:
+
+| Criterion | Description | Example |
+|-----------|-------------|---------|
+| **Cross-scope** | Fix belongs in a different worktree, branch, or module that this agent cannot safely modify | "The auth middleware in worktree-03 has a race condition, but we're in worktree-06" |
+| **Human decision required** | The correct fix requires a judgment call that the agent should not make unilaterally | "Should this pattern be a warning or an error? Depends on team policy." |
+| **Audit trail** | External visibility is needed for collaborators, compliance, or project tracking | "Security finding that needs documented acknowledgment" |
+| **Genuinely deferred** | Real work that is intentionally and correctly out of scope for this sprint/phase | "Performance optimization identified but unrelated to current feature work" |
+
+**What does NOT qualify:**
+
+- Mechanical fixes (missing imports, formatting, simple bugs) — fix inline
+- Anything the current agent can resolve without scope creep — fix inline
+- Issues that just bounce back to the same agent — fix now
+- Pre-existing issues in touched files — not your problem this cycle
+
+### Process
+
+```text
+1. Verify .sentinel/report.md exists
+   - If not: "No sentinel report found. Run /sentinel report first."
+
+2. Read .sentinel/report.md
+
+3. Filter findings by export criteria:
+   - Scan DEFERRED section → likely candidates (genuinely out of scope)
+   - Scan BLOCKING section → only if cross-scope (otherwise: fix it!)
+   - Scan WORKAROUNDS section → only if cross-scope or human decision needed
+   - Skip TEMPORARY/OBSERVATIONS/IDEAS → these are local concerns
+
+4. For each candidate, classify which criterion it meets:
+   - Tag: cross-scope | human-decision | audit-trail | deferred
+
+5. Show the candidate list to the user for confirmation:
+   "Found N findings that may warrant GitHub issues:
+
+    1. [cross-scope] sentinel: race condition in auth middleware
+       → Fix belongs in worktree-03, not here
+    2. [human-decision] sentinel: warning vs error for deprecated API usage
+       → Team policy decision needed
+    3. [deferred] sentinel: O(n²) dedup in append_findings
+       → Performance work, out of scope for this feature sprint
+
+    Export all / Select which / Cancel?"
+
+   Use AskUserQuestion with options:
+     - "Export all" → create all listed issues
+     - "Let me pick" → show each, let user select
+     - "Cancel" → abort, nothing exported
+
+6. For each approved finding, create a GitHub issue:
+
+   Title: "sentinel: {description}"
+
+   Body (markdown):
+     ## Finding
+     {description}
+
+     ## Context
+     - **Discovered in:** {branch/worktree}
+     - **Location:** `{file:line}`
+     - **Severity:** {severity}
+     - **Report section:** {BLOCKING|WORKAROUNDS|DEFERRED}
+
+     ## Export Reason
+     {criterion}: {explanation of why this can't be fixed inline}
+
+     ## Suggested Action
+     {action from the sentinel report}
+
+     ---
+     _Exported from `.sentinel/report.md` by `/sentinel export-issues`_
+     _Most sentinel findings are resolved inline. This one qualified for export because: {criterion}_
+
+   Labels:
+     - sentinel
+     - sentinel:{criterion}  (e.g., sentinel:cross-scope, sentinel:deferred)
+     - severity:{severity}   (e.g., severity:important, severity:minor)
+
+7. Handle duplicates:
+   - Before creating, search: gh issue list --search "sentinel: {description}" --json number,title
+   - If found: skip and report "Issue already exists: #{number}"
+
+8. Output summary:
+   "[sentinel] Exported N issues to GitHub:
+     #{num} sentinel: {title} [criterion]
+     ...
+
+   Remaining findings (N) resolved locally or not eligible for export."
+```
+
+### What This Replaces
+
+The `/sprint export-issues` command exports **planned backlog tasks** (work you intend to do). `/sentinel export-issues` exports **discovered problems** (work you found but can't do here). They are complementary but serve different purposes.
+
+---
+
 ## System Prompt Protocol
 
 When this skill is active in a session, the primary agent should follow the **Sentinel Protocol** — logging observations to `.sentinel/observations.md` whenever it encounters issues outside its current task scope. The triggers are:
@@ -173,6 +293,7 @@ This means a file with 50 pre-existing TODOs won't trigger 50 findings when you 
 | Retrospective (Phase 13) | Full report feeds into pattern analysis |
 | `/tree close` | Run `/sentinel report` before PR creation |
 | Sprint feedback | Unresolved items become backlog candidates |
+| GitHub Issues | Only via `/sentinel export-issues` — strict criteria, user confirmation required |
 
 ## Composition
 

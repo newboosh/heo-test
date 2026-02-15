@@ -1,8 +1,9 @@
-# CI/CD Report Template
-# Phase 10: CI/CD Pipeline (DevOps Engineer)
+# CI Report Template
+# Phase 10: Pull Request & CI (DevOps Engineer)
 #
-# Full build/test/lint/type-check pipeline results.
-# Consumed by gate decision.
+# Gate decision, PR creation, and GitHub CI pipeline results.
+# The gate decision runs before PR creation (reads Phases 7-9).
+# CI runs on GitHub after the PR is created.
 
 # --- Handoff envelope (standard for all 13 phases) ---
 phase: 10
@@ -10,11 +11,11 @@ phase_name: ci_cd
 role: devops
 status: complete
 timestamp: "2026-01-28T00:00:00Z"
-depends_on: qa
+depends_on: security_review
 _schema_version: "1.0"
 
 summary: |
-  CI pipeline passed. Build green, lint clean, types clean.
+  Gate decision: SHIP. PR #42 created. CI pipeline passed.
 
 outputs:
   - .sprint/ci-report.yaml
@@ -28,14 +29,14 @@ signals:
 
 # --- Phase-specific body ---
 
-# REQUIRED: Pipeline execution results
+# REQUIRED: Pipeline execution results (from GitHub CI)
 pipeline:
   build_status: success  # success | failure
   lint_clean: true
   type_check_clean: true
   duration_seconds: 120
 
-# Individual step results
+# Individual CI step results
 steps:
   - name: build
     status: success
@@ -56,9 +57,42 @@ steps:
     duration_seconds: 15
     details: "No type errors"
 
-# CI summary for gate decision
-ci_summary:
-  pass: true
-  build_status: success
-  lint_clean: true
-  type_check_clean: true
+# Pull request details
+pr:
+  number: 42
+  url: "https://github.com/org/repo/pull/42"
+  branch: "feature/my-feature"
+  target_branch: main
+
+# Gate decision (from skills/gate-decision/, runs before PR creation)
+gate_decision:
+  verdict: SHIP  # SHIP | REVISE | BLOCKED
+  timestamp: "2026-01-28T00:00:00Z"
+  rationale: |
+    All signals green. Code review approved, no security findings,
+    all tests passing with 87% coverage.
+
+  signal_summary:
+    code_review:
+      pass: true
+      unresolved_issues: 0
+      severity_max: info
+    qa:
+      pass: true
+      tests_passing: "42/42"
+      coverage: 87
+      lint_clean: true
+      type_check_clean: true
+      acceptance_criteria_met: "2/2"
+    security_review:
+      pass: true
+      vulnerabilities: 0
+      severity_max: none
+    sentinel:
+      pass: true
+      blocking_count: 0
+      total_issues: 3
+      has_report: true
+
+  blockers: []
+  action: "Create pull request"

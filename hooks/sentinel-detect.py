@@ -314,12 +314,10 @@ def append_findings(
             existing_content = ""
 
     # Filter out findings already recorded (match exact backtick-wrapped file:line)
-    existing_lines = set(existing_content.splitlines())
     new_findings = []
     for finding in findings:
         key = f"`{finding['file']}:{finding['line']}`"
-        already_recorded = any(key in line for line in existing_lines)
-        if not already_recorded:
+        if key not in existing_content:
             new_findings.append(finding)
 
     if not new_findings:

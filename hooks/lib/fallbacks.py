@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 # Hook output prefix - consistent with hook_utils.py
-HOOK_PREFIX = "[heo]"
+HOOK_PREFIX = "[frosty]"
 
 
 def graceful_hook_fallback(blocking: bool = False, name: Optional[str] = None):

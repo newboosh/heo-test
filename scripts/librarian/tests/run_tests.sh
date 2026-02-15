@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test runner for the catalog + librarian system
+# Test runner for the file catalog + librarian system
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"

@@ -46,7 +46,7 @@ sprint_summary:
   tasks_planned: <count from backlog.yaml>
   tasks_completed: <count from execution-log.md completed tasks>
   tasks_deferred: <planned minus completed>
-  needs_work_loops: <from sprint-meta.yaml if tracked>
+  revision_cycles: <from sprint-meta.yaml if tracked>
 ```
 
 ### Dimension 2: What Worked
@@ -57,7 +57,7 @@ Look for evidence of success:
 - **No security findings** at gate → security review caught issues early or code was clean
 - **Coverage improved** → test writing discipline
 - **Gate decision was SHIP on first pass** → planning was thorough
-- **No NEEDS_WORK loops** → reviews and implementation aligned
+- **No revision cycles** → reviews and implementation aligned
 
 Each observation needs:
 ```yaml
@@ -71,7 +71,7 @@ what_worked:
 
 Look for evidence of problems:
 
-- **NEEDS_WORK loops** → review findings not addressed in implementation
+- **Revision cycles** → review findings not addressed in implementation
 - **Coverage declined** → tests not matching new code
 - **Tasks deferred** → scope was too large or estimates too small
 - **Build failures in CI** → local testing didn't catch issues

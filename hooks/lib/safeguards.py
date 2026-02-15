@@ -4,7 +4,7 @@ Safeguards module - Prevents runaway subprocess spawning and permission floods.
 
 PRIMARY PROTECTION: Project scope validation
 --------------------------------------------
-Hooks only run in "heo-compatible" projects - those with marker files like
+Hooks only run in "frosty-compatible" projects - those with marker files like
 CLAUDE.md, .claude/hooks.json, etc. This prevents hooks from running in
 arbitrary directories where they shouldn't.
 
@@ -41,7 +41,7 @@ try:
     from .hook_utils import log_info, log_warning, log_error, HOOK_PREFIX, get_context
 except ImportError:
     # Fallback for direct execution
-    HOOK_PREFIX = "[heo]"
+    HOOK_PREFIX = "[frosty]"
     def log_info(msg, **_): print(f"{HOOK_PREFIX} {msg}", file=sys.stderr)
     def log_warning(msg, **_): print(f"{HOOK_PREFIX} WARNING: {msg}", file=sys.stderr)
     def log_error(msg, **_): print(f"{HOOK_PREFIX} ERROR: {msg}", file=sys.stderr)
@@ -72,8 +72,8 @@ MAX_SUBPROCESS_PER_SESSION = 500
 # Timeout for subprocess operations
 DEFAULT_SUBPROCESS_TIMEOUT = 30
 
-# Marker file to detect heo-compatible projects
-HEO_MARKER_FILES = [
+# Marker file to detect frosty-compatible projects
+FROSTY_MARKER_FILES = [
     ".claude/hooks.json",
     ".claude/settings.local.json",
     "CLAUDE.md",
@@ -123,9 +123,9 @@ def reset_session_safeguards() -> None:
 # PROJECT SCOPE VALIDATION
 # ============================================================================
 
-def is_heo_project(project_dir: Optional[Path] = None) -> Tuple[bool, str]:
+def is_frosty_project(project_dir: Optional[Path] = None) -> Tuple[bool, str]:
     """
-    Check if the project directory is a heo-compatible project.
+    Check if the project directory is a frosty-compatible project.
 
     Returns:
         Tuple of (is_valid, reason)
@@ -140,14 +140,14 @@ def is_heo_project(project_dir: Optional[Path] = None) -> Tuple[bool, str]:
             project_dir = Path.cwd()
 
     # Check for marker files
-    for marker in HEO_MARKER_FILES:
+    for marker in FROSTY_MARKER_FILES:
         marker_path = project_dir / marker
         if marker_path.exists():
             return True, f"Found {marker}"
 
     # Check environment variable override
-    if os.environ.get("HEO_FORCE_ENABLE"):
-        return True, "HEO_FORCE_ENABLE set"
+    if os.environ.get("FROSTY_FORCE_ENABLE"):
+        return True, "FROSTY_FORCE_ENABLE set"
 
     # Check if we're in the plugin itself (use path-aware check to avoid false positives)
     plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
@@ -158,7 +158,7 @@ def is_heo_project(project_dir: Optional[Path] = None) -> Tuple[bool, str]:
         except (TypeError, ValueError):
             pass  # is_relative_to not available or invalid path
 
-    return False, "No heo marker files found"
+    return False, "No frosty marker files found"
 
 
 def is_safe_project_scope(project_dir: Optional[Path] = None) -> Tuple[bool, str]:
@@ -181,24 +181,24 @@ def is_safe_project_scope(project_dir: Optional[Path] = None) -> Tuple[bool, str
             project_dir = Path.cwd()
 
     # Check if hooks are explicitly disabled - check this FIRST for consistent behavior
-    if os.environ.get("HEO_DISABLE_HOOKS"):
-        return False, "HEO_DISABLE_HOOKS set"
+    if os.environ.get("FROSTY_DISABLE_HOOKS"):
+        return False, "FROSTY_DISABLE_HOOKS set"
 
-    # Check for skip file BEFORE accepting heo project result
-    # This allows per-project disable even for heo-compatible projects
-    skip_file = project_dir / ".heo-skip-hooks"
+    # Check for skip file BEFORE accepting frosty project result
+    # This allows per-project disable even for frosty-compatible projects
+    skip_file = project_dir / ".frosty-skip-hooks"
     if skip_file.exists():
-        return False, ".heo-skip-hooks file exists"
+        return False, ".frosty-skip-hooks file exists"
 
-    # Check if this is a heo project
-    is_heo, reason = is_heo_project(project_dir)
-    if is_heo:
+    # Check if this is a frosty project
+    is_frosty, reason = is_frosty_project(project_dir)
+    if is_frosty:
         return True, reason
 
     # Default: don't run in unknown projects
     log_warning(
-        f"Skipping hooks: not a heo project. "
-        f"Create CLAUDE.md or set HEO_FORCE_ENABLE=1 to enable.",
+        f"Skipping hooks: not a frosty project. "
+        f"Create CLAUDE.md or set FROSTY_FORCE_ENABLE=1 to enable.",
         project_dir=str(project_dir)
     )
     return False, "Unknown project - hooks disabled for safety"
@@ -448,7 +448,7 @@ def init_logging(log_dir: Optional[Path] = None) -> Path:
         if plugin_root:
             log_dir = Path(plugin_root) / "logs"
         else:
-            log_dir = Path.home() / ".heo" / "logs"
+            log_dir = Path.home() / ".frosty" / "logs"
 
     log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -457,7 +457,7 @@ def init_logging(log_dir: Optional[Path] = None) -> Path:
     log_path = log_dir / f"hooks-{date_str}.log"
 
     _log_file = str(log_path)
-    os.environ["HEO_LOG_FILE"] = _log_file
+    os.environ["FROSTY_LOG_FILE"] = _log_file
 
     return log_path
 
@@ -484,7 +484,7 @@ def log_diagnostic(message: str, **data) -> None:
         except (IOError, OSError):
             pass
 
-    if os.environ.get("HEO_DEBUG"):
+    if os.environ.get("FROSTY_DEBUG"):
         print(f"{HOOK_PREFIX} [DIAG] {message}", file=sys.stderr)
 
 
@@ -503,8 +503,8 @@ def should_skip_hooks() -> Tuple[bool, str]:
         Tuple of (should_skip, reason)
     """
     # Check environment disable flag
-    if os.environ.get("HEO_DISABLE_HOOKS"):
-        return True, "HEO_DISABLE_HOOKS set"
+    if os.environ.get("FROSTY_DISABLE_HOOKS"):
+        return True, "FROSTY_DISABLE_HOOKS set"
 
     # Check if we've hit the session limit
     if _tracker.disabled_reason:

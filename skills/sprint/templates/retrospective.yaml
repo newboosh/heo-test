@@ -37,7 +37,7 @@ sprint_summary:
   tasks_planned: 4
   tasks_completed: 4
   tasks_deferred: 0
-  needs_work_loops: 0
+  revision_cycles: 0
 
 # Dimension 2 - What worked
 what_worked:

@@ -1,0 +1,72 @@
+version: "1.0"
+
+index_dirs: [scripts, .dev]
+doc_dirs: [docs]
+skip_dirs: [__pycache__, .git, node_modules, .venv, .pytest_cache]
+max_file_size: 1048576
+follow_symlinks: true
+
+output:
+  index_dir: .claude/catalog/indexes
+  classification_file: file_classification.json
+  dependencies_file: module_dependencies.json
+
+classification:
+  categories:
+    # Tests always win
+    - name: test
+      rules:
+        - {type: directory, pattern: "**/tests/**"}
+        - {type: filename, pattern: "test_*.py"}
+        - {type: filename, pattern: "*.test.ts"}
+        - {type: content, pattern: "describe\\(|it\\(|test\\(", filetypes: [".ts", ".js"]}
+
+    # Catalog system
+    - name: catalog
+      rules:
+        - {type: directory, pattern: "scripts/catalog/**"}
+
+    # Librarian system
+    - name: librarian
+      rules:
+        - {type: directory, pattern: "scripts/librarian/**"}
+
+    # CLI tools
+    - name: cli
+      rules:
+        - {type: ast_content, condition: "has_main_block"}
+
+    # API routes
+    - name: api
+      rules:
+        - {type: directory, pattern: "**/api/**"}
+        - {type: filename, pattern: "*_routes.py"}
+
+    # Services
+    - name: service
+      rules:
+        - {type: directory, pattern: "**/services/**"}
+        - {type: filename, pattern: "*_service.py"}
+        - {type: filename, pattern: "*Service.ts"}
+
+    # Models
+    - name: model
+      rules:
+        - {type: directory, pattern: "**/models/**"}
+        - {type: ast_content, condition: "class_inherits:BaseModel"}
+
+    # Utilities
+    - name: util
+      rules:
+        - {type: directory, pattern: "**/utils/**"}
+
+    # Configuration
+    - name: config
+      rules:
+        - {type: filename, pattern: "*.yaml"}
+        - {type: filename, pattern: "*.yml"}
+        - {type: filename, pattern: "*.json"}
+        - {type: filename, pattern: "*.toml"}
+
+  default_category: "uncategorized"
+  priority_order: [test, catalog, librarian, cli, api, service, model, util, config]

@@ -46,8 +46,8 @@ def _minimal_envelope(phase: int = 1, **overrides) -> dict:
         5: "tech_lead",
         6: "developer_agent",
         7: "senior_developer",
-        8: "security_engineer",
-        9: "qa_engineer",
+        8: "qa_engineer",
+        9: "security_engineer",
         10: "devops",
         11: "release_manager",
         12: "sre",
@@ -110,10 +110,25 @@ def _phase_7_data(**overrides) -> dict:
     return data
 
 
-def _phase_9_data(**overrides) -> dict:
-    """Return valid phase 9 (QA) data."""
-    data = _minimal_envelope(9)
+def _phase_8_data(**overrides) -> dict:
+    """Return valid phase 8 (QA) data."""
+    data = _minimal_envelope(8)
     data["test_results"] = {"total": 10, "passing": 10, "failing": 0}
+    data.update(overrides)
+    return data
+
+
+def _phase_9_data(**overrides) -> dict:
+    """Return valid phase 9 (security review) data."""
+    data = _minimal_envelope(9)
+    data["findings"] = [
+        {
+            "category": "injection",
+            "severity": "none",
+            "description": "Input properly sanitized",
+            "status": "not_applicable",
+        },
+    ]
     data.update(overrides)
     return data
 
@@ -163,7 +178,7 @@ def _minimal_meta(**overrides) -> dict:
         "phase_log": [],
         "phases_failed": [],
         "retry_count": 0,
-        "needs_work_loops": 0,
+        "revision_cycles": 0,
         "last_error": None,
     }
     base.update(overrides)
@@ -491,46 +506,68 @@ class TestPhase7To13BodyValidation:
         with pytest.raises(SprintError, match="must be a list"):
             load_phase_output(path)
 
-    def test_phase_8_missing_findings_raises(self, tmp_path: Path) -> None:
-        """Phase 8 without 'findings' raises SprintError."""
+    def test_phase_8_valid_loads(self, tmp_path: Path) -> None:
+        """Valid phase 8 (QA) file loads successfully."""
         # Arrange
-        data = _minimal_envelope(8)
-        path = _write_yaml(tmp_path / "review-security.yaml", data)
-
-        # Act & Assert
-        with pytest.raises(SprintError, match="requires 'findings'"):
-            load_phase_output(path)
-
-    def test_phase_9_valid_loads(self, tmp_path: Path) -> None:
-        """Valid phase 9 file loads successfully."""
-        # Arrange
-        path = _write_yaml(tmp_path / "qa-report.yaml", _phase_9_data())
+        path = _write_yaml(tmp_path / "qa-report.yaml", _phase_8_data())
 
         # Act
         envelope = load_phase_output(path)
 
         # Assert
-        assert envelope.phase == 9
+        assert envelope.phase == 8
         assert envelope.phase_name == "qa"
 
-    def test_phase_9_missing_test_results_raises(self, tmp_path: Path) -> None:
-        """Phase 9 without 'test_results' raises SprintError."""
+    def test_phase_8_missing_test_results_raises(self, tmp_path: Path) -> None:
+        """Phase 8 (QA) without 'test_results' raises SprintError."""
         # Arrange
-        data = _minimal_envelope(9)
+        data = _minimal_envelope(8)
         path = _write_yaml(tmp_path / "qa-report.yaml", data)
 
         # Act & Assert
         with pytest.raises(SprintError, match="requires 'test_results'"):
             load_phase_output(path)
 
-    def test_phase_9_test_results_not_mapping_raises(self, tmp_path: Path) -> None:
-        """Phase 9 with non-mapping test_results raises SprintError."""
+    def test_phase_8_test_results_not_mapping_raises(self, tmp_path: Path) -> None:
+        """Phase 8 (QA) with non-mapping test_results raises SprintError."""
         # Arrange
-        data = _minimal_envelope(9, test_results=[1, 2, 3])
+        data = _minimal_envelope(8, test_results=[1, 2, 3])
         path = _write_yaml(tmp_path / "qa-report.yaml", data)
 
         # Act & Assert
         with pytest.raises(SprintError, match="must be a mapping"):
+            load_phase_output(path)
+
+    def test_phase_9_valid_loads(self, tmp_path: Path) -> None:
+        """Valid phase 9 (security review) file loads successfully."""
+        # Arrange
+        path = _write_yaml(tmp_path / "review-security.yaml", _phase_9_data())
+
+        # Act
+        envelope = load_phase_output(path)
+
+        # Assert
+        assert envelope.phase == 9
+        assert envelope.phase_name == "security_review"
+
+    def test_phase_9_missing_findings_raises(self, tmp_path: Path) -> None:
+        """Phase 9 (security review) without 'findings' raises SprintError."""
+        # Arrange
+        data = _minimal_envelope(9)
+        path = _write_yaml(tmp_path / "review-security.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="requires 'findings'"):
+            load_phase_output(path)
+
+    def test_phase_9_findings_not_list_raises(self, tmp_path: Path) -> None:
+        """Phase 9 (security review) with non-list findings raises SprintError."""
+        # Arrange
+        data = _minimal_envelope(9, findings="not a list")
+        path = _write_yaml(tmp_path / "review-security.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="must be a list"):
             load_phase_output(path)
 
     def test_phase_10_missing_pipeline_raises(self, tmp_path: Path) -> None:

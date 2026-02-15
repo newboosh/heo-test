@@ -8,10 +8,10 @@ This package provides tools for:
 - Generating fix prompts for the librarian agent
 
 Usage:
-    python -m scripts.librarian.catalog build   # Build full catalog
-    python -m scripts.librarian.catalog check   # Check for staleness
-    python -m scripts.librarian.catalog status  # Show status
-    python -m scripts.librarian.catalog fix     # Generate fix prompts
+    python -m scripts.librarian.doclinks build   # Build doc links
+    python -m scripts.librarian.doclinks check   # Check for staleness
+    python -m scripts.librarian.doclinks status  # Show status
+    python -m scripts.librarian.doclinks fix     # Generate fix prompts
 """
 
 __version__ = "1.0.0"

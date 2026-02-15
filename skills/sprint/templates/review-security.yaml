@@ -1,16 +1,16 @@
 # Security Review Template
-# Phase 8: Security Review (Security Engineer)
+# Phase 9: Security Review (Security Engineer)
 #
 # Security-focused analysis of implementation changes.
 # Findings include OWASP categories and severity ratings.
 
 # --- Handoff envelope (standard for all 13 phases) ---
-phase: 8
+phase: 9
 phase_name: security_review
 role: security_engineer
 status: complete
 timestamp: "2026-01-28T00:00:00Z"
-depends_on: code_review
+depends_on: qa
 _schema_version: "1.0"
 
 summary: |

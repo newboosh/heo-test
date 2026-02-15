@@ -1,15 +1,15 @@
 {
-  "name": "heo-test-marketplace",
+  "name": "frosty-testing-marketplace",
   "owner": {
-    "name": "newboosh",
-    "email": "newboosh.clientmanagement@gmail.com"
+    "name": "Community",
+    "email": "community@example.com"
   },
   "plugins": [
     {
-      "name": "heo-test",
+      "name": "frosty-testing",
       "source": "./",
-      "description": "Comprehensive Claude Code testing toolkit with worktree management, TDD, code review, security, and deployment",
-      "version": "0.1.0"
+      "description": "Testing-tier features for frosty: sprint orchestration, catalog/librarian intelligence, sentinel monitoring, eval harness, and ralph-wiggum agentic loops.",
+      "version": "1.0.0"
     }
   ]
 }

@@ -46,8 +46,8 @@ PHASE_NAMES: list[str] = [
     "backlog",
     "implementation",
     "code_review",
-    "security_review",
     "qa",
+    "security_review",
     "ci_cd",
     "merge",
     "monitoring",
@@ -65,8 +65,8 @@ DEPENDS_ON_MAP: dict[int, Optional[str]] = {
     6: "backlog",
     7: "implementation",
     8: "code_review",
-    9: "security_review",
-    10: "qa",
+    9: "qa",
+    10: "security_review",
     11: "ci_cd",
     12: "merge",
     13: "monitoring",
@@ -80,8 +80,8 @@ PHASE_OUTPUT_FILES: dict[int, str] = {
     5: "backlog.yaml",
     6: "execution-status.yaml",
     7: "review-code.yaml",
-    8: "review-security.yaml",
-    9: "qa-report.yaml",
+    8: "qa-report.yaml",
+    9: "review-security.yaml",
     10: "ci-report.yaml",
     11: "merge-report.yaml",
     12: "monitoring-report.yaml",
@@ -227,7 +227,7 @@ class SprintMeta:
     phase_log: list[PhaseLogEntry] = field(default_factory=list)
     phases_failed: list[int] = field(default_factory=list)
     retry_count: int = 0
-    needs_work_loops: int = 0
+    revision_cycles: int = 0
     last_error: Optional[str] = None
 
 
@@ -696,32 +696,6 @@ def validate_phase_8_body(
     data: dict[str, Any],
     file: Optional[str] = None,
 ) -> None:
-    """Validate security review body fields.
-
-    Args:
-        data: Full YAML data for the phase.
-        file: Source file path for error reporting.
-
-    Raises:
-        SprintError: If required body fields are missing or malformed.
-    """
-    if "findings" not in data:
-        raise SprintError(
-            "Phase 8 (security_review) requires 'findings' field",
-            file=file,
-        )
-    findings = data["findings"]
-    if not isinstance(findings, list):
-        raise SprintError(
-            "'findings' must be a list",
-            file=file,
-        )
-
-
-def validate_phase_9_body(
-    data: dict[str, Any],
-    file: Optional[str] = None,
-) -> None:
     """Validate QA report body fields.
 
     Args:
@@ -733,12 +707,38 @@ def validate_phase_9_body(
     """
     if "test_results" not in data:
         raise SprintError(
-            "Phase 9 (qa) requires 'test_results' field",
+            "Phase 8 (qa) requires 'test_results' field",
             file=file,
         )
     if not isinstance(data["test_results"], dict):
         raise SprintError(
             "'test_results' must be a mapping",
+            file=file,
+        )
+
+
+def validate_phase_9_body(
+    data: dict[str, Any],
+    file: Optional[str] = None,
+) -> None:
+    """Validate security review body fields.
+
+    Args:
+        data: Full YAML data for the phase.
+        file: Source file path for error reporting.
+
+    Raises:
+        SprintError: If required body fields are missing or malformed.
+    """
+    if "findings" not in data:
+        raise SprintError(
+            "Phase 9 (security_review) requires 'findings' field",
+            file=file,
+        )
+    findings = data["findings"]
+    if not isinstance(findings, list):
+        raise SprintError(
+            "'findings' must be a list",
             file=file,
         )
 
@@ -797,7 +797,7 @@ def validate_phase_11_body(
             "'gate_decision' requires 'verdict' field",
             file=file,
         )
-    valid_verdicts = ["SHIP", "NEEDS_WORK", "BLOCKED"]
+    valid_verdicts = ["SHIP", "REVISE", "BLOCKED"]
     if gate["verdict"] not in valid_verdicts:
         raise SprintError(
             f"Invalid gate verdict: '{gate['verdict']}'."
@@ -1042,7 +1042,7 @@ def load_sprint_meta(meta_path: Path | str) -> SprintMeta:
         phase_log=phase_log,
         phases_failed=list(data.get("phases_failed", [])),
         retry_count=int(data.get("retry_count", 0)),
-        needs_work_loops=int(data.get("needs_work_loops", 0)),
+        revision_cycles=int(data.get("revision_cycles", 0)),
         last_error=data.get("last_error"),
     )
 
@@ -1152,7 +1152,7 @@ def _write_sprint_meta(meta: SprintMeta, meta_path: Path) -> None:
         "phase_log": phase_log_data,
         "phases_failed": meta.phases_failed,
         "retry_count": meta.retry_count,
-        "needs_work_loops": meta.needs_work_loops,
+        "revision_cycles": meta.revision_cycles,
         "last_error": meta.last_error,
     }
 
@@ -1174,7 +1174,7 @@ def rollback_to_phase(sprint_dir: Path | str, target_phase: int) -> None:
 
     Deletes all output files for phases after target_phase and resets
     current_phase in sprint-meta.yaml. Used by the smart router and
-    the NEEDS_WORK loop, not as a standalone subcommand.
+    the revision cycle, not as a standalone subcommand.
 
     Args:
         sprint_dir: Path to the .sprint/ directory.

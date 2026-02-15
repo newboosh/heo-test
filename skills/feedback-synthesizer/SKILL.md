@@ -42,7 +42,7 @@ Apply these rules to transform signals into intake items. Each rule maps a signa
 |---------|-----------|-----------|
 | Low review signal-to-noise | `signal_to_noise` < 0.3 for a reviewer | `process`: "Adjust <reviewer> scope or focus" |
 | Estimation bias | `estimation_accuracy.bias` != balanced | `process`: "Recalibrate estimation for <task type>" |
-| Recurring NEEDS_WORK loops | `needs_work_loops` > 1 | `process`: "Improve Phase 6 implementation quality" |
+| Recurring revision cycles | `revision_cycles` > 1 | `process`: "Improve Phase 6 implementation quality" |
 | Deferred tasks | `tasks_deferred` > 0 | `improvement`: "Complete deferred task: <title>" |
 | Phase bottleneck | Phase N took disproportionate time | `process`: "Optimize Phase N workflow" |
 | Extracted pattern | `save_as_skill` is true | `process`: "Codify pattern <name> as a skill" |
@@ -125,7 +125,7 @@ Items are ordered by priority (critical first), then by source (monitoring befor
 
 - **Data-driven.** Every item traces to a specific signal or metric. If you can't point to data, don't generate the item.
 - **Actionable.** Each item includes enough context to be picked up as a Phase 1 input without additional research. Include file paths, module names, and specific numbers.
-- **Deduplicated.** Don't generate items for problems that were already fixed during the sprint. Cross-reference monitoring signals with what was addressed in the NEEDS_WORK loops.
+- **Deduplicated.** Don't generate items for problems that were already fixed during the sprint. Cross-reference monitoring signals with what was addressed in the revision cycles.
 - **Bounded.** Cap generated items at 10 per sprint. If more than 10, keep only the highest priority items. Accumulation kills velocity.
 
 ## Accumulation Safety Valve

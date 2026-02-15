@@ -11,6 +11,8 @@ debug artifacts, hardcoded values, incomplete work, and disconnection
 markers. Each pattern has a type, severity, and suggested action.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -152,7 +154,7 @@ SENTINEL_PATTERNS: List[SentinelPattern] = [
         issue_type="debug",
         severity="minor",
         markers=[
-            r"(?<!['\"])console\.log\(",
+            r"(?<!['\"\w])console\.log\(",
             r"\bprint\(\s*['\"]debug",
             r"\bprint\(\s*f?['\"](?:>>>|---|\*\*\*|DEBUG)",
             r"\bbreakpoint\(\)",
@@ -183,8 +185,8 @@ SENTINEL_PATTERNS: List[SentinelPattern] = [
         issue_type="debt",
         severity="critical",
         markers=[
-            r"(?:password|passwd|secret|token|api_key|apikey)\s*=\s*['\"][^'\"]{4,}['\"]",
-            r"(?:PASSWORD|SECRET|TOKEN|API_KEY)\s*=\s*['\"][^'\"]{4,}['\"]",
+            r"(?:password|passwd|secret|token|api_key|apikey)\s*=\s*['\"][^'\"]{8,}['\"]",
+            r"(?:PASSWORD|SECRET|TOKEN|API_KEY)\s*=\s*['\"][^'\"]{8,}['\"]",
         ],
         action="Move secret to environment variable or secrets manager",
         description="Hardcoded secrets, passwords, or API keys",
@@ -271,7 +273,7 @@ SKIP_PATTERNS = [
     r"tests/",
     r"__tests__/",
     r"spec/",
-    r"hooks/",
+    r"hooks/lib/",  # Skip shared sentinel library; production hooks are still scanned
     r"node_modules/",
     r"\.venv/",
     r"venv/",
@@ -375,12 +377,10 @@ def scan_file_content(
         if len(line.strip()) < 3:
             continue
 
-        # Skip comment-only lines that are just section headers
+        # Skip divider comments (e.g., "# ---", "# ===") but keep actionable markers
         stripped = line.strip()
-        if stripped.startswith("#") and len(stripped) < 10:
-            # Skip divider comments (e.g., "# ----"), but keep actionable markers
-            if re.fullmatch(r"#[-#=\s]*", stripped):
-                continue
+        if stripped.startswith("#") and re.match(r'^#\s*[-=_*#/\\]+$', stripped):
+            continue
 
         for pattern in SENTINEL_PATTERNS:
             # Skip mock/fake patterns in test files

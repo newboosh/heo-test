@@ -1,0 +1,49 @@
+# Test Swarm Report Template
+# Phase 6.5 handoff — produced by /test-swarm, consumed by Phase 8 (QA Validation)
+
+phase: "6.5"
+phase_name: test_swarm
+role: test_team_lead
+status: complete          # complete | failed
+timestamp: ""             # ISO 8601
+depends_on: implementation
+_schema_version: "1.0"
+
+summary: |
+  Test swarm produced N tests across unit/integration/e2e domains.
+  Final coverage: X%. Scan cycles: N.
+
+coverage:
+  overall: 0.0            # percentage
+  target: 80.0
+  target_met: false
+  by_domain:
+    unit: 0.0
+    integration: 0.0
+    e2e: 0.0
+  uncovered_files: []      # files still below target
+
+tests_written:
+  total: 0
+  unit: 0
+  integration: 0
+  e2e: 0
+
+scan_cycles: 0             # coverage monitor cycles (max 3)
+gap_tasks_created: 0
+gap_tasks_completed: 0
+
+strategy_selections: []
+  # - module: "src/services/payment_service.py"
+  #   strategy: chicago_tdd
+  #   supplement: property_based
+
+fixture_requests: 0         # shared fixture requests handled by lead
+
+outputs:
+  - .sprint/test-swarm-report.yaml
+
+signals:
+  pass: false
+  confidence: low          # high | medium | low
+  blockers: []

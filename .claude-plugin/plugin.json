@@ -1,17 +1,9 @@
 {
-  "name": "heo-test",
-  "version": "0.1.0",
-  "description": "Comprehensive Claude Code testing toolkit. Includes worktree management, TDD workflow, code review, security review, and deployment scripts.",
+  "name": "frosty-testing",
+  "version": "1.0.0",
+  "description": "Testing-tier features for frosty: sprint orchestration, catalog/librarian intelligence, sentinel monitoring, eval harness, and ralph-wiggum agentic loops. Install alongside frosty for experimental features.",
   "author": {
-    "name": "newboosh",
-    "email": "newboosh.clientmanagement@gmail.com"
-  },
-  "repository": "https://github.com/newboosh/heo-test",
-  "keywords": [
-    "worktree",
-    "tdd",
-    "code-review",
-    "security",
-    "deployment"
-  ]
+    "name": "Community",
+    "email": "community@example.com"
+  }
 }

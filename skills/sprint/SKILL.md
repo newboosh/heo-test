@@ -36,7 +36,8 @@ This skill reads `velocity_mode` from `.sprint/sprint-meta.yaml` to determine ho
 
 ## Commands
 
-- `/sprint <what to build>` - Start new sprint from developer input
+- `/sprint <what to build>` - Run Phases 1-5 (pipeline mode, auto-continues)
+- `/sprint phase <N>` - Run a single planning phase (1-5) and return control
 - `/sprint` (bare) - Smart router: show current state, offer contextual choices
 - `/sprint status` - Quick non-interactive status check
 - `/sprint reset` - Clear sprint state and start over
@@ -75,8 +76,15 @@ If $ARGUMENTS starts with "rollback":
   → Rollback to specified phase (see Rollback section)
 If $ARGUMENTS is "export-issues":
   → Export backlog to GitHub issues (see Export Issues section)
+If $ARGUMENTS starts with "phase":
+  → Parse phase number N from "phase <N>"
+  → Validate N is 1-5 (this skill manages planning phases only)
+  → If N not in 1-5: "Phase {N} is outside the planning range (1-5).
+     Use /orchestrate phase {N} for execution phases (6-11),
+     or /sprint-run for the full lifecycle."
+  → Run Phase N only (see Single Phase Execution below)
 Otherwise:
-  → Start Phase 1 with $ARGUMENTS as initial input
+  → Start Phase 1 with $ARGUMENTS as initial input, then continue through Phase 5
 ```
 
 ### Smart Router (bare `/sprint`)
@@ -606,11 +614,11 @@ After Phase 5 (Backlog) completes, delegate to the orchestrate command which seq
 
 ```text
 Phase 6:  Implementation (TDD)    → tdd-guide agent
-Phase 7:  Code Review (multi)     → code-reviewer, CodeRabbit
-Phase 8:  Security Review         → security-reviewer agent
-Phase 9:  QA Validation           → qa-agent, verification-loop, e2e-runner
-Phase 10: CI/CD Pipeline          → ci command, verify command
-Phase 11: Merge & Deploy          → push command, git-orchestrator
+Phase 7:  Code Review (multi)     → code-reviewer, qa-agent
+Phase 8:  QA Validation           → qa-agent, verification-loop, e2e-runner
+Phase 9:  Security Review         → security-reviewer agent
+Phase 10: Pull Request & CI       → gate-decision, push, GitHub CI
+Phase 11: PR Review & Merge       → CodeRabbit review loop, merge
 ```
 
 The orchestrate command reads `.sprint/backlog.yaml` and writes its own handoff files to `.sprint/` as each phase completes. See `commands/orchestrate.md` for details.
@@ -642,10 +650,10 @@ All state is stored in `.sprint/` directory:
 ├── execution-status.yaml   # Phase 6: Implementation handoff (structured)
 ├── execution-log.md        # Phase 6: Implementation progress (detailed log)
 ├── review-code.yaml        # Phase 7: Code Review results
-├── review-security.yaml    # Phase 8: Security Review results
-├── qa-report.yaml          # Phase 9: QA results
-├── ci-report.yaml          # Phase 10: CI/CD results
-├── merge-report.yaml       # Phase 11: Merge results (includes gate_decision)
+├── qa-report.yaml          # Phase 8: QA results
+├── review-security.yaml    # Phase 9: Security Review results
+├── ci-report.yaml          # Phase 10: Pull Request & CI results
+├── merge-report.yaml       # Phase 11: PR Review & Merge results
 ├── monitoring-report.yaml  # Phase 12: Post-merge signals
 ├── retrospective.yaml      # Phase 13a: Sprint analysis
 ├── feedback-intake.yaml    # Phase 13b: Next sprint intake items
@@ -752,12 +760,98 @@ Use AskUserQuestion with options:
 
 ---
 
-## Example Sessions
+## Junction Protocol
 
-### Autonomous Mode (default)
+Phases can be invoked in two modes: **pipeline** (auto-continue through all phases) or **single** (run one phase and return control).
+
+- `/sprint <req>` — **Pipeline mode.** Runs Phases 1-5 sequentially, auto-continuing in autonomous mode.
+- `/sprint phase <N>` — **Single mode.** Runs Phase N only, then returns control. No downstream cascade.
+- `/sprint-run` — **Full pipeline.** Auto-sequences all 13 phases.
+- `/orchestrate sprint` — **Pipeline mode.** Runs Phases 6-11 as a continuous pipeline.
+- `/orchestrate phase <N>` — **Single mode.** Runs one execution phase and returns control.
+
+**Once in a pipeline, continue all the way through.** The junction protocol governs single-phase invocation only — use `/sprint phase <N>` or `/orchestrate phase <N>` when you want standalone execution without downstream cascades. This ensures individual phases (TDD, code review, QA, etc.) can be reused in non-sprint workflows.
+
+---
+
+## Single Phase Execution
+
+When invoked via `/sprint phase <N>`, run only the specified phase and return control. This does NOT apply to `/sprint <requirements>`, which runs in pipeline mode (Phases 1-5).
+
+### Prerequisite Check
+
+Before running Phase N, verify that Phase N-1 is complete:
 
 ```text
-User: /sprint-run Add semantic search to the markets API
+If N == 1:
+  No prerequisite. Proceed.
+If N > 1:
+  Read the Phase N-1 output file from PHASE_FILE_MAP[N-1].
+  If file does not exist:
+    Halt: "Phase {N-1} ({phase_name}) has not been run.
+      Output file .sprint/{filename} not found.
+      Run /sprint phase {N-1} first, or /sprint-run for the full lifecycle."
+  If file exists:
+    Load and check status field.
+    If status != "complete":
+      Halt: "Phase {N-1} ({phase_name}) is not complete (status: {status}).
+        Run /sprint phase {N-1} to complete it first."
+    Otherwise: prerequisite satisfied. Proceed.
+
+Phase file map (planning phases 1-5):
+  1 → .sprint/input.yaml
+  2 → .sprint/product.yaml
+  3 → .sprint/design.yaml
+  4 → .sprint/technical.yaml
+  5 → .sprint/backlog.yaml
+```
+
+### sprint-meta.yaml Initialization
+
+```text
+If .sprint/sprint-meta.yaml does not exist (standalone invocation):
+  Create a minimal sprint-meta.yaml:
+    sprint_id: <short uuid>
+    _schema_version: "1.0"
+    started: <ISO timestamp>
+    velocity_mode: autonomous
+    requirements: "(standalone phase invocation)"
+    current_phase: N
+    status: in_progress
+    phase_log: []
+
+If sprint-meta.yaml exists:
+  Update current_phase to N and status to in_progress.
+```
+
+### Execute Phase
+
+Run Phase N exactly as defined in the existing phase sections above.
+
+### Junction Return
+
+After the phase completes:
+
+```text
+1. Write phase output file (as specified in the phase section)
+2. Update sprint-meta.yaml:
+   - current_phase: N + 1 (next phase to run)
+   - Append to phase_log
+3. Display completion:
+   "✓ Phase {N}: {phase_name} complete → .sprint/{filename}
+    Ready for Phase {N+1} ({next_phase_name}).
+    Run /sprint phase {N+1} to continue, or /sprint-run resume to auto-sequence."
+4. STOP. Do not proceed to Phase N+1. Return control to the caller.
+```
+
+---
+
+## Example Sessions
+
+### Pipeline Mode (via /sprint or /sprint-run)
+
+```text
+User: /sprint Add semantic search to the markets API
 
 Claude: Starting sprint planning (autonomous mode)...
   Scanning codebase for related files...
@@ -769,10 +863,27 @@ Claude: Starting sprint planning (autonomous mode)...
 ✓ Phase 4: Technical Planning → .sprint/technical.yaml
 ✓ Phase 5: Backlog → .sprint/backlog.yaml
 
-Ready to execute 4 tasks. Delegating to /orchestrate sprint...
+Planning complete. 4 tasks ready.
 ```
 
-No questions asked. All context inferred from input text and codebase.
+Pipeline mode auto-continues through all planning phases.
+
+### Single Phase Mode (standalone)
+
+```text
+User: /sprint phase 3
+
+Claude: Checking prerequisites...
+  ✓ .sprint/product.yaml exists (status: complete)
+
+Running Phase 3 (design)...
+
+✓ Phase 3: Design complete → .sprint/design.yaml
+  Ready for Phase 4 (technical_planning).
+  Run /sprint phase 4 to continue, or /sprint-run resume to auto-sequence.
+```
+
+Control returns to the developer. No downstream cascade.
 
 ### Attended Mode
 

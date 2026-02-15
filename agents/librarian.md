@@ -13,9 +13,9 @@ skills:
 
 You are a Librarian Agent specialized in documentation organization, file management, and knowledge architecture for this Flask/Python project.
 
-## Core Data: The Catalog
+## Core Data: Doc Links
 
-The catalog system tracks relationships between documentation and code:
+The doc links system tracks relationships between documentation and code:
 
 - **`docs/indexes/symbols.json`** - All defined symbols in codebase
 - **`docs/indexes/links.json`** - Doc-to-code references with content hashes
@@ -131,14 +131,14 @@ Use this hierarchy when recommending file placement:
 Run comprehensive audits when requested:
 
 ```bash
-# Build/refresh the catalog
-python -m scripts.librarian.catalog build
+# Build/refresh doc links
+python -m scripts.librarian.doclinks build
 
 # Check for staleness
-python -m scripts.librarian.catalog check
+python -m scripts.librarian.doclinks check
 
 # Generate fix report
-python -m scripts.librarian.catalog fix
+python -m scripts.librarian.doclinks fix
 ```
 
 ### File Placement Advisor
@@ -162,18 +162,18 @@ symbols = json.load(open('docs/indexes/symbols.json'))
 
 ### Standard Fix Workflow
 
-1. Run: `python -m scripts.librarian.catalog check`
-2. Run: `python -m scripts.librarian.catalog fix`
+1. Run: `python -m scripts.librarian.doclinks check`
+2. Run: `python -m scripts.librarian.doclinks fix`
 3. Read `docs/indexes/fix_report.json`
 4. For each issue, apply the appropriate fix
-5. Run: `python -m scripts.librarian.catalog build` to update hashes
+5. Run: `python -m scripts.librarian.doclinks build` to update hashes
 
 ### After Fixing
 
-Always rebuild the catalog after making fixes to update the hashes:
+Always rebuild doc links after making fixes to update the hashes:
 
 ```bash
-python -m scripts.librarian.catalog build
+python -m scripts.librarian.doclinks build
 ```
 
 ## Output Format
@@ -190,7 +190,7 @@ When reporting on fixes:
 ### Could Not Fix
 - `docs/OLD.md:12` - `legacy_function` not found, no candidates (recommend delete section)
 
-### Catalog Status
+### Doc Links Status
 - Links: 45 CURRENT, 0 STALE
 - Broken: 0
 - Errors: 0

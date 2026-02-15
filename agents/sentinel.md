@@ -2,7 +2,6 @@
 name: sentinel
 description: Emerging issues consolidation agent. Use at end-of-phase, end-of-cycle, before gate decisions, or before /tree close to surface discovered issues, workarounds, temporary code, disconnected features, and deferred ideas that would otherwise be forgotten.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task
-model: haiku
 color: red
 ---
 
@@ -158,7 +157,7 @@ Things noticed that may or may not need action.
 | Severity | Criteria | Gate Impact |
 |----------|----------|-------------|
 | **critical** | Security holes, hardcoded secrets, will crash in production | BLOCKED |
-| **important** | Mocks in non-test code, workarounds, skipped tests, incomplete implementations | NEEDS_WORK |
+| **important** | Mocks in non-test code, workarounds, skipped tests, incomplete implementations | REVISE |
 | **minor** | TODOs, debug prints, unused imports | Noted but won't block |
 | **deferred** | Work explicitly declared out of scope by an agent | Noted (backlog candidate) |
 | **note** | Ideas, observations, possible improvements | Informational |
