@@ -243,15 +243,11 @@ All of these must be true for `<IMPLEMENTATION_COMPLETE>`:
 
 ### Push to Remote
 
-Push every 5000 lines of code changes to:
-```
-https://github.com/FrostyTeeth/claude_plugin_source
-Branch: feat/implement-catalog
-```
+Push every 5000 lines of code changes to the configured remote branch.
 
 Use credentials from `.env.local`:
 ```
-REPO_ORIGIN_URL=https://github.com/FrostyTeeth/claude_plugin_source.git
+REPO_ORIGIN_URL=<from .env.local>
 REPO_ORIGIN_PAT=<from .env.local>
 ```
 
@@ -292,7 +288,7 @@ export REPO_ORIGIN_PAT="${REPO_ORIGIN_PAT:-}"  # Read from environment
 
 # Use in git commands
 git config --global credential.helper store
-git push https://${REPO_ORIGIN_PAT}@github.com/FrostyTeeth/claude_plugin_source.git
+git push https://${REPO_ORIGIN_PAT}@github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}.git
 ```
 
 ---
