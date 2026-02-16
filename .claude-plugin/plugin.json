@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Testing-tier features for frosty: sprint orchestration, catalog/librarian intelligence, sentinel monitoring, eval harness, and ralph-wiggum agentic loops. Install alongside frosty for experimental features.",
   "author": {
-    "name": "Community",
-    "email": "community@example.com"
+    "name": "Steve Glen",
+    "email": "therealstevenglen@gmail.com"
   }
 }
