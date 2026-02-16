@@ -1,0 +1,461 @@
+---
+description: Deep-dive analysis and recommendations without implementation
+globs:
+alwaysApply: false
+---
+# Rule: ANALYZE Template - Deep Analysis Without Implementation
+
+## Goal
+
+To guide an AI assistant in performing comprehensive analysis, evaluation, and recommendation tasks WITHOUT implementing any changes. This template focuses on understanding, documenting, and advising rather than coding.
+
+**Use this template when:**
+- User wants to understand how something works
+- Evaluating different approaches or technologies
+- Assessing code quality, performance, or security
+- Investigating bugs or issues without fixing them
+- Creating architectural or design recommendations
+- Comparing options before making decisions
+
+## Core Principle
+
+**ANALYSIS ONLY - NO IMPLEMENTATION**
+
+The agent should:
+- ✓ Read, examine, and understand code/systems
+- ✓ Research and gather information
+- ✓ Evaluate options and trade-offs
+- ✓ Provide recommendations and explanations
+- ✓ Create documentation and reports
+
+The agent should NOT:
+- ✗ Write or modify code
+- ✗ Create new files (except analysis reports)
+- ✗ Make configuration changes
+- ✗ Install dependencies
+- ✗ Run tests or builds
+
+## Analysis Process
+
+### 1. Scope Definition
+
+First, clarify what needs analysis:
+- What specific aspect should be analyzed?
+- What questions need answers?
+- What decisions are being informed?
+- How deep should the analysis go?
+
+**Present to user:**
+```
+I'll analyze [topic] for you.
+
+My analysis will cover:
+- [Aspect 1]
+- [Aspect 2]
+- [Aspect 3]
+
+Is this the right scope, or would you like me to focus on something specific?
+```
+
+### 2. Information Gathering
+
+Systematically collect information:
+
+#### Code Analysis
+- Read relevant source files
+- Trace execution flows
+- Identify patterns and anti-patterns
+- Document dependencies and relationships
+
+#### Context Analysis
+- Review documentation
+- Check git history for context
+- Examine test coverage
+- Review related issues or PRs
+
+#### External Research (if applicable)
+- Research best practices
+- Compare with industry standards
+- Review relevant documentation
+- Check for known issues or CVEs
+
+### 3. Deep Dive Analysis
+
+Perform thorough examination:
+
+#### Structure & Organization
+- How is code organized?
+- Are there clear separation of concerns?
+- Is the architecture appropriate?
+
+#### Quality Assessment
+- Code readability and maintainability
+- Test coverage and quality
+- Documentation completeness
+- Error handling robustness
+
+#### Performance Evaluation
+- Identify bottlenecks
+- Assess scalability
+- Check resource usage
+- Evaluate efficiency
+
+#### Security Review
+- Identify vulnerabilities
+- Check for security best practices
+- Review authentication/authorization
+- Assess data handling
+
+## Analysis Report Structure
+
+### Executive Summary
+Brief overview for quick understanding:
+```markdown
+## Executive Summary
+
+**What was analyzed:** [Brief description]
+**Key findings:** [3-5 bullet points]
+**Recommendation:** [High-level advice]
+**Priority:** [Critical/High/Medium/Low]
+```
+
+### Current State
+
+Detailed documentation of what exists:
+```markdown
+## Current State
+
+### Architecture Overview
+[Describe the system architecture]
+
+### Key Components
+- **Component A:** [Description and purpose]
+- **Component B:** [Description and purpose]
+
+### Data Flow
+[Explain how data moves through the system]
+
+### Dependencies
+- External: [List external dependencies]
+- Internal: [List internal module dependencies]
+```
+
+### Findings
+
+Organize findings by category:
+
+```markdown
+## Findings
+
+### Strengths 💪
+- [What works well]
+- [Good practices found]
+- [Solid implementations]
+
+### Weaknesses 🔍
+- [Areas needing improvement]
+- [Technical debt identified]
+- [Missing functionality]
+
+### Opportunities 🚀
+- [Potential improvements]
+- [Optimization possibilities]
+- [Enhancement ideas]
+
+### Risks ⚠️
+- [Security concerns]
+- [Performance issues]
+- [Scalability limitations]
+```
+
+### Detailed Analysis
+
+Deep dive into each finding:
+
+```markdown
+## Detailed Analysis
+
+### Issue 1: [Title]
+
+**Location:** `path/to/file.py:line_number`
+
+**Description:**
+[Detailed explanation of the issue]
+
+**Impact:**
+- User impact: [How it affects users]
+- Technical impact: [How it affects system]
+- Business impact: [How it affects business]
+
+**Root Cause:**
+[Why this exists]
+
+**Evidence:**
+```python
+# Code example showing the issue
+```
+
+**Severity:** [Critical/High/Medium/Low]
+```
+
+### Comparative Analysis
+
+When comparing options:
+
+```markdown
+## Option Comparison
+
+### Option A: [Name]
+
+**Pros:**
+- ✓ [Advantage 1]
+- ✓ [Advantage 2]
+
+**Cons:**
+- ✗ [Disadvantage 1]
+- ✗ [Disadvantage 2]
+
+**Best for:** [Use case]
+**Complexity:** [Low/Medium/High]
+**Cost:** [Estimated effort]
+
+### Option B: [Name]
+
+**Pros:**
+- ✓ [Advantage 1]
+- ✓ [Advantage 2]
+
+**Cons:**
+- ✗ [Disadvantage 1]
+- ✗ [Disadvantage 2]
+
+**Best for:** [Use case]
+**Complexity:** [Low/Medium/High]
+**Cost:** [Estimated effort]
+
+### Recommendation Matrix
+
+| Criteria | Option A | Option B | Winner |
+|----------|----------|----------|--------|
+| Performance | 8/10 | 9/10 | B |
+| Maintainability | 9/10 | 7/10 | A |
+| Cost | 6/10 | 8/10 | B |
+| Time to implement | 7/10 | 5/10 | A |
+
+**Overall Recommendation:** [Choice with justification]
+```
+
+### Recommendations
+
+Actionable advice organized by priority:
+
+```markdown
+## Recommendations
+
+### High Priority (Do First)
+
+#### 1. [Recommendation Title]
+**Why:** [Justification]
+**Impact:** [Expected benefit]
+**Effort:** [Time/complexity estimate]
+**Implementation approach:** [High-level how-to]
+
+### Medium Priority (Do Soon)
+
+#### 2. [Recommendation Title]
+[Same structure as above]
+
+### Low Priority (Nice to Have)
+
+#### 3. [Recommendation Title]
+[Same structure as above]
+
+### Long-term Considerations
+
+- [Strategic improvements]
+- [Architectural evolutions]
+```
+
+### Implementation Roadmap
+
+If recommendations are extensive:
+
+```markdown
+## Suggested Implementation Roadmap
+
+### Phase 1: Foundation (Weeks 1-2)
+- [ ] Fix critical security issues
+- [ ] Improve error handling
+- [ ] Add monitoring
+
+### Phase 2: Optimization (Weeks 3-4)
+- [ ] Performance improvements
+- [ ] Code refactoring
+- [ ] Test coverage
+
+### Phase 3: Enhancement (Weeks 5-6)
+- [ ] New features
+- [ ] UX improvements
+- [ ] Documentation
+```
+
+## Analysis Types & Templates
+
+### Performance Analysis
+```markdown
+## Performance Analysis
+
+### Metrics Collected
+- Load time: [X seconds]
+- Memory usage: [X MB]
+- Database queries: [X per request]
+
+### Bottlenecks Identified
+1. **[Bottleneck name]**
+   - Location: `file.py:123`
+   - Impact: [Slowdown amount]
+   - Cause: [Why it's slow]
+   - Fix complexity: [Easy/Medium/Hard]
+
+### Optimization Opportunities
+[Ranked list of improvements]
+```
+
+### Security Analysis
+```markdown
+## Security Analysis
+
+### Vulnerabilities Found
+
+#### 🔴 Critical
+- **[Vulnerability name]**
+  - Type: [SQL Injection/XSS/etc.]
+  - Location: [Where it exists]
+  - Risk: [What could happen]
+  - Mitigation: [How to fix]
+
+#### 🟡 Medium
+[Same structure]
+
+#### 🟢 Low
+[Same structure]
+
+### Security Best Practices Review
+- ✅ [Practice followed]
+- ❌ [Practice missing]
+```
+
+### Architecture Review
+```markdown
+## Architecture Review
+
+### Current Architecture
+[Diagram or description]
+
+### Alignment with Best Practices
+| Practice | Status | Notes |
+|----------|--------|-------|
+| Separation of Concerns | ✅ Good | [Comment] |
+| DRY Principle | ⚠️ Partial | [Comment] |
+| SOLID Principles | ❌ Needs work | [Comment] |
+
+### Architectural Recommendations
+[Suggested improvements]
+```
+
+### Code Quality Analysis
+```markdown
+## Code Quality Analysis
+
+### Metrics
+- Lines of code: [X]
+- Cyclomatic complexity: [Average X]
+- Test coverage: [X%]
+- Documentation coverage: [X%]
+
+### Quality Issues
+- **Duplicated code:** [X instances]
+- **Long functions:** [X over 50 lines]
+- **Deep nesting:** [X over 4 levels]
+- **Missing docstrings:** [X functions]
+
+### Code Smells Detected
+1. [Smell type]: [Description]
+```
+
+## Output Guidelines
+
+### Format
+- **Format:** Markdown (`.md`)
+- **Location:** `/docs/analysis/` or `/docs/reports/`
+- **Filename:** `analysis-[topic]-[date].md`
+
+### Style
+- **Professional but readable** - Clear explanations
+- **Evidence-based** - Support claims with data
+- **Actionable** - Provide concrete next steps
+- **Balanced** - Acknowledge both positives and negatives
+- **Concise** - Respect reader's time
+
+### Visuals
+Include when helpful:
+- Tables for comparisons
+- Code snippets for examples
+- Diagrams for architecture (use Mermaid)
+- Charts for metrics (ASCII or markdown tables)
+
+## Integration with /task Command
+
+When user invokes:
+```
+/task analyze [what to analyze]
+```
+
+The agent should:
+1. Clarify scope and focus areas
+2. Gather relevant information through:
+   - File reading
+   - Code searching
+   - Documentation review
+   - External research if needed
+3. Perform systematic analysis
+4. Create comprehensive report
+5. Save to `/docs/analysis/`
+6. Present findings to user
+7. **DO NOT implement any changes**
+8. Offer to proceed with implementation if user requests
+
+## Example Prompts
+
+```
+/task analyze the authentication system security
+
+/task analyze performance bottlenecks in the API
+
+/task analyze whether we should use PostgreSQL or MongoDB
+
+/task analyze the email integration module architecture
+
+/task analyze test coverage and quality
+```
+
+## Final Reminder
+
+**THIS IS ANALYSIS ONLY**
+
+At the end of analysis, always include:
+
+```markdown
+---
+
+## Next Steps
+
+This analysis is complete. No code changes have been made.
+
+If you'd like to implement any of these recommendations:
+- Use `/task go [recommendation]` for quick implementation
+- Use `/task slow [recommendation]` for guided implementation
+- Or tell me which specific recommendation to implement
+
+Would you like me to help with implementation?
+```

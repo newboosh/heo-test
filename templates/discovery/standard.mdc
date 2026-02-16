@@ -1,0 +1,121 @@
+# Rule: Discovery Phase - Understanding Requirements and Context
+
+## Goal
+
+To guide an AI assistant through a systematic discovery process before implementing any feature or task. This phase ensures complete understanding of requirements, context, and constraints before any implementation work begins.
+
+## Discovery Process
+
+### 1. Initial Request Analysis
+
+When receiving a task request, first analyze:
+- **What** is being requested (the core requirement)
+- **Why** it's needed (business/user value)
+- **Scope** (how large/complex is this)
+
+
+### 2. Context Gathering
+
+Systematically gather context about:
+
+#### Codebase Context
+- Search for related code already in the project
+- Identify relevant modules, components, or systems
+- Check for similar patterns or implementations
+- Review existing documentation
+
+#### Technical Context
+- Identify technical constraints (language, framework, dependencies)
+- Check for architectural patterns to follow
+- Review coding standards and conventions (CLAUDE.md)
+- Identify integration points with existing systems
+
+#### Data Context
+- Understand data models and schemas involved
+- Identify database tables or data structures affected
+- Check for data validation requirements
+- Review data flow and transformations needed
+
+### 3. Clarifying Questions
+
+Ask targeted questions to fill knowledge gaps:
+
+**Functional Questions:**
+- "What should happen when [edge case]?"
+- "Are there any specific workflows or user journeys to follow?"
+- "What are the acceptance criteria for completion?"
+- "Are there any existing features this should integrate with?"
+
+**Technical Questions:**
+- "Are there any performance requirements?"
+- "What error handling is expected?"
+- "Are there security considerations?"
+- "What testing coverage is expected?"
+
+**Scope Questions:**
+- "What are the non-goals (out of scope)?"
+- "Are there any constraints or limitations?"
+- "What's the priority if we need to make trade-offs?"
+
+### 4. Environment Analysis
+
+Check the development environment:
+- Review project structure
+- Check available tools and utilities
+- Identify testing frameworks
+- Review deployment/build processes
+- Check for pre-commit hooks or automation
+
+### 5. Discovery Output
+
+After discovery, provide:
+
+1. **Summary of Understanding:**
+   - Restate the requirement in your own words
+   - Confirm your understanding is correct
+
+2. **Identified Dependencies:**
+   - List files/modules that will be affected
+   - Note any external dependencies
+   - Highlight integration points
+
+3. **Approach Recommendation:**
+   - Suggest high-level approach
+   - Identify potential challenges
+   - Propose alternatives if applicable
+
+4. **Next Steps:**
+   - Confirm readiness to proceed
+   - Ask for approval to move to planning phase
+
+## Discovery Best Practices
+
+- **Don't assume** - Always verify your assumptions
+- **Search first** - Look for existing solutions in the codebase
+- **Ask early** - Clarify requirements before planning
+- **Document findings** - Keep notes on what you discover
+- **Think holistically** - Consider the full system impact
+- **Identify risks** - Flag potential problems early
+
+## When to Skip Discovery
+
+Discovery can be minimal for:
+- Very simple, well-defined tasks
+- Repeated patterns you've done before
+- Bug fixes with clear reproduction steps
+- Documentation updates
+
+## Output
+
+After discovery phase:
+- Present findings to user
+- Await confirmation before proceeding to task generation
+- If using `/task go` or `/task slow`, automatically proceed to PRD/task generation
+- If standalone discovery, ask: "Ready to proceed with implementation planning?"
+
+## Integration with Workflows
+
+- **`/task go [description]`**: Deep discovery → planning → implementation
+- **`/task slow [description]`**: Thorough discovery → user review → planning → user review → execution
+- **`/task analyze [description]`**: Deep discovery with analysis output (no implementation)
+- **`/task research [description]`**: Extended discovery focused on research and options

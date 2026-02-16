@@ -1,0 +1,96 @@
+# Project Standards Configuration Template
+# ========================================
+# Copy this file to `.claude/project-standards.yaml` and customize for your project.
+#
+# The Context Agent and QA Agent read this file to ensure they apply
+# the correct standards for your specific project.
+#
+# If a standard is not specified, defaults from standards/*.md are used.
+# Delete any sections you don't need to customize.
+#
+# Reference: skills/standards-lookup/SKILL.md
+
+# ============================================================
+# DIAGRAMS
+# ============================================================
+diagrams:
+  dfd: yourdon-demarco      # Options: yourdon-demarco, gane-sarson
+  erd: crows-foot           # Options: crows-foot, chen, idef1x
+  sequence: uml-2.5         # Options: uml-2.5
+  flowchart: iso-5807       # Options: iso-5807
+  architecture: c4          # Options: c4
+
+# ============================================================
+# DOCUMENTATION
+# ============================================================
+documentation:
+  docstrings: google        # Options: google, numpy, sphinx
+  adr: adr                  # Options: adr, madr
+  changelog: keep-a-changelog
+
+# ============================================================
+# API
+# ============================================================
+api:
+  response_format: standard # Options: standard, jsonapi
+  error_format: rfc-7807    # Options: rfc-7807, custom
+  datetime: iso-8601
+
+# ============================================================
+# CODE STYLE
+# ============================================================
+code:
+  python_style: pep8
+  line_length: 100
+  type_annotations: required  # Options: required, optional
+  error_handling: lbyl        # Options: lbyl, eafp
+
+# ============================================================
+# TESTING
+# ============================================================
+testing:
+  framework: pytest
+  structure: aaa
+  e2e_framework: playwright   # Options: playwright, selenium, cypress
+  coverage_minimum: 70
+  coverage_target: 80
+
+# ============================================================
+# VERSION CONTROL
+# ============================================================
+vcs:
+  commit_format: conventional-commits  # Options: conventional-commits, angular
+  branch_naming: feature-branch        # Options: feature-branch, gitflow
+
+# ============================================================
+# ARTIFACTS (for artifact-audit skill)
+# ============================================================
+# Customize paths based on your project structure.
+# These are used by QA Agent to check if required artifacts exist.
+artifacts:
+  # Python/Flask defaults shown. Adjust for your stack:
+  #
+  # TypeScript/NestJS:
+  #   models_path: "src/entities/**/*.ts"
+  #   services_path: "src/services/**/*.ts"
+  #   api_path: "src/controllers/**/*.ts"
+  #
+  # Go:
+  #   models_path: "internal/models/*.go"
+  #   services_path: "internal/services/*.go"
+  #   api_path: "internal/handlers/*.go"
+
+  models_path: "app/models/**/*.py"
+  services_path: "app/services/**/*.py"
+  api_path: "app/api/**/*.py"
+  migrations_path: "migrations/versions/"
+  unit_tests_path: "tests/unit/"
+  integration_tests_path: "tests/integration/"
+  require_docstrings: true
+  require_type_annotations: true
+
+# ============================================================
+# CUSTOM OVERRIDES
+# ============================================================
+# Add project-specific settings not covered above
+custom: {}

@@ -1,0 +1,181 @@
+# Project Standards Configuration
+# ================================
+# This file declares which standards this project uses.
+# The Context Agent and QA Agent read this file to ensure
+# they apply the correct standards for this specific project.
+#
+# If a standard is not specified here, the default from
+# standards/*.md is used.
+#
+# Reference: skills/standards-lookup/SKILL.md
+
+# ============================================================
+# DIAGRAMS
+# ============================================================
+diagrams:
+  # Data Flow Diagrams
+  # Options: yourdon-demarco (default), gane-sarson
+  dfd: yourdon-demarco
+
+  # Entity-Relationship Diagrams
+  # Options: crows-foot (default), chen, idef1x
+  erd: crows-foot
+
+  # Sequence Diagrams
+  # Options: uml-2.5 (default)
+  sequence: uml-2.5
+
+  # State Diagrams
+  # Options: uml-2.5 (default)
+  state: uml-2.5
+
+  # Flowcharts
+  # Options: iso-5807 (default)
+  flowchart: iso-5807
+
+  # Architecture Diagrams
+  # Options: c4 (default)
+  architecture: c4
+
+# ============================================================
+# DOCUMENTATION
+# ============================================================
+documentation:
+  # Docstring Style
+  # Options: google (default), numpy, sphinx
+  docstrings: google
+
+  # README Format
+  # Options: standard (default)
+  readme: standard
+
+  # Architecture Decision Records
+  # Options: adr (default), madr
+  adr: adr
+
+  # Changelog Format
+  # Options: keep-a-changelog (default)
+  changelog: keep-a-changelog
+
+# ============================================================
+# API
+# ============================================================
+api:
+  # Response Format
+  # Options: standard (default), jsonapi
+  response_format: standard
+
+  # Error Format
+  # Options: rfc-7807 (default), custom
+  error_format: rfc-7807
+
+  # Date/Time Format
+  # Options: iso-8601 (default)
+  datetime: iso-8601
+
+  # Versioning Strategy
+  # Options: url-path (default), header
+  versioning: url-path
+
+# ============================================================
+# CODE STYLE
+# ============================================================
+code:
+  # Python Style
+  # Options: pep8 (default)
+  python_style: pep8
+
+  # Line Length
+  # Default: 100
+  line_length: 100
+
+  # Type Annotations
+  # Options: required (default), optional
+  type_annotations: required
+
+  # Error Handling Pattern
+  # Options: lbyl (default), eafp
+  error_handling: lbyl
+
+  # Import Order Tool
+  # Options: isort (default), manual
+  import_order: isort
+
+# ============================================================
+# TESTING
+# ============================================================
+testing:
+  # Test Framework
+  # Options: pytest (default)
+  framework: pytest
+
+  # Test Structure
+  # Options: aaa (default)
+  structure: aaa
+
+  # E2E Framework
+  # Options: playwright (default), selenium, cypress
+  e2e_framework: playwright
+
+  # Coverage Minimum
+  # Default: 70
+  coverage_minimum: 70
+
+  # Coverage Target
+  # Default: 80
+  coverage_target: 80
+
+# ============================================================
+# VERSION CONTROL
+# ============================================================
+vcs:
+  # Commit Message Format
+  # Options: conventional-commits (default), angular, custom
+  commit_format: conventional-commits
+
+  # Branch Naming
+  # Options: feature-branch (default), gitflow
+  branch_naming: feature-branch
+
+# ============================================================
+# ARTIFACTS (for artifact-audit skill)
+# ============================================================
+# Customize paths for artifact detection based on your project structure
+artifacts:
+  # Model/Entity paths (triggers migration requirement check)
+  # Default: app/models/**/*.py
+  models_path: "app/models/**/*.py"
+
+  # Migration path (where migrations should exist)
+  # Default: migrations/versions/
+  migrations_path: "migrations/versions/"
+
+  # Service paths (triggers unit test requirement check)
+  # Default: app/services/**/*.py
+  services_path: "app/services/**/*.py"
+
+  # API paths (triggers integration test requirement check)
+  # Default: app/api/**/*.py
+  api_path: "app/api/**/*.py"
+
+  # Unit test path
+  # Default: tests/unit/
+  unit_tests_path: "tests/unit/"
+
+  # Integration test path
+  # Default: tests/integration/
+  integration_tests_path: "tests/integration/"
+
+  # Whether to require docstrings on public functions
+  # Default: true
+  require_docstrings: true
+
+  # Whether to require type annotations (Python only)
+  # Default: true
+  require_type_annotations: true
+
+# ============================================================
+# CUSTOM OVERRIDES
+# ============================================================
+# Add project-specific overrides here that don't fit above categories
+custom: {}

@@ -1,0 +1,82 @@
+# Local resources - not for publication
+resources/
+
+# Environment files with secrets
+.env
+.env.*
+
+# SSH keys (secrets - never commit)
+.keys/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# Worktree-local files (NEVER commit these)
+CLAUDE.md
+PURPOSE.md
+.claude-task-context.md
+.claude-purpose-context.md
+.claude-init.sh
+.worktree-scope.json
+.pending-terminals.txt
+.pending-*
+
+# CodeRabbit loop tracker (local state)
+.coderabbit-tracker.json
+.coderabbit-tracker.lock
+.coderabbit-branches.json
+
+# Worktree build state tracking (development only)
+.trees/.build-state
+.trees/.completed
+.trees/.incomplete
+.trees/.archived
+.trees/.conflict-backup
+
+# Local development notes (not shared)
+README.local.md
+
+# Publish staging directories (used by publish scripts)
+.publish/
+.publish-test/
+
+# Agents in development (use .dev/agents-development/ instead)
+agents/development/
+
+# Catalog system cache (not tracked)
+.claude/cache/
+.catalog_state.json
+.coverage
+
+# Sentinel ephemeral working data (per-cycle, not source code)
+.sentinel/
+
+# Pilot measurement results (generated, not tracked)
+.dev/pilot/results/
+!.dev/pilot/results/.gitkeep
+
+# Test suite artifacts
+test-report.json
+.plugin-test-workspace/

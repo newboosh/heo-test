@@ -1,179 +1,113 @@
-# Ralph Wiggum Plugin
+# Heo
 
-Implementation of the Ralph Wiggum technique for iterative, self-referential AI development loops in Claude Code.
+A comprehensive Claude Code plugin for Python/Flask development with worktree management, TDD workflow, code review, and production deployment scripts.
 
-## What is Ralph?
+## Features
 
-Ralph is a development methodology based on continuous AI agent loops. As Geoffrey Huntley describes it: **"Ralph is a Bash loop"** - a simple `while true` that repeatedly feeds an AI agent a prompt file, allowing it to iteratively improve its work until completion.
+- **Git Worktree Management** (`/tree`) - Manage parallel development branches
+- **Test-Driven Development** (`/tdd`) - Enforced TDD workflow with pytest
+- **Code Review** (`/code-review`) - Automated code quality checks
+- **Security Review** (`/verify`) - Security analysis before commits
+- **Build Error Resolution** (`/build-fix`) - Systematic build error fixing
+- **Production Deployment** (`/deploy`) - SSH-based deployment scripts
+- **Documentation Updates** (`/update-docs`) - Keep docs in sync with code
 
-The technique is named after Ralph Wiggum from The Simpsons, embodying the philosophy of persistent iteration despite setbacks.
+## Installation
 
-### Core Concept
-
-This plugin implements Ralph using a **Stop hook** that intercepts Claude's exit attempts:
-
-```bash
-# You run ONCE:
-/ralph-loop "Your task description" --completion-promise "DONE"
-
-# Then Claude Code automatically:
-# 1. Works on the task
-# 2. Tries to exit
-# 3. Stop hook blocks exit
-# 4. Stop hook feeds the SAME prompt back
-# 5. Repeat until completion
-```
-
-The loop happens **inside your current session** - you don't need external bash loops. The Stop hook in `hooks/stop-hook.sh` creates the self-referential feedback loop by blocking normal session exit.
-
-This creates a **self-referential feedback loop** where:
-- The prompt never changes between iterations
-- Claude's previous work persists in files
-- Each iteration sees modified files and git history
-- Claude autonomously improves by reading its own past work in files
-
-## Quick Start
+### Via Claude Code Plugin System
 
 ```bash
-/ralph-loop "Build a REST API for todos. Requirements: CRUD operations, input validation, tests. Output <promise>COMPLETE</promise> when done." --completion-promise "COMPLETE" --max-iterations 50
+# In Claude Code, run:
+/plugin add newboosh/heo
 ```
 
-Claude will:
-- Implement the API iteratively
-- Run tests and see failures
-- Fix bugs based on test output
-- Iterate until all requirements met
-- Output the completion promise when done
+### Manual Installation
 
-## Commands
+1. Clone this repo into your project's `.claude/` directory:
+   ```bash
+   git clone https://github.com/newboosh/heo.git .claude
+   ```
 
-### /ralph-loop
+2. Or copy specific components you need.
 
-Start a Ralph loop in your current session.
+## Configuration
 
-**Usage:**
-```bash
-/ralph-loop "<prompt>" --max-iterations <n> --completion-promise "<text>"
+### Quick Setup
+
+Run `/setup` to interactively configure the plugin for your project.
+
+### Manual Setup
+
+Most features work out of the box. Some features (deployment, GitHub integration) require environment variables — create a `.env.local` in your project root if needed.
+
+| Feature | Required Variables |
+|---------|-------------------|
+| Production Deployment | `PRODUCTION_DOMAIN`, `PRODUCTION_SERVER_IP` |
+| GitHub Integration | `REPO_ORIGIN_URL`, `REPO_ORIGIN_PAT` |
+| Worktree Management | None (works out of the box) |
+
+## Directory Structure
+
+```
+├── agents/           # Specialized AI agents
+├── commands/         # Slash commands (/tree, /tdd, etc.)
+├── contexts/         # Context presets (dev, review, research)
+├── hooks/            # Git safety and auto-formatting hooks
+├── rules/            # Project standards and guidelines
+├── scripts/          # Shell scripts for automation
+├── skills/           # Reusable skill modules
+├── standards/        # Coding standards (conventional commits, etc.)
+└── templates/        # Document and workflow templates
 ```
 
-**Options:**
-- `--max-iterations <n>` - Stop after N iterations (default: unlimited)
-- `--completion-promise <text>` - Phrase that signals completion
+## Hooks
 
-### /cancel-ralph
+The plugin includes automatic hooks that run during Claude Code sessions:
 
-Cancel the active Ralph loop.
+| Hook | Trigger | Action |
+|------|---------|--------|
+| **Git Safety** | Any `git` command | Blocks `--no-verify`, direct push to main, `reset --hard` |
+| **Python Formatter** | Edit `.py` files | Auto-formats with ruff, warns about `print()` |
+| **Template Security** | Edit `.html` files | Warns about `\|safe` filter and missing CSP nonce |
+| **Session Validation** | Session start | Checks for required dev tools |
 
-**Usage:**
-```bash
-/cancel-ralph
-```
+Hooks run directly from the plugin directory using `${CLAUDE_PLUGIN_ROOT}`. Project-specific hooks (if any) run in parallel and are not modified.
 
-## Prompt Writing Best Practices
+### Upgrading from v2.0.x
 
-### 1. Clear Completion Criteria
-
-❌ Bad: "Build a to-do API and make it good."
-
-✅ Good:
-```markdown
-Build a REST API for todos.
-
-When complete:
-- All CRUD endpoints working
-- Input validation in place
-- Tests passing (coverage > 80%)
-- README with API docs
-- Output: <promise>COMPLETE</promise>
-```
-
-### 2. Incremental Goals
-
-❌ Bad: "Create a complete e-commerce platform."
-
-✅ Good:
-```markdown
-Phase 1: User authentication (JWT, tests)
-Phase 2: Product catalog (list/search, tests)
-Phase 3: Shopping cart (add/remove, tests)
-
-Output <promise>COMPLETE</promise> when all phases done.
-```
-
-### 3. Self-Correction
-
-❌ Bad: "Write code for feature X."
-
-✅ Good:
-```markdown
-Implement feature X following TDD:
-1. Write failing tests
-2. Implement feature
-3. Run tests
-4. If any fail, debug and fix
-5. Refactor if needed
-6. Repeat until all green
-7. Output: <promise>COMPLETE</promise>
-```
-
-### 4. Escape Hatches
-
-Always use `--max-iterations` as a safety net to prevent infinite loops on impossible tasks:
+If you used an earlier version that synced hooks to projects, you may have orphaned files. To clean up:
 
 ```bash
-# Recommended: Always set a reasonable iteration limit
-/ralph-loop "Try to implement feature X" --max-iterations 20
+# Remove synced hook files (safe to run even if they don't exist)
+rm -rf .claude/hooks/pre-git-safety-check.py \
+       .claude/hooks/post-python-format.py \
+       .claude/hooks/session-validate-tools.py \
+       .claude/hooks/session-ensure-git-hooks.py \
+       .claude/hooks/lib/
 
-# In your prompt, include what to do if stuck:
-# "After 15 iterations, if not complete:
-#  - Document what's blocking progress
-#  - List what was attempted
-#  - Suggest alternative approaches"
+# Remove [heo] hooks from .claude/settings.json if present
+# (Only needed if you have custom hooks you want to keep)
 ```
 
-**Note**: The `--completion-promise` uses exact string matching, so you cannot use it for multiple completion conditions (like "SUCCESS" vs "BLOCKED"). Always rely on `--max-iterations` as your primary safety mechanism.
+The plugin no longer modifies project files - hooks run from the plugin directory.
 
-## Philosophy
+## Stack
 
-Ralph embodies several key principles:
+Designed for:
+- Python 3.9+
+- Flask
+- SQLAlchemy
+- Celery
+- pytest
 
-### 1. Iteration > Perfection
-Don't aim for perfect on first try. Let the loop refine the work.
+## Credits
 
-### 2. Failures Are Data
-"Deterministically bad" means failures are predictable and informative. Use them to tune prompts.
+This project builds upon and is inspired by several sources:
 
-### 3. Operator Skill Matters
-Success depends on writing good prompts, not just having a good model.
+- **Base Implementation**: Most of the foundational work is based on [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by affaan-m
+- **Librarian Workflow**: Agent, skill, and command implementation by Steve Glen
+- **Dignified Python Principles**: Inspired by the [10 Rules for Dignified Python](https://dagster.io/blog/dignified-python-10-rules-to-improve-your-llm-agents) by the Dagster team
 
-### 4. Persistence Wins
-Keep trying until success. The loop handles retry logic automatically.
+## License
 
-## When to Use Ralph
-
-**Good for:**
-- Well-defined tasks with clear success criteria
-- Tasks requiring iteration and refinement (e.g., getting tests to pass)
-- Greenfield projects where you can walk away
-- Tasks with automatic verification (tests, linters)
-
-**Not good for:**
-- Tasks requiring human judgment or design decisions
-- One-shot operations
-- Tasks with unclear success criteria
-- Production debugging (use targeted debugging instead)
-
-## Real-World Results
-
-- Successfully generated 6 repositories overnight in Y Combinator hackathon testing
-- One $50k contract completed for $297 in API costs
-- Created entire programming language ("cursed") over 3 months using this approach
-
-## Learn More
-
-- Original technique: https://ghuntley.com/ralph/
-- Ralph Orchestrator: https://github.com/mikeyobrien/ralph-orchestrator
-
-## For Help
-
-Run `/help` in Claude Code for detailed command reference and examples.
+MIT

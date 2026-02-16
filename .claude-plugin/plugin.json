@@ -1,7 +1,7 @@
 {
-  "name": "frosty-testing",
-  "version": "1.0.0",
-  "description": "Testing-tier features for frosty: sprint orchestration, catalog/librarian intelligence, sentinel monitoring, eval harness, and ralph-wiggum agentic loops. Install alongside frosty for experimental features.",
+  "name": "heo-testing",
+  "version": "1.1.0",
+  "description": "Complete heo plugin with testing-tier extras: sprint orchestration, catalog/librarian intelligence, sentinel monitoring, eval harness, ralph-wiggum agentic loops, and comprehensive test suite.",
   "author": {
     "name": "Steve Glen",
     "email": "therealstevenglen@gmail.com"

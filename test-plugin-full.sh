@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# test-plugin-full.sh — Comprehensive Frosty Plugin Test Suite
+# test-plugin-full.sh — Comprehensive Heo Plugin Test Suite
 # ============================================================================
 #
 # Tests every agent, command, skill, and hook after the plugin is installed.
@@ -23,6 +23,7 @@
 #   --timeout <secs>   Default timeout per test (default: 120)
 #   --verbose          Show full claude output for each test
 #   --dry-run          Print what would run without executing
+#   --plugin-dir <dir> Plugin root directory (auto-detected if omitted)
 #   --report <file>    Write JSON report to file (default: test-report.json)
 #   --cleanup          Remove scaffold files after testing
 #   -h, --help         Show this help
@@ -37,6 +38,22 @@
 # Note: NOT using set -e — test functions return non-zero on failure,
 # and we need the suite to continue running all tests, not abort on first failure.
 set -uo pipefail
+
+# ---------------------------------------------------------------------------
+# Plugin root auto-detection
+# ---------------------------------------------------------------------------
+# Priority: 1) --plugin-dir arg  2) CLAUDE_PLUGIN_ROOT env  3) script's own directory  4) pwd
+# This allows the test to run correctly whether invoked from the plugin directory,
+# from a project that has the plugin installed, or via the /test-plugin command.
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_DIR=""
+
+# Check if script's own directory looks like a plugin root
+if [[ -f "$_SCRIPT_DIR/hooks/hooks.json" ]] && [[ -d "$_SCRIPT_DIR/commands" ]]; then
+    PLUGIN_DIR="$_SCRIPT_DIR"
+elif [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]] && [[ -d "$CLAUDE_PLUGIN_ROOT/hooks" ]]; then
+    PLUGIN_DIR="$CLAUDE_PLUGIN_ROOT"
+fi
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -158,6 +175,9 @@ while [[ $# -gt 0 ]]; do
             DEFAULT_TIMEOUT="$2"; shift 2 ;;
         --verbose)          VERBOSE=true; shift ;;
         --dry-run)          DRY_RUN=true; shift ;;
+        --plugin-dir)
+            [[ $# -lt 2 ]] && { echo "Missing value for --plugin-dir"; usage; }
+            PLUGIN_DIR="$2"; shift 2 ;;
         --cleanup)          CLEANUP=true; shift ;;
         --report)
             [[ $# -lt 2 ]] && { echo "Missing value for --report"; usage; }
@@ -180,6 +200,21 @@ if [[ -n "$ONLY" ]]; then
         integration) SKIP_INTEGRATION=false ;;
         *)           echo "Unknown category: $ONLY (use agents|commands|skills|hooks|structure|integration)"; exit 1 ;;
     esac
+fi
+
+# ---------------------------------------------------------------------------
+# Change to plugin root (for local tests that use relative paths)
+# ---------------------------------------------------------------------------
+if [[ -n "$PLUGIN_DIR" ]]; then
+    cd "$PLUGIN_DIR"
+    log "Plugin root: $PLUGIN_DIR"
+elif [[ -f "hooks/hooks.json" ]]; then
+    log "Plugin root: $(pwd) (current directory)"
+else
+    echo -e "${YELLOW}WARNING: Could not detect plugin root directory.${NC}"
+    echo -e "${YELLOW}Local tests (hook syntax, file existence) may fail.${NC}"
+    echo -e "${YELLOW}Use --plugin-dir <path> to specify the plugin location.${NC}"
+    echo ""
 fi
 
 # ---------------------------------------------------------------------------
@@ -1196,8 +1231,8 @@ test_skills() {
 
     # setup
     run_test_if skill setup "skill" "setup" \
-        "Use the setup skill to describe how to configure the frosty plugin for this project. Do NOT make changes." \
-        "(setup|config|plugin|frosty|install|configure)" \
+        "Use the setup skill to describe how to configure the heo plugin for this project. Do NOT make changes." \
+        "(setup|config|plugin|heo|install|configure)" \
         "$DEFAULT_TIMEOUT"
 
     # agent-creator
@@ -1856,7 +1891,7 @@ cleanup_scaffold() {
 main() {
     echo ""
     echo -e "${BOLD}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BOLD}║   Frosty Plugin — Comprehensive Test Suite               ║${NC}"
+    echo -e "${BOLD}║   Heo Plugin — Comprehensive Test Suite                   ║${NC}"
     echo -e "${BOLD}║   Smoke + Functional Tests via claude CLI                ║${NC}"
     echo -e "${BOLD}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""

@@ -10,32 +10,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-catalog-build.py\"",
-            "timeout": 60
-          }
-        ],
-        "description": "[frosty-testing] Build catalog incrementally for fresh AI indexes"
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sentinel-detect.py\"",
-            "timeout": 10
-          }
-        ],
-        "description": "[frosty-testing] Sentinel: scan for emerging issues (mocks, TODOs, hardcoded values, workarounds)"
-      }
     ]
   }
 }
