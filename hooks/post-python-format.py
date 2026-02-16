@@ -36,7 +36,7 @@ except ImportError:
     def guard_hook_execution(): return False
     def safe_subprocess_run(cmd, **kw):
         return False, "", "blocked: safeguards unavailable"
-    def is_heo_project(p=None): return False, "safeguards unavailable"
+    def is_heo_project(_p=None): return False, "safeguards unavailable"
     def log_diagnostic(msg, **_): pass
 
 

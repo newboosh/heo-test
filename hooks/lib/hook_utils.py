@@ -37,15 +37,20 @@ class HookContext:
 
 
 # Thread-safe context variable (replaces module-level globals)
-_hook_context: ContextVar[HookContext] = ContextVar(
+# Default is None to avoid sharing a mutable HookContext across contexts/threads.
+_hook_context: ContextVar[Optional[HookContext]] = ContextVar(
     'hook_context',
-    default=HookContext(log_file=os.environ.get("HEO_LOG_FILE") or os.environ.get("FROSTY_LOG_FILE"))
+    default=None
 )
 
 
 def get_context() -> HookContext:
     """Get the current hook context."""
-    return _hook_context.get()
+    ctx = _hook_context.get()
+    if ctx is None:
+        ctx = HookContext(log_file=os.environ.get("HEO_LOG_FILE") or os.environ.get("FROSTY_LOG_FILE"))
+        _hook_context.set(ctx)
+    return ctx
 
 
 def set_context(ctx: HookContext) -> None:

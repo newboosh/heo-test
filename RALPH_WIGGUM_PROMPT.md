@@ -246,7 +246,7 @@ All of these must be true for `<IMPLEMENTATION_COMPLETE>`:
 Push every 5000 lines of code changes to the configured remote branch.
 
 Use credentials from `.env.local`:
-```
+```bash
 REPO_ORIGIN_URL=<from .env.local>
 REPO_ORIGIN_PAT=<from .env.local>
 ```

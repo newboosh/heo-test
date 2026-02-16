@@ -83,7 +83,7 @@ except ImportError:
             cwd=kw.get('cwd'),
         )
         return r.returncode == 0, r.stdout, r.stderr
-    def is_heo_project(p=None): return True, "fallback"
+    def is_heo_project(_p=None): return True, "fallback"
     def log_diagnostic(msg, **_): pass
 
 
@@ -233,11 +233,11 @@ def main():
     if missing or wrong_version:
         venv = find_venv(project_dir)
         if venv:
-            print(f"\n[heo] To install missing tools:", file=sys.stderr)
+            print("\n[heo] To install missing tools:", file=sys.stderr)
             print(f"  source {venv}/bin/activate && pip install -r requirements-dev.txt", file=sys.stderr)
         else:
-            print(f"\n[heo] No venv found. Create one:", file=sys.stderr)
-            print(f"  python -m venv .venv && source .venv/bin/activate", file=sys.stderr)
+            print("\n[heo] No venv found. Create one:", file=sys.stderr)
+            print("  python -m venv .venv && source .venv/bin/activate", file=sys.stderr)
 
     # Always exit 0 - this is informational, not blocking
     sys.exit(0)

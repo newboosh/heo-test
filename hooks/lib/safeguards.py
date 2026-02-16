@@ -198,8 +198,8 @@ def is_safe_project_scope(project_dir: Optional[Path] = None) -> Tuple[bool, str
 
     # Default: don't run in unknown projects
     log_warning(
-        f"Skipping hooks: not a heo project. "
-        f"Create CLAUDE.md or set HEO_FORCE_ENABLE=1 to enable.",
+        "Skipping hooks: not a heo project. "
+        "Create CLAUDE.md or set HEO_FORCE_ENABLE=1 to enable.",
         project_dir=str(project_dir)
     )
     return False, "Unknown project - hooks disabled for safety"

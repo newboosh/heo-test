@@ -52,7 +52,7 @@ try:
     SAFEGUARDS_AVAILABLE = True
 except ImportError:
     SAFEGUARDS_AVAILABLE = False
-    def is_heo_project(p=None): return True, "fallback"
+    def is_heo_project(_p=None): return True, "fallback"
     def log_diagnostic(msg, **_): pass
 
 

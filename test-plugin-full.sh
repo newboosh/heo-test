@@ -45,13 +45,13 @@ unset CLAUDECODE 2>/dev/null || true
 # ---------------------------------------------------------------------------
 # Plugin root auto-detection
 # ---------------------------------------------------------------------------
-# Priority: 1) --plugin-dir arg  2) CLAUDE_PLUGIN_ROOT env  3) script's own directory  4) pwd
+# Priority: 1) --plugin-dir arg  2) script's own directory  3) CLAUDE_PLUGIN_ROOT env  4) pwd
 # This allows the test to run correctly whether invoked from the plugin directory,
 # from a project that has the plugin installed, or via the /test-plugin command.
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR=""
 
-# Check if script's own directory looks like a plugin root
+# Check if script's own directory looks like a plugin root (most common case)
 if [[ -f "$_SCRIPT_DIR/hooks/hooks.json" ]] && [[ -d "$_SCRIPT_DIR/commands" ]]; then
     PLUGIN_DIR="$_SCRIPT_DIR"
 elif [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]] && [[ -d "$CLAUDE_PLUGIN_ROOT/hooks" ]]; then
@@ -209,7 +209,10 @@ fi
 # Change to plugin root (for local tests that use relative paths)
 # ---------------------------------------------------------------------------
 if [[ -n "$PLUGIN_DIR" ]]; then
-    cd "$PLUGIN_DIR"
+    if ! cd "$PLUGIN_DIR"; then
+        echo -e "${RED}ERROR: Failed to cd to plugin root: $PLUGIN_DIR${NC}"
+        exit 1
+    fi
     log "Plugin root: $PLUGIN_DIR"
 elif [[ -f "hooks/hooks.json" ]]; then
     log "Plugin root: $(pwd) (current directory)"
