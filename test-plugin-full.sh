@@ -39,6 +39,9 @@
 # and we need the suite to continue running all tests, not abort on first failure.
 set -uo pipefail
 
+# Clear nested-session guard so claude -p works when invoked from within Claude Code
+unset CLAUDECODE 2>/dev/null || true
+
 # ---------------------------------------------------------------------------
 # Plugin root auto-detection
 # ---------------------------------------------------------------------------
@@ -323,9 +326,10 @@ run_test() {
     # Use anchored/specific patterns to avoid matching Claude's own analysis text.
     if grep -qE "^(Error|ERROR): (plugin not found|unknown (skill|agent|command))" "$output_file" 2>/dev/null ||
        grep -qE "^(bash|sh): .+: (command not found|No such file)" "$output_file" 2>/dev/null ||
-       grep -qE "^Traceback \(most recent call last\)" "$output_file" 2>/dev/null; then
+       grep -qE "^Traceback \(most recent call last\)" "$output_file" 2>/dev/null ||
+       grep -qi "cannot be launched inside another" "$output_file" 2>/dev/null; then
         local err_match
-        err_match=$(grep -E "^(Error|ERROR):|^(bash|sh):.*not found|^Traceback" "$output_file" | head -1)
+        err_match=$(grep -iE "^(Error|ERROR):|^(bash|sh):.*not found|^Traceback|cannot be launched inside another" "$output_file" | head -1)
         log_fail "$test_id — Infrastructure error: ${err_match:0:100}"
         FAILED=$((FAILED + 1))
         ERRORS+=("$test_id: $err_match")
