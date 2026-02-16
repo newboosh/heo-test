@@ -34,6 +34,8 @@ This skill reads `velocity_mode` from `.sprint/sprint-meta.yaml` to determine ho
 
 **Key rule:** In autonomous mode, this skill NEVER uses `AskUserQuestion`. All decisions are made from available data. Ambiguities are noted in `open_issues` for downstream phases to handle.
 
+**Auto-detection:** When `velocity_mode` is `auto` in `sprint-meta.yaml`, Phase 1 runs a triage step (Step 0a) before gathering requirements. Triage classifies the request as minor, medium, or major, then resolves `auto` to either `autonomous` or `attended`. Once resolved, the mode is written back to `sprint-meta.yaml` and all subsequent behavior follows the table above. If `velocity_mode` is explicitly `autonomous` or `attended`, triage still runs for classification transparency (recorded in `input.yaml`), but the mode is never changed.
+
 ## Commands
 
 - `/sprint <what to build>` - Run Phases 1-5 (pipeline mode, auto-continues)
@@ -106,7 +108,124 @@ Otherwise:
 **Goal**: Capture what the developer wants to build.
 
 **Process**:
-0. **Check for pending feedback** — Before gathering new input, check if a previous sprint left feedback items:
+0a. **Triage — classify request and resolve velocity mode**
+
+This step runs before any human interaction. It must NOT use AskUserQuestion. It is a pure analysis step.
+
+```text
+Read .sprint/sprint-meta.yaml to check velocity_mode.
+
+--- Step 0a.1: Classify the request ---
+
+Parse $ARGUMENTS (the developer's raw input text) and perform a quick codebase scan.
+
+CLARITY signals (is the problem well-defined?):
+  Clear indicators (any match → clear):
+    - Specific file or component mentioned by name
+    - Action verbs: "fix", "update", "change", "remove", "rename", "add X to Y"
+    - References to specific error messages, bug IDs, or test names
+  Vague indicators (any match → vague):
+    - Abstract verbs: "improve", "rethink", "redesign", "make better", "optimize"
+    - No specific component or file mentioned
+    - Open-ended: "figure out", "explore", "investigate"
+  Default: clear (if neither pattern matches, assume clarity)
+
+SCOPE signals (how many files are affected?):
+  Extract keywords from $ARGUMENTS (nouns, component names, file paths)
+  Use Glob to find files matching those keywords
+  Use Grep to search for references to mentioned components
+  Count distinct files found:
+    1-2 files → minor_scope
+    3-5 files → medium_scope
+    6+ files → major_scope
+  If no keywords can be extracted or no files found:
+    Use clarity signal as proxy:
+      clear → minor_scope (specific problem, likely small)
+      vague → medium_scope (unknown scope, hedge toward medium)
+
+NOVELTY signals (what kind of change?):
+  Existing code change indicators:
+    "fix", "bug", "patch", "tweak", "correct", "resolve", "repair", "adjust"
+    → novelty: patch
+  New functionality indicators:
+    "add", "implement", "build", "create", "new", "introduce", "support"
+    → novelty: new_feature
+  Structural change indicators:
+    "refactor", "migrate", "redesign", "restructure", "rewrite", "consolidate", "extract"
+    → novelty: structural
+  Default: new_feature (if no match)
+
+DOMAIN RISK override:
+  Check if $ARGUMENTS or the matched files touch sensitive domains:
+    auth, authentication, authorization, login, session, token, JWT, OAuth
+    payment, billing, charge, subscription, stripe, invoice
+    data model, schema, migration, database, ORM
+    security, encryption, secrets, credentials, certificate
+    infrastructure, deploy, CI/CD, pipeline, docker, kubernetes
+  If any sensitive domain is detected: domain_risk = true
+  Otherwise: domain_risk = false
+
+--- Step 0a.2: Compute classification (first-match-wins) ---
+
+MAJOR — any of these:
+  - clarity == vague AND scope >= medium_scope
+  - scope == major_scope (regardless of clarity)
+  - novelty == structural AND scope >= medium_scope
+  - clarity == vague AND novelty == structural
+
+MEDIUM — any of these (and not already MAJOR):
+  - scope == medium_scope
+  - novelty == new_feature AND scope >= medium_scope
+  - domain_risk == true AND classification would otherwise be MINOR
+    (bumps minor to medium, but does NOT bump to major when clear and scoped)
+  - novelty == structural AND scope == minor_scope
+
+MINOR — default when none of the above match:
+  - clarity == clear AND scope == minor_scope AND not bumped by domain risk
+
+--- Step 0a.3: Resolve velocity mode ---
+
+If velocity_mode == "auto":
+  If classification == minor → resolved_mode = autonomous
+  If classification == medium → resolved_mode = autonomous
+  If classification == major → resolved_mode = attended
+  Write resolved_mode back to sprint-meta.yaml velocity_mode field.
+
+If velocity_mode == "autonomous" or "attended":
+  resolved_mode = velocity_mode (unchanged, explicit override respected)
+  Do NOT modify sprint-meta.yaml.
+
+--- Step 0a.4: Record triage results ---
+
+Store triage data for inclusion in input.yaml (written in step 3):
+
+triage:
+  classification: minor|medium|major
+  resolved_mode: autonomous|attended
+  mode_source: auto_detected|explicit_override
+  signals:
+    clarity: clear|vague
+    scope:
+      level: minor_scope|medium_scope|major_scope
+      file_count: <number of files found>
+      matched_files:
+        - <top 5 file paths found>
+    novelty: patch|new_feature|structural
+    domain_risk: true|false
+    domain_risk_domains:
+      - <list of detected sensitive domains, if any>
+  rationale: |
+    <1-2 sentence explanation of why this classification was chosen>
+
+--- Display triage result ---
+
+Show a brief triage summary before continuing:
+
+  Triage: <classification> (<resolved_mode>, <mode_source>)
+  Scope: <file_count> files | Clarity: <clarity> | Novelty: <novelty>
+```
+
+0b. **Check for pending feedback** — Before gathering new input, check if a previous sprint left feedback items:
 
 ```text
 If .sprint/feedback-intake.yaml exists:
@@ -195,6 +314,23 @@ context:
     - "<system 1>"
   related_files:
     - "<file pattern>"
+
+triage:
+  classification: minor|medium|major
+  resolved_mode: autonomous|attended
+  mode_source: auto_detected|explicit_override
+  signals:
+    clarity: clear|vague
+    scope:
+      level: minor_scope|medium_scope|major_scope
+      file_count: <number>
+      matched_files:
+        - "<file 1>"
+    novelty: patch|new_feature|structural
+    domain_risk: false
+    domain_risk_domains: []
+  rationale: |
+    <1-2 sentence explanation>
 
 outputs:
   - .sprint/input.yaml
@@ -665,6 +801,12 @@ All state is stored in `.sprint/` directory:
 ```text
 Read current_phase and velocity_mode from .sprint/sprint-meta.yaml
 
+If velocity_mode == "auto":
+  This should not happen on resume — Phase 1 triage resolves auto before completing.
+  Treat as autonomous mode and log a warning:
+  "Warning: velocity_mode is still 'auto' — Phase 1 triage may not have completed.
+   Defaulting to autonomous."
+
 If velocity_mode == "autonomous":
   If phase 1: Continue input gathering from draft or start fresh
   If phase 2-5: Auto-continue from current_phase
@@ -848,14 +990,16 @@ After the phase completes:
 
 ## Example Sessions
 
-### Pipeline Mode (via /sprint or /sprint-run)
+### Pipeline Mode — Auto-Detected Autonomous
 
 ```text
-User: /sprint Add semantic search to the markets API
+User: /sprint-run Add semantic search to the markets API
 
-Claude: Starting sprint planning (autonomous mode)...
-  Scanning codebase for related files...
+Claude: Starting sprint...
+  Triaging request...
   Found: src/api/markets.py, src/services/market_service.py, src/rag/embeddings.py
+  Triage: medium (autonomous, auto-detected)
+  Scope: 3 files | Clarity: clear | Novelty: new_feature
 
 ✓ Phase 1: Intake → .sprint/input.yaml
 ✓ Phase 2: Refinement → .sprint/product.yaml
@@ -866,7 +1010,32 @@ Claude: Starting sprint planning (autonomous mode)...
 Planning complete. 4 tasks ready.
 ```
 
-Pipeline mode auto-continues through all planning phases.
+Triage classified this as medium (3 files, new feature, clear scope) → autonomous.
+
+### Pipeline Mode — Auto-Detected Attended
+
+```text
+User: /sprint-run Redesign the authentication system to support OAuth2 and SSO
+
+Claude: Starting sprint...
+  Triaging request...
+  Found: src/auth/*.py (8 files), src/middleware/auth.py, src/models/user.py, config/oauth.yaml
+  Triage: major (attended, auto-detected)
+  Scope: 11 files | Clarity: vague | Novelty: structural | Domain risk: auth
+
+Phase 1: Developer Input
+─────────────────────────
+
+I need a few details to build your requirements:
+
+1. What specific OAuth2 flows do you need?
+   - Authorization Code / Client Credentials / Both
+
+2. What SSO providers should be supported?
+...
+```
+
+Triage classified this as major (11 files, structural, vague scope, auth domain) → attended.
 
 ### Single Phase Mode (standalone)
 
@@ -885,12 +1054,14 @@ Running Phase 3 (design)...
 
 Control returns to the developer. No downstream cascade.
 
-### Attended Mode
+### Explicit Override Mode
 
 ```text
 User: /sprint-run attended Add semantic search to the markets API
 
-Claude: Starting sprint planning (attended mode)...
+Claude: Starting sprint (attended mode — explicit override)...
+  Triaging request...
+  Triage: medium (attended, explicit override — triage would have selected autonomous)
 
 Phase 1: Developer Input
 ─────────────────────────
@@ -935,7 +1106,7 @@ Handoff Protocol Checklist:
 ### Phase-Specific Required Fields
 
 ```text
-Phase 1 (intake):     what, why, who
+Phase 1 (intake):     what, why, who, triage (optional for backward compat; always produced by Step 0a)
 Phase 2 (refinement): epic, user_stories (≥1 with acceptance_criteria), scope
 Phase 3 (design):     design_mode, plus:
                         if frontend: ux_requirements.flows, ux_requirements.edge_cases
@@ -1264,7 +1435,7 @@ signals:
 ### Progress Fields Per Phase
 
 ```text
-Phase 1: gathered/remaining from [what, why, who, constraints, context]
+Phase 1: gathered/remaining from [triage, what, why, who, constraints, context]
 Phase 2: gathered/remaining from [epic, user_stories, success_metrics, scope]
 Phase 3: gathered/remaining from [design_mode, flows/api_contract, edge_cases]
 Phase 4: gathered/remaining from [architecture, changes, dependencies, risks]

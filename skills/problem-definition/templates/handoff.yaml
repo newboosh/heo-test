@@ -1,0 +1,180 @@
+# Problem Definition Handoff Template
+# Structured contract between /problem-definition and /requirements-engineering
+#
+# This file provides the machine-consumable output of the problem-definition
+# skill. It parallels the sprint handoff envelope pattern (see
+# skills/sprint/templates/input.yaml) but is independent of the sprint phase
+# numbering. The companion human-readable markdown is written to
+# .problem-definition/problem-definition.md.
+#
+# Validate with: python3 -m scripts.schemas.problem_definition .problem-definition/
+
+# --- Handoff envelope (mirrors sprint pattern) ---
+_schema_version: "1.0"
+phase: "problem_definition"
+phase_name: "Problem Definition"
+skill: "problem-definition"
+status: complete                # complete | draft | failed | blocked
+timestamp: "2026-01-01T00:00:00Z"
+depends_on: null                # problem-definition has no upstream dependency
+summary: |
+  One to three sentence summary of the defined problem.
+
+# ---------------------------------------------------------------------------
+# Problem Definition Body — maps to the six process steps in SKILL.md
+# ---------------------------------------------------------------------------
+
+# Step 1: Explore the Problem Situation
+# Source: Checkland (SSM), Ackoff (mess formulation), Kepner-Tregoe
+problem_situation:
+  # What is happening — environment, people, systems, workflows
+  context: |
+    Description of the situation. Do not state the problem yet —
+    describe what is happening.
+
+  # All things that bother stakeholders about this situation
+  concerns:
+    - concern: "Description of the first concern"
+      source: "Who raised it or where it was observed"
+    - concern: "Description of another concern"
+      source: "Source"
+
+  # Which concerns are related, which are symptoms of deeper issues
+  interconnections: |
+    How concerns relate to each other. Which might be symptoms.
+
+  # What has been tried before and why it didn't fully work
+  prior_attempts: |
+    Previous attempts and their outcomes. Empty if none.
+
+# Step 2: Classify the Problem
+# Source: Rittel & Webber (wicked problems), Jackson (problem frames)
+problem_classification:
+  type: tame                    # tame | complicated | wicked | mess
+  evidence:
+    - "Which classification tests led to this determination"
+  implication: |
+    What this classification means for the approach.
+
+# Step 3: Frame the Problem
+# Source: Dorst (Frame Innovation), Checkland (worldviews), Gause & Weinberg
+problem_framing:
+  current_frame:
+    description: |
+      How the problem is currently being described.
+    held_by: "Who holds this frame"
+
+  alternative_frames:
+    - frame: "An alternative perspective on the situation"
+      reveals: "What this frame shows that the current frame doesn't"
+
+  selected_frame:
+    description: |
+      Which frame will be used going forward, and why.
+    includes: "What this frame includes"
+    excludes: "What this frame excludes"
+
+# Step 4: Identify Who Has the Problem
+# Source: Gause & Weinberg, IEEE 15288, IEEE 29148
+# NOTE: This list feeds directly into /requirements-engineering Step 1.1
+# (stakeholder identification). Each entry maps to a stakeholder row.
+problem_owners:
+  - who: "Specific person, role, or group"
+    experience: "How they concretely experience the problem"
+    cost: "What they lose — time, money, quality, safety, satisfaction"
+    priority: primary             # primary | secondary | affected
+
+# Step 5: Define the Gap
+# Source: IEEE 29148 Clause 6.1, Kepner-Tregoe (IS/IS-NOT)
+# NOTE: This feeds into /requirements-engineering Step 1.2 as grounding
+# for elicitation questions. Each dimension seeds a line of inquiry.
+problem_definition:
+  gap_analysis:
+    - dimension: what             # what | where | when | who | how_much
+      is_current: "Observable behaviors, outputs, or failures"
+      is_not_desired: "What should be happening instead"
+      gap: "Specific difference"
+    - dimension: where
+      is_current: "Systems, components, or contexts affected"
+      is_not_desired: "Where it doesn't happen or shouldn't"
+      gap: "Scope boundary"
+    - dimension: when
+      is_current: "Conditions, triggers, frequency"
+      is_not_desired: "When it doesn't happen"
+      gap: "Pattern"
+    - dimension: who
+      is_current: "Who is affected (from problem_owners)"
+      is_not_desired: "Who is not affected, and why"
+      gap: "Distinguishing factor"
+    - dimension: how_much
+      is_current: "Severity, frequency, cost"
+      is_not_desired: "Acceptable threshold"
+      gap: "Measurable delta"
+
+  # The crystallized problem statement — 1-3 sentences
+  # Must be: specific, measurable, factual, solution-free
+  problem_statement: |
+    A clear, concise statement of the problem.
+
+  # What is lost by not solving this
+  cost_of_problem: |
+    Time, money, quality, user experience, or risk impact.
+
+  # Gause & Weinberg's final heuristic: do we really want to solve this?
+  worth_solving: true             # true | false
+  worth_solving_rationale: |
+    Why this is or isn't worth the engineering effort.
+
+# Step 6: Characterize the Solution Space
+# Source: IEEE 15288 Clause 6.4.1, Jackson (problem frames)
+# NOTE: classes_excluded feeds into /requirements-engineering Step 2.1
+# as feasibility constraints. trade_offs seed non-functional requirements.
+solution_space:
+  classes_considered:
+    - "Type of solution that could address the gap"
+  classes_excluded:
+    - class: "Type of solution excluded"
+      reason: "Why — technical infeasibility, cost, constraint violation"
+  trade_offs:
+    - "What must be balanced — e.g., simplicity vs. flexibility"
+  existing_partial_solutions:
+    - "What already exists that addresses part of this problem"
+  recommended_next_step: "/requirements-engineering"
+
+# ---------------------------------------------------------------------------
+# Quality Gate — mechanizes the 7 checks from SKILL.md
+# ---------------------------------------------------------------------------
+
+quality_gate:
+  solution_free: true             # Problem statement doesn't prescribe technology
+  specific: true                  # Names who, what, where/when
+  measurable: true                # Includes quantifiable gap or observable behavior
+  owners_identified: true         # At least one real person/role with stated cost
+  worth_solving_explicit: true    # User has seen the cost and agreed
+  frame_stated: true              # Perspective is explicit, not hidden
+  solution_space_bounded: true    # At least one feasible solution class exists
+  all_passed: true                # True only if all above are true
+
+# ---------------------------------------------------------------------------
+# Provenance
+# ---------------------------------------------------------------------------
+
+provenance:
+  frameworks_applied:
+    - "Checkland SSM"
+    - "Gause & Weinberg"
+  defined_by: agent               # agent | user | collaborative
+  boundary_critique: null         # Path to boundary critique output, or null
+  iterations: 0                   # Number of backtracking iterations
+
+# --- Standard handoff footer ---
+outputs:
+  - .problem-definition/handoff.yaml
+  - .problem-definition/problem-definition.md
+
+open_issues: []
+
+signals:
+  pass: true
+  confidence: high                # high | medium | low
+  blockers: []

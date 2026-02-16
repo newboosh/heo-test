@@ -1,6 +1,6 @@
 # Sprint Runner
 
-Run the full 13-phase sprint lifecycle autonomously. The developer provides requirements once; everything else runs without human intervention.
+Run the full 13-phase sprint lifecycle. The developer provides requirements once; the system auto-detects the appropriate velocity mode (or accepts an explicit override), then sequences all 13 phases.
 
 **Lifecycle reference:** `docs/SPRINT_LIFECYCLE.md`
 
@@ -10,8 +10,9 @@ Run the full 13-phase sprint lifecycle autonomously. The developer provides requ
 /sprint-run [mode] <requirements>
 ```
 
-- `/sprint-run Add user authentication` — Start autonomous sprint (default)
-- `/sprint-run attended Add user authentication` — Start with human checkpoints
+- `/sprint-run Add user authentication` — Start sprint (auto-detects velocity mode)
+- `/sprint-run autonomous Add user authentication` — Force autonomous mode (skip triage resolution)
+- `/sprint-run attended Add user authentication` — Force attended mode (human checkpoints)
 - `/sprint-run resume` — Resume from last completed phase
 - `/sprint-run status` — Show sprint progress
 - `/sprint-run from <phase> <requirements>` — Start or restart from a specific phase
@@ -29,7 +30,9 @@ Create the `.sprint/` directory and metadata:
 sprint_id: <short uuid>
 _schema_version: "1.0"
 started: <ISO timestamp>
-velocity_mode: autonomous|attended
+velocity_mode: auto|autonomous|attended
+# auto = Phase 1 triage resolves to autonomous or attended based on request analysis
+# autonomous|attended = explicit override, triage records classification but does not change mode
 requirements: |
   <developer's original input>
 current_phase: 1
@@ -50,7 +53,12 @@ last_error: null
 
 `phase_log` replaces `phases_completed`. Each entry records timing, output file, and validation status — enabling duration analysis in the retrospective.
 
+**Velocity mode resolution:**
+- `auto` (default): Phase 1 of the sprint skill runs a triage step that analyzes the developer's input text and scans the codebase to classify the request as minor, medium, or major. Minor and medium resolve to `autonomous`; major resolves to `attended`. The resolved mode is written back to `sprint-meta.yaml` before Phase 1 proceeds with requirements gathering.
+- `autonomous` or `attended` (explicit): Phase 1 still runs triage for classification transparency (recorded in `input.yaml`), but the explicit mode is never overridden.
+
 If `.sprint/` already exists and `$ARGUMENTS` is not `resume`:
+- In auto mode: if `current_phase` > 1, triage already resolved in the previous session — auto-resume from `current_phase`. If `current_phase` == 1 and velocity_mode is still `auto`, Phase 1 will run triage as its first step.
 - In autonomous mode: auto-resume from `current_phase` in `sprint-meta.yaml`
 - In attended mode: warn the developer and ask whether to resume or reset
 
@@ -200,7 +208,7 @@ SPRINT COMPLETE
 ===============
 Sprint: <sprint_id>
 Duration: <hours>
-Mode: autonomous|attended
+Mode: autonomous|attended (auto-detected|explicit)
 
 TASK SUMMARY
 ────────────
@@ -310,9 +318,10 @@ No mid-phase checkpointing is needed — the sprint skill's partial completion s
 ## Arguments
 
 $ARGUMENTS:
-- `<requirements>` — Start autonomous sprint with these requirements
-- `attended <requirements>` — Start attended sprint
-- `team <requirements>` — Start sprint with team_mode enabled (parallel planning + Agent Team reviews)
+- `<requirements>` — Start sprint with auto-detected velocity mode (default)
+- `autonomous <requirements>` — Start sprint in autonomous mode (explicit, skip triage resolution)
+- `attended <requirements>` — Start sprint in attended mode (explicit override)
+- `team <requirements>` — Start sprint with auto-detected velocity mode + team_mode enabled
 - `resume` — Resume from last completed phase
 - `status` — Show current sprint state
 - `from <N> <requirements>` — Start or re-run from phase N (e.g., `from 7` to re-run reviews)

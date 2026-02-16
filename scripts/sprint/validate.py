@@ -111,7 +111,7 @@ VALID_ROLES: list[str] = [
     "scrum_master",
 ]
 
-VALID_VELOCITY_MODES: list[str] = ["autonomous", "attended"]
+VALID_VELOCITY_MODES: list[str] = ["auto", "autonomous", "attended"]
 
 VALID_META_STATUSES: list[str] = [
     "in_progress",
@@ -474,6 +474,94 @@ def validate_envelope(
 # ---------------------------------------------------------------------------
 
 
+def _validate_triage(
+    triage: dict[str, Any],
+    file: Optional[str] = None,
+) -> None:
+    """Validate the triage section of a Phase 1 intake file.
+
+    The triage section is optional for backward compatibility, but when
+    present its fields are validated for correct enum values.
+
+    Args:
+        triage: The parsed triage mapping from input.yaml.
+        file: Source file path for error reporting.
+
+    Raises:
+        SprintError: If triage fields contain invalid values.
+    """
+    valid_classifications = ("minor", "medium", "major")
+    valid_resolved_modes = ("autonomous", "attended")
+    valid_mode_sources = ("auto_detected", "explicit_override")
+    valid_clarities = ("clear", "vague")
+    valid_scope_levels = ("minor_scope", "medium_scope", "major_scope")
+    valid_novelties = ("patch", "new_feature", "structural")
+
+    classification = triage.get("classification")
+    if classification is not None and classification not in valid_classifications:
+        raise SprintError(
+            f"Invalid triage classification: '{classification}'."
+            f" Must be one of: {', '.join(valid_classifications)}",
+            file=file,
+        )
+
+    resolved_mode = triage.get("resolved_mode")
+    if resolved_mode is not None and resolved_mode not in valid_resolved_modes:
+        raise SprintError(
+            f"Invalid triage resolved_mode: '{resolved_mode}'."
+            f" Must be one of: {', '.join(valid_resolved_modes)}",
+            file=file,
+        )
+
+    mode_source = triage.get("mode_source")
+    if mode_source is not None and mode_source not in valid_mode_sources:
+        raise SprintError(
+            f"Invalid triage mode_source: '{mode_source}'."
+            f" Must be one of: {', '.join(valid_mode_sources)}",
+            file=file,
+        )
+
+    signals = triage.get("signals")
+    if signals is not None and not isinstance(signals, dict):
+        raise SprintError(
+            "triage 'signals' must be a mapping",
+            file=file,
+        )
+    if isinstance(signals, dict):
+        clarity = signals.get("clarity")
+        if clarity is not None and clarity not in valid_clarities:
+            raise SprintError(
+                f"Invalid triage signals.clarity: '{clarity}'."
+                f" Must be one of: {', '.join(valid_clarities)}",
+                file=file,
+            )
+
+        scope = signals.get("scope")
+        if scope is not None and isinstance(scope, dict):
+            level = scope.get("level")
+            if level is not None and level not in valid_scope_levels:
+                raise SprintError(
+                    f"Invalid triage signals.scope.level: '{level}'."
+                    f" Must be one of: {', '.join(valid_scope_levels)}",
+                    file=file,
+                )
+
+        novelty = signals.get("novelty")
+        if novelty is not None and novelty not in valid_novelties:
+            raise SprintError(
+                f"Invalid triage signals.novelty: '{novelty}'."
+                f" Must be one of: {', '.join(valid_novelties)}",
+                file=file,
+            )
+
+        domain_risk = signals.get("domain_risk")
+        if domain_risk is not None and not isinstance(domain_risk, bool):
+            raise SprintError(
+                "triage signals.domain_risk must be a boolean",
+                file=file,
+            )
+
+
 def validate_phase_1_body(
     data: dict[str, Any],
     file: Optional[str] = None,
@@ -492,6 +580,17 @@ def validate_phase_1_body(
             "Phase 1 (intake) requires 'what' field",
             file=file,
         )
+
+    # Triage is optional for backward compatibility with existing sprints,
+    # but when present its fields are validated.
+    triage = data.get("triage")
+    if triage is not None:
+        if not isinstance(triage, dict):
+            raise SprintError(
+                "'triage' must be a mapping",
+                file=file,
+            )
+        _validate_triage(triage, file)
 
 
 def validate_phase_2_body(

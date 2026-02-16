@@ -74,6 +74,29 @@ def _minimal_envelope(phase: int = 1, **overrides) -> dict:
     return base
 
 
+def _valid_triage(**overrides) -> dict:
+    """Return a valid triage section for Phase 1 input.yaml."""
+    base = {
+        "classification": "medium",
+        "resolved_mode": "autonomous",
+        "mode_source": "auto_detected",
+        "signals": {
+            "clarity": "clear",
+            "scope": {
+                "level": "medium_scope",
+                "file_count": 3,
+                "matched_files": ["src/api/foo.py", "src/models/bar.py"],
+            },
+            "novelty": "new_feature",
+            "domain_risk": False,
+            "domain_risk_domains": [],
+        },
+        "rationale": "Medium classification: 3 files affected, new feature.",
+    }
+    base.update(overrides)
+    return base
+
+
 def _phase_1_data(**overrides) -> dict:
     """Return valid phase 1 data."""
     data = _minimal_envelope(1)
@@ -465,6 +488,131 @@ class TestPhaseBodyValidation:
         with pytest.raises(SprintError, match="requires 'architecture'"):
             load_phase_output(path)
 
+    def test_phase_1_without_triage_still_passes(self, tmp_path: Path) -> None:
+        """Phase 1 without triage section passes (backward compat)."""
+        # Arrange
+        data = _phase_1_data()
+        assert "triage" not in data
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act
+        envelope = load_phase_output(path)
+
+        # Assert
+        assert envelope.phase == 1
+
+    def test_phase_1_with_valid_triage_passes(self, tmp_path: Path) -> None:
+        """Phase 1 with a complete triage section passes validation."""
+        # Arrange
+        data = _phase_1_data(triage=_valid_triage())
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act
+        envelope = load_phase_output(path)
+
+        # Assert
+        assert envelope.phase == 1
+
+    def test_triage_invalid_classification_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid classification value raises SprintError."""
+        # Arrange
+        data = _phase_1_data(triage=_valid_triage(classification="huge"))
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage classification"):
+            load_phase_output(path)
+
+    def test_triage_invalid_resolved_mode_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid resolved_mode value raises SprintError."""
+        # Arrange
+        data = _phase_1_data(triage=_valid_triage(resolved_mode="turbo"))
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage resolved_mode"):
+            load_phase_output(path)
+
+    def test_triage_invalid_mode_source_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid mode_source value raises SprintError."""
+        # Arrange
+        data = _phase_1_data(triage=_valid_triage(mode_source="guessed"))
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage mode_source"):
+            load_phase_output(path)
+
+    def test_triage_invalid_clarity_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid signals.clarity value raises SprintError."""
+        # Arrange
+        triage = _valid_triage()
+        triage["signals"]["clarity"] = "fuzzy"
+        data = _phase_1_data(triage=triage)
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage signals.clarity"):
+            load_phase_output(path)
+
+    def test_triage_invalid_scope_level_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid signals.scope.level value raises SprintError."""
+        # Arrange
+        triage = _valid_triage()
+        triage["signals"]["scope"]["level"] = "huge_scope"
+        data = _phase_1_data(triage=triage)
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage signals.scope.level"):
+            load_phase_output(path)
+
+    def test_triage_invalid_novelty_raises(self, tmp_path: Path) -> None:
+        """Triage with invalid signals.novelty value raises SprintError."""
+        # Arrange
+        triage = _valid_triage()
+        triage["signals"]["novelty"] = "invention"
+        data = _phase_1_data(triage=triage)
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="Invalid triage signals.novelty"):
+            load_phase_output(path)
+
+    def test_triage_not_mapping_raises(self, tmp_path: Path) -> None:
+        """Triage as a string instead of mapping raises SprintError."""
+        # Arrange
+        data = _phase_1_data(triage="not a mapping")
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="must be a mapping"):
+            load_phase_output(path)
+
+    def test_triage_signals_not_mapping_raises(self, tmp_path: Path) -> None:
+        """Triage with non-mapping signals raises SprintError."""
+        # Arrange
+        triage = _valid_triage()
+        triage["signals"] = "not a mapping"
+        data = _phase_1_data(triage=triage)
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="signals.*must be a mapping"):
+            load_phase_output(path)
+
+    def test_triage_domain_risk_non_boolean_raises(self, tmp_path: Path) -> None:
+        """Triage with non-boolean domain_risk raises SprintError."""
+        # Arrange
+        triage = _valid_triage()
+        triage["signals"]["domain_risk"] = "yes"
+        data = _phase_1_data(triage=triage)
+        path = _write_yaml(tmp_path / "input.yaml", data)
+
+        # Act & Assert
+        with pytest.raises(SprintError, match="domain_risk must be a boolean"):
+            load_phase_output(path)
+
 
 # ---------------------------------------------------------------------------
 # TestPhase7To13BodyValidation
@@ -828,6 +976,18 @@ class TestSprintMeta:
         # Act & Assert
         with pytest.raises(SprintError, match="File not found"):
             load_sprint_meta(path)
+
+    def test_auto_velocity_mode_is_valid(self, tmp_path: Path) -> None:
+        """Auto velocity mode is accepted in sprint-meta.yaml."""
+        # Arrange
+        data = _minimal_meta(velocity_mode="auto")
+        path = _write_yaml(tmp_path / "sprint-meta.yaml", data)
+
+        # Act
+        meta = load_sprint_meta(path)
+
+        # Assert
+        assert meta.velocity_mode == "auto"
 
     def test_invalid_velocity_mode_raises(self, tmp_path: Path) -> None:
         """Invalid velocity mode raises SprintError."""

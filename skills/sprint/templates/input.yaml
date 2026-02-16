@@ -56,6 +56,42 @@ context:
   notes: |
     Any additional context the developer wants to provide.
 
+# --- Triage results (auto-populated by Phase 1 Step 0a) ---
+# Records how the velocity mode was determined. Always present in new sprints.
+triage:
+  # Classification of the request
+  classification: medium  # minor | medium | major
+
+  # The velocity mode that will govern the sprint
+  resolved_mode: autonomous  # autonomous | attended
+
+  # How the mode was determined
+  mode_source: auto_detected  # auto_detected | explicit_override
+
+  signals:
+    # Was the request well-defined?
+    clarity: clear  # clear | vague
+
+    # How many files are likely affected?
+    scope:
+      level: medium_scope  # minor_scope | medium_scope | major_scope
+      file_count: 3
+      matched_files:
+        - "src/services/relevant_service.py"
+        - "src/api/endpoints/relevant.py"
+        - "src/models/relevant_model.py"
+
+    # What kind of change is this?
+    novelty: new_feature  # patch | new_feature | structural
+
+    # Does this touch a sensitive domain?
+    domain_risk: false
+    domain_risk_domains: []
+
+  rationale: |
+    Medium classification: 3 files affected, new feature request with clear scope.
+    Auto-resolved to autonomous mode.
+
 # --- Standard handoff footer ---
 outputs:
   - .sprint/input.yaml
