@@ -2,6 +2,7 @@
 name: sentinel
 description: Emerging issues consolidation agent. Use at end-of-phase, end-of-cycle, before gate decisions, or before /tree close to surface discovered issues, workarounds, temporary code, disconnected features, and deferred ideas that would otherwise be forgotten.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task
+model: sonnet
 color: red
 ---
 
