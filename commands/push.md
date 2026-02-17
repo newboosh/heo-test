@@ -4,8 +4,6 @@ Push changes safely with automatic branch protection and PR creation.
 
 Automatically detects whether the branch exists on remote and handles both first-time pushes (with tracking) and subsequent pushes.
 
-**Patterns used:** See `common-patterns.md` for GitHub auth, quality checks, branch protection.
-
 ## Environment Setup
 
 This command requires GitHub authentication. Configure the origin repo in your project root `.env.local`:

@@ -1,40 +1,8 @@
 # CodeRabbit Review Management
 
-Orchestrate a single iteration of CodeRabbit PR review processing.
+Run a single iteration of CodeRabbit PR review processing: check status, fix comments, resolve conflicts.
 
-## Overview
-
-This command orchestrates three subcommands to process CodeRabbit reviews:
-
-```
-/coderabbit
-    │
-    ├─► /coderabbit status     → Check PR state
-    │   │
-    │   ├─► REVIEWING → Stop, wait for review
-    │   ├─► CLEAN → Stop, PR is ready
-    │   └─► COMMENTS/CONFLICTS → Continue
-    │
-    ├─► /coderabbit process    → Fix comments, push
-    │   (if comments exist)
-    │
-    └─► /coderabbit conflicts  → Resolve conflicts, push
-        (if conflicts exist)
-```
-
-## Subcommands
-
-| Command | Purpose |
-|---------|---------|
-| `/coderabbit status` | Check PR status (reviewing, comments, conflicts, clean) |
-| `/coderabbit process` | Fetch comments, apply fixes, commit and push |
-| `/coderabbit conflicts` | Resolve merge conflicts, commit and push |
-
-## Prerequisites
-
-**GitHub Token**: Required for accessing PR comments. Loaded from:
-1. `GITHUB_TOKEN` environment variable
-2. Repository root `.env` file (`GITHUB_TOKEN=<token>` or `GITHUB_PAT=<token>`)
+For a full loop that repeats until approval, use `/coderabbitloop`.
 
 ## Arguments
 
@@ -43,95 +11,117 @@ This command orchestrates three subcommands to process CodeRabbit reviews:
   - `--no-resolve` - Don't auto-resolve comments (let CodeRabbit verify)
   - `--no-push` - Don't commit/push changes (for dry-run inspection)
   - `--iteration <N>` - Current iteration number (for commit messages)
-  - `status` - Only check status (calls `/coderabbit status`)
-  - `process` - Only process comments (calls `/coderabbit process`)
-  - `conflicts` - Only resolve conflicts (calls `/coderabbit conflicts`)
+
+## Prerequisites
+
+**GitHub Token**: Required for accessing PR comments. Loaded from:
+1. `GITHUB_TOKEN` environment variable
+2. Repository root `.env` file (`GITHUB_TOKEN=<token>` or `GITHUB_PAT=<token>`)
 
 ## Instructions
 
-**You are orchestrating a CodeRabbit review iteration.**
+**You are running a single CodeRabbit review iteration.**
 
 ---
 
-### Step 1: Check Status
+### Step 1: Identify the PR
 
-Delegate to `/coderabbit status`:
-
+If no PR number was provided:
+```bash
+PR_NUMBER=$(gh pr view --json number -q .number 2>/dev/null)
 ```
-/coderabbit status $PR_NUMBER
+
+---
+
+### Step 2: Check Status
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/check_pr_status.py" --pr $PR_NUMBER --json
 ```
 
 Based on the result:
 
-| Status | Action |
-|--------|--------|
-| **REVIEWING** | **STOP** - Report "Review in progress" |
-| **CLEAN** | **STOP** - Report "PR is clean" |
-| **COMMENTS** | Go to Step 2 |
-| **CONFLICTS_BLOCKED** | Go to Step 2, then Step 3 |
-| **CONFLICTS_ONLY** | Skip to Step 3 |
+| State | Condition | Action |
+|-------|-----------|--------|
+| **REVIEWING** | CodeRabbit review in progress | **STOP** — Report "Review in progress, try again later" |
+| **CLEAN** | No unresolved comments, no conflicts | **STOP** — Report "PR is clean" |
+| **MERGED** | PR was merged | **STOP** — Report success |
+| **COMMENTS** | Has unresolved comments | Go to Step 3 |
+| **CONFLICTS_BLOCKED** | Has both comments and conflicts | Go to Step 3, then Step 4 |
+| **CONFLICTS_ONLY** | Has conflicts, no comments | Skip to Step 4 |
 
 ---
 
-### Step 2: Process Comments
+### Step 3: Process Comments
 
-Delegate to `/coderabbit process`:
+#### 3a. Fetch all unresolved comments
 
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/loop/fetch_comments.py" --pr $PR_NUMBER --json
 ```
-/coderabbit process $PR_NUMBER --iteration $N
+
+Also fetch outside-diff comments:
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/loop/fetch_outside_diff_comments.py" --pr $PR_NUMBER
 ```
 
-Pass through flags: `--no-resolve`, `--no-push`
+#### 3b. For each comment, apply fixes
 
-**CRITICAL: Fixes MUST be pushed BEFORE resolving conflicts.** Resolving conflicts triggers a full re-review.
+1. **Read the file** at the specified location
+2. **If CodeRabbit provides a committable suggestion** — apply it EXACTLY
+3. **If no suggestion** — create a minimal fix
+4. **Verify locally**:
+   ```bash
+   ${CLAUDE_PLUGIN_ROOT}/scripts/run-quality-checks.sh
+   ```
+   Max 3 attempts per comment. After 3 failures, escalate.
+
+#### 3c. Post replies
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/loop/post_reply.py" --pr $PR_NUMBER --thread <THREAD_ID> --body "<REPLY>"
+```
+
+#### 3d. Auto-resolve (unless `--no-resolve`)
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/smart_resolver.py" --pr $PR_NUMBER
+```
+
+#### 3e. Commit and push
+
+Stage, commit, and push via `/push`.
+
+**CRITICAL: Push fixes BEFORE resolving conflicts.**
 
 ---
 
-### Step 3: Resolve Conflicts (if any)
+### Step 4: Resolve Conflicts (if any)
 
-**Skip if no conflicts or `--no-push` flag is set.**
+**Skip if no conflicts or `--no-push`.**
 
-Delegate to `/coderabbit conflicts`:
-
+```bash
+git fetch origin main
+git merge origin/main
 ```
-/coderabbit conflicts $PR_NUMBER
-```
+
+Resolve each conflict intelligently, run quality checks, commit and push via `/push`.
 
 ---
 
-### Step 4: Report Results
+### Step 5: Report Results
 
 Output a summary:
 - PR status
-- Comments processed
+- Comments processed and files modified
 - Conflicts resolved
 - Final state
-
----
+- Suggest `/coderabbitloop` if there are more iterations needed
 
 ## Important Rules
 
-- **Push fixes BEFORE resolving conflicts** - Fixes must be committed and pushed first, then conflicts resolved in a separate commit
+- **Push fixes BEFORE resolving conflicts** — conflict resolution triggers re-review
 - **Never auto-resolve security comments** without manual verification
 - **Always run quality checks** before pushing
-- **Reference Dignified Python rules** when explaining fixes (e.g., "Fixed per Rule #2")
-- **Use `@coderabbitai` mentions** to communicate with CodeRabbit
-
-## Error Handling
-
-Errors from subcommands bubble up. See individual subcommand documentation:
-- `/coderabbit process` - Quality check failures, comment processing failures
-- `/coderabbit conflicts` - Conflict resolution failures, push failures
-
-## Composition
-
-This command follows the **Composition Pattern** (see `/composition-patterns`):
-
-```
-/coderabbit (orchestrator)
-    ├─► /coderabbit status   (Gate pattern - determines workflow)
-    ├─► /coderabbit process  (Delegation pattern)
-    └─► /coderabbit conflicts (Delegation pattern)
-```
-
-Each subcommand is independently useful and testable.
+- **Use CodeRabbit's exact suggestions** when provided
+- **Max 3 attempts per comment** — escalate after 3 failures

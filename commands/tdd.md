@@ -196,7 +196,7 @@ See `/test-coverage` for detailed thresholds. Summary:
 
 ## Composition
 
-This command follows the **Pipeline Pattern** (see `/composition-patterns`):
+This command follows the **Pipeline Pattern**:
 
 ```
 /tdd
