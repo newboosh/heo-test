@@ -45,17 +45,16 @@ unset CLAUDECODE 2>/dev/null || true
 # ---------------------------------------------------------------------------
 # Plugin root auto-detection
 # ---------------------------------------------------------------------------
-# Priority: 1) --plugin-dir arg  2) script's own directory  3) CLAUDE_PLUGIN_ROOT env  4) pwd
-# This allows the test to run correctly whether invoked from the plugin directory,
-# from a project that has the plugin installed, or via the /test-plugin command.
+# Priority: 1) --plugin-dir arg  2) CLAUDE_PLUGIN_ROOT env  3) script's own directory  4) pwd
+# Explicit env var wins over auto-detection so users can override the plugin root.
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR=""
 
-# Check if script's own directory looks like a plugin root (most common case)
-if [[ -f "$_SCRIPT_DIR/hooks/hooks.json" ]] && [[ -d "$_SCRIPT_DIR/commands" ]]; then
-    PLUGIN_DIR="$_SCRIPT_DIR"
-elif [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]] && [[ -d "$CLAUDE_PLUGIN_ROOT/hooks" ]]; then
+# Prefer explicit env var over script-dir auto-detection
+if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]] && [[ -d "$CLAUDE_PLUGIN_ROOT/hooks" ]]; then
     PLUGIN_DIR="$CLAUDE_PLUGIN_ROOT"
+elif [[ -f "$_SCRIPT_DIR/hooks/hooks.json" ]] && [[ -d "$_SCRIPT_DIR/commands" ]]; then
+    PLUGIN_DIR="$_SCRIPT_DIR"
 fi
 
 # ---------------------------------------------------------------------------
