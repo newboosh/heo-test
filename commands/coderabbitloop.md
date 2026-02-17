@@ -46,7 +46,7 @@ Parse the result and determine the state:
 
 | State | Condition | Action |
 |-------|-----------|--------|
-| **REVIEWING** | CodeRabbit review in progress | **WAIT** — sleep 60 seconds, re-check (up to 5 times) |
+| **REVIEWING** | CodeRabbit review in progress | **WAIT** — sleep 60 seconds, re-check (up to 15 times) |
 | **CLEAN** | No unresolved comments, no conflicts | **STOP — SUCCESS** |
 | **MERGED** | PR was merged | **STOP — SUCCESS** |
 | **CLOSED** | PR was closed without merge | **STOP — report closure** |
@@ -58,7 +58,7 @@ If REVIEWING, wait and re-check:
 ```bash
 sleep 60
 ```
-Re-run the status check. If still REVIEWING after 5 waits (5 minutes), report "CodeRabbit is still reviewing — try again later" and stop.
+Re-run the status check. If still REVIEWING after 15 waits (15 minutes), report "CodeRabbit is still reviewing — try again later" and stop.
 
 ---
 
@@ -192,14 +192,27 @@ Push via `/push`.
 
 #### Step 4: Wait for CodeRabbit Re-review
 
-After pushing fixes or conflict resolutions, CodeRabbit will re-review.
+After pushing fixes or conflict resolutions, CodeRabbit will re-review. You **MUST** confirm CodeRabbit has reviewed the new push before accepting a CLEAN result.
 
-Wait for the re-review:
+**Phase 1 — Wait for review to start:**
+
+Poll every 30 seconds for up to 5 minutes. Run the status check each time:
 ```bash
-sleep 60
+sleep 30
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/coderabbit/check_pr_status.py" --pr $PR_NUMBER --json
 ```
 
-Then **increment ITERATION** and go back to **Step 1**.
+You are waiting for the status to show **REVIEWING** (SKIP state), which means CodeRabbit picked up the new push. Once REVIEWING is detected, move to Phase 2.
+
+If REVIEWING is never detected within 5 minutes (10 polls), move to Phase 2 anyway — CodeRabbit may have reviewed very quickly.
+
+**Phase 2 — Wait for review to finish:**
+
+Now use the same REVIEWING wait logic from Step 1: poll every 60 seconds for up to 15 minutes until the status is no longer REVIEWING.
+
+**Then increment ITERATION and go back to Step 1.**
+
+> **CRITICAL:** Do NOT accept a CLEAN status in Step 1 on the first check after a push. If Step 1 returns CLEAN immediately and Phase 1 never detected REVIEWING, wait 60 seconds and re-check once more to guard against the race condition where CodeRabbit hasn't started yet.
 
 ---
 
