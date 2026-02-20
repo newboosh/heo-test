@@ -2,6 +2,7 @@
 name: problem-definition
 description: Structured problem definition before requirements engineering. Identifies the real problem, who has it, and what the gap is. Use ONLY when explicitly invoked.
 argument-hint: [problem-statement or situation-description]
+model: opus
 disable-model-invocation: true
 ---
 

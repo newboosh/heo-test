@@ -1,6 +1,7 @@
 ---
 name: token-budget
 description: Token estimation and budget management for hybrid context payloads. Provides estimation formulas, budget allocation rules, overflow handling, and running tally logic. Used by context-agent during payload assembly.
+model: haiku
 ---
 
 # Token Budget

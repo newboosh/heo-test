@@ -1,6 +1,8 @@
 ---
 name: project-skeleton
 description: Template for creating project-specific skills. Copy and customize for your Flask/Python project.
+model: sonnet
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Project Skeleton Skill (Template)

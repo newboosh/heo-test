@@ -67,6 +67,12 @@ try:
 except ImportError:
     PATTERNS_AVAILABLE = False
 
+try:
+    from reasoning import classify_reasoning, read_agent_context, apply_context_to_findings
+    REASONING_AVAILABLE = True
+except ImportError:
+    REASONING_AVAILABLE = False
+
 
 # ============================================================================
 # DIFF-SCOPING FUNCTIONS
@@ -430,11 +436,32 @@ def main() -> None:
             print(json.dumps({}))
             sys.exit(0)
 
+        # Apply reasoning context to findings (suppress acknowledged / escalate uncontextualized)
+        if REASONING_AVAILABLE:
+            last_msg = hook_input.get("last_assistant_message", "")
+            classification = classify_reasoning(last_msg)
+            agent_context = read_agent_context(cwd)
+            active, suppressed, escalated = apply_context_to_findings(
+                findings, classification, agent_context
+            )
+        else:
+            active, suppressed, escalated = findings, [], []
+
+        # If all findings suppressed by context, exit quietly
+        if not active:
+            if suppressed:
+                log_diagnostic(
+                    f"[sentinel] {len(suppressed)} finding(s) suppressed by context "
+                    f"in {Path(filepath).name}"
+                )
+            print(json.dumps({}))
+            sys.exit(0)
+
         # Get sentinel directory
         sentinel_dir = get_sentinel_dir(cwd)
 
-        # Append findings (with dedup)
-        new_findings = append_findings(sentinel_dir, filepath, findings, scope_label)
+        # Append active findings (with dedup)
+        new_findings = append_findings(sentinel_dir, filepath, active, scope_label)
 
         if new_findings:
             new_count = len(new_findings)
@@ -451,9 +478,24 @@ def main() -> None:
                 parts.append(f"{new_count} minor")
 
             severity_summary = ", ".join(parts)
+
+            # Annotate with context notes (suppression, escalation)
+            context_notes = []
+            if suppressed:
+                context_notes.append(f"{len(suppressed)} suppressed")
+            if escalated:
+                context_notes.append(f"{len(escalated)} escalated")
+            context_str = f" [{', '.join(context_notes)}]" if context_notes else ""
+
+            escalation_line = ""
+            if escalated:
+                escalation_line = (
+                    "\n[sentinel] !! ESCALATED: critical finding(s) with no context — review needed"
+                )
+
             message = (
-                f"\n[sentinel] {new_count} emerging issue(s) detected "
-                f"({severity_summary}) in {Path(filepath).name} [{scope_label}]\n"
+                f"{escalation_line}\n[sentinel] {new_count} emerging issue(s) detected "
+                f"({severity_summary}) in {Path(filepath).name} [{scope_label}]{context_str}\n"
                 f"  Run /sentinel report for details\n"
             )
 

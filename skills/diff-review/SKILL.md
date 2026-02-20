@@ -1,6 +1,8 @@
 ---
 name: diff-review
 description: Review changed files and identify what to check. Used by QA Agent.
+model: opus
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 # Diff Review

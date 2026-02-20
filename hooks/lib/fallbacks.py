@@ -69,6 +69,7 @@ class HookResultFallback:
         self.block_reason: Optional[str] = None
         self.block_command: Optional[str] = None
         self.warnings = []
+        self.additional_context: Optional[str] = None
 
     def block(self, reason: str, command: Optional[str] = None) -> None:
         self.blocked = True
@@ -78,16 +79,27 @@ class HookResultFallback:
     def warn(self, message: str) -> None:
         self.warnings.append(message)
 
+    def add_context(self, context: str) -> None:
+        self.additional_context = context
+
     def exit(self, pass_through: Optional[dict] = None) -> None:
         for warning in self.warnings:
             print(f"{HOOK_PREFIX} {warning}", file=sys.stderr)
 
         if self.blocked:
             print(f"{HOOK_PREFIX} BLOCKED: {self.block_reason}", file=sys.stderr)
+            if self.additional_context:
+                try:
+                    json.dump({"additionalContext": self.additional_context}, sys.stdout)
+                except (IOError, BrokenPipeError):
+                    pass
             sys.exit(2)
 
-        if pass_through is not None:
-            write_hook_output_fallback(pass_through)
+        output = pass_through or {}
+        if self.additional_context:
+            output["additionalContext"] = self.additional_context
+        if output:
+            write_hook_output_fallback(output)
 
         sys.exit(0)
 

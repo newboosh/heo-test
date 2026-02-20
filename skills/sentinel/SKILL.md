@@ -2,6 +2,8 @@
 name: sentinel
 description: Surface emerging issues discovered during work — workarounds, mocks, temporary code, disconnected features, deferred bugs, and ideas. Use at end-of-cycle, before gate decisions, or anytime to check what might have been forgotten.
 argument-hint: [report|log|check|clear|export-issues]
+model: sonnet
+context: fork
 allowed-tools: Read, Grep, Glob, Bash(*), Write, Edit, Task
 ---
 
@@ -291,7 +293,7 @@ This means a file with 50 pre-existing TODOs won't trigger 50 findings when you 
 |--------|----------------------|
 | Gate Decision (Phase 11) | BLOCKING items contribute to `sentinel.pass` signal |
 | Retrospective (Phase 13) | Full report feeds into pattern analysis |
-| `/tree close` | Run `/sentinel report` before PR creation |
+| `/tree close` | Run `/sentinel report` before worktree removal |
 | Sprint feedback | Unresolved items become backlog candidates |
 | GitHub Issues | Only via `/sentinel export-issues` — strict criteria, user confirmation required |
 

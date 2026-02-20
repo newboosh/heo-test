@@ -1,6 +1,8 @@
 ---
 name: prereq-check
 description: Verify prerequisites and dependencies before starting work. Used by Context Agent.
+model: haiku
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # Prerequisite Check

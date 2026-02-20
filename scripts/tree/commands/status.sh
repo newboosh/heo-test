@@ -6,7 +6,7 @@
 # Description: Show worktree status, restore terminals, refresh session
 
 # Dependencies: lib/common.sh (print_* functions), lib/setup.sh (generate_* functions)
-# Required variables: TREES_DIR, STAGED_FEATURES_FILE, COMPLETED_DIR, SCRIPT_DIR
+# Required variables: TREES_DIR, STAGED_FEATURES_FILE, SCRIPT_DIR
 
 # /tree status
 # Show worktree environment status
@@ -59,16 +59,6 @@ tree_status() {
         fi
     fi
 
-    # Show completed worktrees
-    if [ -d "$COMPLETED_DIR" ]; then
-        local completed_count=$(find "$COMPLETED_DIR" -name "*-synopsis-*.md" 2>/dev/null | wc -l | tr -d ' ')
-        if [ $completed_count -gt 0 ]; then
-            print_info "Completed Worktrees: $completed_count"
-            echo "  Run /tree closedone to merge and cleanup"
-            echo ""
-        fi
-    fi
-
     # Show build history
     if [ -d "$TREES_DIR/.build-history" ]; then
         local recent_build=$(ls -t "$TREES_DIR/.build-history" 2>/dev/null | head -1)
@@ -82,8 +72,8 @@ tree_status() {
     echo "Actions:"
     echo "  - /tree stage [description] - Stage new feature"
     echo "  - /tree build - Create worktrees from staged features"
-    echo "  - /tree close - Complete current worktree"
-    echo "  - /tree closedone - Merge completed worktrees"
+    echo "  - /tree close - Remove current worktree"
+    echo "  - /tree closedone - Prune all worktrees"
 }
 
 # /tree restore

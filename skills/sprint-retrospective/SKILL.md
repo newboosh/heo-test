@@ -1,6 +1,8 @@
 ---
 name: sprint-retrospective
 description: Analysis methodology for completed sprints. Read all sprint phase handoffs, evaluate what worked, what didn't, review effectiveness, estimation accuracy, and extract reusable patterns. Used by the Sprint Runner at Phase 13.
+model: opus
+allowed-tools: Read, Write, Grep, Glob
 ---
 
 # Sprint Retrospective Skill

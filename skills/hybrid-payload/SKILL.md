@@ -1,6 +1,7 @@
 ---
 name: hybrid-payload
 description: Reference for the 90/9/1 hybrid context payload format. Used by context-agent to structure context delivery into three tiers - RAW (inlined content), LINKED (fetchable references), and SUMMARY (narrative overview). Defines payload format, classification algorithm, and budget-constrained assembly.
+model: opus
 ---
 
 # Hybrid Payload Format

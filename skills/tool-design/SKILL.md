@@ -1,6 +1,7 @@
 ---
 name: tool-design
 description: Design standards for building skills, commands, and agents. Use when creating or modifying plugin tools — or when planning multi-phase workflows like the sprint lifecycle.
+model: opus
 ---
 
 # Tool Design Guide

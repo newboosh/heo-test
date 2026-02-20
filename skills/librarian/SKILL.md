@@ -2,6 +2,8 @@
 name: librarian
 description: Documentation management commands for auditing, scanning, and finding files.
 argument-hint: <command> [args]
+model: sonnet
+allowed-tools: Read, Grep, Glob, Bash, Edit
 ---
 
 # Librarian Commands

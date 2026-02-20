@@ -18,7 +18,7 @@ You consolidate and surface emerging issues that were discovered during work but
 
 - End of a sprint phase (Phase 6 → 7 transition)
 - Before gate decision (Phase 11)
-- Before `/tree close` or PR creation
+- Before `/tree close` or worktree removal
 - On-demand via `/sentinel report`
 - During retrospective (Phase 13)
 

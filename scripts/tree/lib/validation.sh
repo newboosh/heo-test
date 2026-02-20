@@ -6,108 +6,7 @@
 # Description: Validates worktree state and provides safe cleanup operations
 
 # Dependencies: lib/common.sh (print_* functions)
-# Required variables: TREES_DIR, COMPLETED_DIR
-
-# Validate that all active worktrees have been closed
-#
-# Checks all worktrees in .trees/ to see if they have synopsis files
-# in .completed/ directory. If any are missing, displays summary and exits.
-#
-# Returns:
-#   0 - All worktrees closed
-#   1 - Some worktrees not closed
-validate_all_worktrees_closed() {
-    # Get list of all active worktrees (excluding special directories)
-    local all_worktrees=()
-    if [ -d "$TREES_DIR" ]; then
-        while IFS= read -r dir; do
-            local name
-            name=$(basename "$dir")
-            # Skip special directories
-            if [[ "$name" != .* ]] && [ -d "$dir" ]; then
-                all_worktrees+=("$name")
-            fi
-        done < <(find "$TREES_DIR" -maxdepth 1 -type d)
-    fi
-
-    if [ ${#all_worktrees[@]} -eq 0 ]; then
-        # No worktrees at all
-        return 0
-    fi
-
-    # Get list of closed worktrees (have synopsis files)
-    local closed_worktrees=()
-    if [ -d "$COMPLETED_DIR" ]; then
-        while IFS= read -r file; do
-            if [ -f "$file" ]; then
-                local filename
-                filename=$(basename "$file")
-                local worktree_name="${filename%%-synopsis-*}"
-                closed_worktrees+=("$worktree_name")
-            fi
-        done < <(find "$COMPLETED_DIR" -name "*-synopsis-*.md" 2>/dev/null)
-    fi
-
-    # Find unclosed worktrees (in .trees but no synopsis)
-    local unclosed=()
-    for worktree in "${all_worktrees[@]}"; do
-        local is_closed=false
-        for closed in "${closed_worktrees[@]}"; do
-            if [ "$worktree" = "$closed" ]; then
-                is_closed=true
-                break
-            fi
-        done
-
-        if [ "$is_closed" = false ]; then
-            unclosed+=("$worktree")
-        fi
-    done
-
-    # If all are closed, return success
-    if [ ${#unclosed[@]} -eq 0 ]; then
-        return 0
-    fi
-
-    # Display summary of unclosed worktrees
-    echo ""
-    print_error "Cannot proceed: ${#unclosed[@]} worktree(s) have not been closed"
-    echo ""
-    echo "The following worktrees need to be closed with '/tree close' before merging:"
-    echo ""
-
-    for worktree in "${unclosed[@]}"; do
-        # Get branch info if available
-        local worktree_path="$TREES_DIR/$worktree"
-        local branch=""
-
-        # Try to get branch from git worktree list first (use -Fx for exact line matching)
-        branch=$(git worktree list --porcelain | grep -Fx -A 3 -- "worktree $worktree_path" | grep "^branch " | sed 's/^branch //' | sed 's#refs/heads/##' || echo "")
-
-        # Fallback to checking inside worktree
-        if [ -z "$branch" ] && [ -d "$worktree_path" ]; then
-            branch=$(cd "$worktree_path" && git branch --show-current 2>/dev/null || echo "unknown")
-        fi
-
-        echo "  - $worktree"
-        if [ -n "$branch" ] && [ "$branch" != "unknown" ]; then
-            echo "    Branch: $branch"
-        fi
-        echo "    Path: $worktree_path"
-        echo ""
-    done
-
-    echo "Options:"
-    echo "  1. Close each worktree: cd $TREES_DIR/<worktree> && /tree close"
-    echo "  2. Use --force to merge all worktrees anyway: /tree closedone --force"
-    echo ""
-
-    print_info "Tip: The --force flag will merge all worktrees, but you'll lose"
-    print_info "the structured synopsis and work description for unclosed worktrees."
-    echo ""
-
-    return 1
-}
+# Required variables: TREES_DIR
 
 # Validate worktree has no uncommitted changes
 # Returns 0 if clean, 1 if dirty
@@ -141,8 +40,7 @@ validate_cleanup_safe() {
     # Must not be a special directory
     local basename
     basename=$(basename "$target_path")
-    if [[ "$basename" == .completed ]] || [[ "$basename" == .incomplete ]] || \
-       [[ "$basename" == .archived ]] || [[ "$basename" == .conflict-backup ]]; then
+    if [[ "$basename" == .conflict-backup ]]; then
         print_error "Refusing to cleanup special directory: $basename"
         return 1
     fi

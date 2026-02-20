@@ -2,6 +2,8 @@
 name: catalog
 description: File classification and dependency tracking for AI agents. Build and query the codebase catalog.
 argument-hint: <command> [options]
+model: haiku
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # Catalog Commands

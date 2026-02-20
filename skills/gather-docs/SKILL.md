@@ -1,6 +1,8 @@
 ---
 name: gather-docs
 description: Collect relevant documentation for a task. Used primarily by Context Agent.
+model: haiku
+allowed-tools: Read, Grep, Glob
 ---
 
 # Gather Docs

@@ -1,6 +1,8 @@
 ---
 name: gate-decision
 description: Automated go/no-go decision criteria for the sprint pipeline. Aggregates signals from code review, QA, security review, and sentinel to produce SHIP / REVISE / BLOCKED. Used by the orchestrate command at Phase 10 (before PR creation).
+model: opus
+allowed-tools: Read, Grep, Glob
 ---
 
 # Gate Decision Skill

@@ -1,5 +1,8 @@
 ---
+name: setup
 description: Configure the heo plugin for your project
+model: sonnet
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Heo Plugin Setup

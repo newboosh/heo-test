@@ -18,8 +18,9 @@ Available commands:
   scope-conflicts        - Detect scope conflicts across worktrees
   build [options]        - Create worktrees from staged features
   restore                - Restore terminals for existing worktrees
-  close [incomplete]     - Commit, push to remote, create PR
-  closedone              - Prune local worktrees (after GitHub PR merge)
+  close                  - Remove the current worktree
+  closedone              - Prune all local worktrees
+  sync [--all]           - Sync worktree(s) from source/main via rebase
   status                 - Show worktree environment status
   refresh                - Check slash command availability
   help                   - Show this help
@@ -30,35 +31,24 @@ Available commands:
   --confirm              Prompt before each worktree
   --dry-run              Preview without creating
 
-/tree close usage:
-  /tree close              Complete feature and create PR
-  /tree close incomplete   Save progress for next cycle
+/tree sync usage:
+  /tree sync               Sync current worktree from source/main (run from inside a worktree)
+  /tree sync --all         Sync all worktrees from source/main (run from repo root)
 
-  AUTO-COMMIT + PUSH: /tree close automatically:
-     1. Commits all uncommitted changes
-     2. Pushes branch to origin
-     3. Offers to create PR via gh CLI
+  Stashes all changes (including untracked files) before rebasing onto main,
+  then pops the stash so you can review your work against what changed in main.
+
+/tree close usage:
+  /tree close
+
+  Removes the current worktree and deletes the local branch.
+  Warns if there are uncommitted changes.
 
 /tree closedone usage:
-  /tree closedone [options]
+  /tree closedone [--dry-run]
 
-  Prunes local worktrees after PRs merged on GitHub.
-  NOTE: Merging happens via GitHub PRs, NOT locally.
-
-Options:
-  --force                Prune regardless of close status
-  --dry-run              Preview without pruning
-
-/tree closedone --full-cycle usage:
-  /tree closedone --full-cycle [--bump patch|minor|major] [--dry-run]
-
-  Executes complete development cycle:
-  1. Validate all worktrees closed
-  2. Merge completed features
-  3. Promote to main
-  4. Bump version
-  5. Create new dev branch
-  6. Auto-stage incomplete features
+  Removes all local worktrees and cleans up local branches.
+  Remote branches are preserved. Use --dry-run to preview.
 
 Environment Variables:
   TREE_VERBOSE=true      Enable verbose mode globally
@@ -69,10 +59,11 @@ Typical Workflow:
   2. /tree list                 # Review staged
   3. /tree build                # Create worktrees
   4. [work in worktrees]        # Implement
-  5. /tree close                # Commit, push, PR
+  5. [commit, push, create PR]  # Ship via GitHub
   6. [PR review on GitHub]      # Code review
   7. [Merge PRs on GitHub]      # Merge via GitHub
-  8. /tree closedone            # Prune local worktrees
+  8. /tree close                # Remove finished worktree
+  9. /tree closedone            # Or prune all at once
 
 Examples:
   /tree stage Add user preferences backend
@@ -81,10 +72,9 @@ Examples:
   /tree build --dry-run          # Preview
   /tree build                    # Create worktrees
   /tree build --resume           # Resume after failure
-  /tree close                    # Complete feature
-  /tree close incomplete         # Save progress
-  /tree closedone                # Prune completed
-  /tree closedone --full-cycle   # Full cycle automation
+  /tree close                    # Remove current worktree
+  /tree closedone                # Prune all worktrees
+  /tree closedone --dry-run      # Preview pruning
 
 EOF
 }

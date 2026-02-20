@@ -159,8 +159,7 @@ Complete the following deliverables for this task. See PURPOSE.md for more detai
 
 ## Workflow Commands
 - Check status: /tree status
-- Close when done: /tree close
-- Close incomplete: /tree close incomplete
+- Remove worktree when done: /tree close
 
 Focus on this specific task and its objectives.
 EOF

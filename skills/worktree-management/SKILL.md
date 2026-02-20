@@ -1,3 +1,10 @@
+---
+name: worktree-management
+description: Manage parallel development using git worktrees.
+model: haiku
+allowed-tools: Read, Bash, Grep, Glob
+---
+
 # Worktree Management Skill
 
 Manage parallel development using git worktrees.
@@ -22,14 +29,14 @@ Create all staged worktrees with isolated branches.
 /tree build
 ```
 
-### Complete Work
-Commit, push, and optionally create PR.
+### Remove Worktrees
+Remove a single worktree when done with it.
 ```
 /tree close
 ```
 
-### Cleanup
-Prune local worktrees after PRs are merged.
+### Prune All Worktrees
+Remove all local worktrees at once.
 ```
 /tree closedone
 ```

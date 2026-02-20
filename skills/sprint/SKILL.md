@@ -2,6 +2,7 @@
 name: sprint
 description: Full sprint lifecycle — from developer requirements through planning, implementation, review, CI/CD, monitoring, and retrospective. Entry point for automated development cycles.
 argument-hint: [what to build]
+model: opus
 disable-model-invocation: true
 ---
 

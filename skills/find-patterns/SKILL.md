@@ -1,6 +1,8 @@
 ---
 name: find-patterns
 description: Find similar implementations, patterns, and prior art in the codebase. Used by Context Agent and QA Agent.
+model: sonnet
+allowed-tools: Read, Grep, Glob
 ---
 
 # Find Patterns

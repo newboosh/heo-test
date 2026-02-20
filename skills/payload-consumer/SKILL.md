@@ -1,6 +1,7 @@
 ---
 name: payload-consumer
 description: Instructions for agents receiving a hybrid context payload. Explains reading order, how to fetch LINKED content on demand, context window management, and the ACK protocol for confirming payload receipt.
+model: haiku
 ---
 
 # Consuming a Context Payload

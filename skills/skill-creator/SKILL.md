@@ -2,6 +2,8 @@
 name: skill-creator
 description: Create new Claude Code skills with proper structure, frontmatter, and conventions. Use when creating a new skill, converting a command to a skill, or setting up skill templates.
 argument-hint: [skill-name] [description]
+model: opus
+allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
 # Skill Creator

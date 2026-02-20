@@ -284,6 +284,7 @@ class HookResult:
         result = HookResult()
         result.block("Dangerous command detected", command="git push --no-verify")
         result.warn("Consider using a different approach")
+        result.add_context("Use git push --force-with-lease instead of --force")
         result.exit()
     """
 
@@ -292,6 +293,7 @@ class HookResult:
         self.block_reason: Optional[str] = None
         self.block_command: Optional[str] = None
         self.warnings: List[str] = []
+        self.additional_context: Optional[str] = None
 
     def block(self, reason: str, command: Optional[str] = None) -> None:
         """Mark this hook as blocking with a reason."""
@@ -302,6 +304,17 @@ class HookResult:
     def warn(self, message: str) -> None:
         """Add a warning (non-blocking)."""
         self.warnings.append(message)
+
+    def add_context(self, context: str) -> None:
+        """
+        Add context that will be injected into the model's context window.
+
+        This uses Claude Code's additionalContext feature (v2.1+) to help
+        the model understand why a command was blocked and what alternatives
+        to use. The context appears as model-visible information, not just
+        stderr output.
+        """
+        self.additional_context = context
 
     def exit(self, pass_through: Optional[dict] = None) -> None:
         """
@@ -318,9 +331,19 @@ class HookResult:
                 log_blocked(self.block_command, self.block_reason)
             else:
                 log_error(f"BLOCKED: {self.block_reason}")
+            # Output additionalContext JSON so the model knows why and what to do
+            if self.additional_context:
+                try:
+                    json.dump({"additionalContext": self.additional_context}, sys.stdout)
+                except (IOError, BrokenPipeError):
+                    pass
             sys.exit(2)
 
-        if pass_through is not None:
-            write_hook_output(pass_through)
+        # For non-blocking results, output additionalContext if set
+        output = pass_through or {}
+        if self.additional_context:
+            output["additionalContext"] = self.additional_context
+        if output:
+            write_hook_output(output)
 
         sys.exit(0)

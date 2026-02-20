@@ -2,6 +2,8 @@
 name: bug-investigate
 description: Hypothesis-driven bug investigation with evidence provenance. Use when debugging non-trivial bugs that resist a quick fix, or when a fix attempt has already failed once. Enforces problem-definition-first, single-variable testing, and prevention sweep.
 argument-hint: [bug description or error message]
+model: opus
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Bug Investigation Skill

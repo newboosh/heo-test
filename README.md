@@ -14,21 +14,41 @@ A comprehensive Claude Code plugin for Python/Flask development with worktree ma
 
 ## Installation
 
-### Via Claude Code Plugin System
+> **Full walkthrough with key transfer instructions:** [docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)
+
+### Quick Install (Recommended)
 
 ```bash
-# In Claude Code, run:
-/plugin add newboosh/heo
+# If you already have the repo cloned:
+bash scripts/install-plugin.sh --key /path/to/deploy_heo
+
+# Or download and run directly:
+curl -sO https://raw.githubusercontent.com/FrostyTeeth/claude_plugin_source/main/scripts/install-plugin.sh
+bash install-plugin.sh --key /path/to/deploy_heo
 ```
 
-### Manual Installation
+### Shell Aliases
 
-1. Clone this repo into your project's `.claude/` directory:
-   ```bash
-   git clone https://github.com/newboosh/heo.git .claude
-   ```
+After install, add to your `~/.zshrc` or `~/.bashrc`:
 
-2. Or copy specific components you need.
+```bash
+source ~/.heo-plugin/scripts/shell-alias.sh
+```
+
+Then use:
+- `claude-heo` or `ch` — launch Claude with the plugin
+- `claude-heo-tree` or `cht` — launch in a worktree with task context
+
+### Other Install Methods
+
+```bash
+# With GitHub PAT instead of deploy key
+bash scripts/install-plugin.sh --pat ghp_xxxxxxxxxxxx
+
+# Manual clone (requires SSH config — see INSTALL_GUIDE.md)
+git clone git@heo.github.com:newboosh/heo.git ~/.heo-plugin
+claude --add-dir ~/.heo-plugin
+```
 
 ## Configuration
 

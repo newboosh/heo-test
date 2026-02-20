@@ -1,6 +1,7 @@
 ---
 name: backend-patterns
 description: Backend architecture patterns, API design, database optimization, and server-side best practices for Flask, SQLAlchemy, and Celery.
+model: opus
 ---
 
 # Backend Development Patterns

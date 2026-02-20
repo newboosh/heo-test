@@ -1,6 +1,7 @@
 ---
 name: learned
 description: Store and retrieve reusable patterns learned across sessions
+model: sonnet
 agent_only: true
 ---
 

@@ -2,6 +2,8 @@
 name: hook-creator
 description: Create and update Claude Code hooks for automation, validation, and workflow customization.
 argument-hint: [hook-type] [description]
+model: opus
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Hook Creator

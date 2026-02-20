@@ -1,6 +1,8 @@
 ---
 name: process-map
 description: Identify affected business processes and data structures. Used by Context Agent to understand system impact before work begins.
+model: opus
+allowed-tools: Read, Grep, Glob
 ---
 
 # Process Map

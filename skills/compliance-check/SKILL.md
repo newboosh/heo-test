@@ -1,6 +1,8 @@
 ---
 name: compliance-check
 description: Check code against applicable standards. Used by QA Agent.
+model: opus
+allowed-tools: Read, Grep, Glob
 ---
 
 # Compliance Check

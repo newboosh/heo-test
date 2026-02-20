@@ -1,6 +1,7 @@
 ---
 name: sub-agent-dispatch
 description: Coordination patterns for context-agent sub-agents. Defines which sub-agents to spawn per complexity tier, prompt templates, the two-batch parallel execution pattern, and the result envelope format for collected items.
+model: opus
 ---
 
 # Sub-Agent Dispatch

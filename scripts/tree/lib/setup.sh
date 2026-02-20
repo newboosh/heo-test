@@ -349,7 +349,7 @@ This worktree is dedicated to implementing the feature described above. Focus on
 Slash commands are available!
 
 After Claude starts, you can use:
-- \`/tree close\` - Complete work and generate synopsis
+- \`/tree close\` - Remove this worktree when done
 - \`/tree status\` - Show worktree status
 - \`/tree restore\` - Restore terminals (if needed)
 

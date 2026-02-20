@@ -1,6 +1,7 @@
 ---
 name: team-patterns
 description: Reusable coordination patterns for Claude Code Agent Teams. Reference when building team-based commands (review-swarm, bug-swarm, arch-debate, test-swarm, health-check, plan-swarm).
+model: opus
 ---
 
 # Team Coordination Patterns

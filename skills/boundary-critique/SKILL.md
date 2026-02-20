@@ -2,6 +2,7 @@
 name: boundary-critique
 description: Critical Systems Heuristics (CSH) boundary analysis for problem definition. Use ONLY when explicitly invoked by a user or agent to interrogate whether the right problem is being solved.
 argument-hint: [problem-statement or topic]
+model: opus
 disable-model-invocation: true
 ---
 

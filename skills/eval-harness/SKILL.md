@@ -1,6 +1,8 @@
 ---
 name: eval-harness
 description: Eval-Driven Development (EDD) framework for Python. Define success criteria before implementation, run evals continuously, track pass@k metrics.
+model: opus
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Eval Harness Skill

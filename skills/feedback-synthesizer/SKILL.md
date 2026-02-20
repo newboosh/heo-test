@@ -1,6 +1,8 @@
 ---
 name: feedback-synthesizer
 description: Synthesis rules for transforming monitoring signals and retrospective insights into actionable intake items for the next sprint. Closes the loop from Phase 13 back to Phase 1.
+model: opus
+allowed-tools: Read, Write, Grep, Glob
 ---
 
 # Feedback Synthesizer Skill

@@ -1,6 +1,7 @@
 ---
 name: ack-protocol
 description: Reusable acknowledgment protocol for confirming delivery of structured payloads between agents. Defines the ACK format, status values, and re-delivery workflow. Used by context payloads and any inter-agent delivery that needs confirmation.
+model: haiku
 ---
 
 # ACK Protocol

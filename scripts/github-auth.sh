@@ -162,7 +162,7 @@ _clean_github_url() {
 # Prompts before overwriting existing values (unless GITHUB_AUTH_FORCE=1)
 github_auth_detect() {
     local project_root
-    project_root=$(_find_project_root)
+    project_root=$(_find_project_root) || true
 
     # Save existing PAT to detect conflicts
     local existing_pat="$GITHUB_PAT"
@@ -245,7 +245,7 @@ github_auth_detect() {
     # Priority 3: Git remote URL (extract embedded PAT if present)
     if [ -z "$GITHUB_PAT" ] || [ -z "$GITHUB_REPO_URL" ]; then
         local remote_url
-        remote_url=$(git remote get-url origin 2>/dev/null)
+        remote_url=$(git remote get-url origin 2>/dev/null) || true
 
         if [ -n "$remote_url" ]; then
             # Try to extract PAT from URL

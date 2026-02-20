@@ -1,6 +1,8 @@
 ---
 name: security-review
 description: Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing sensitive features. Provides comprehensive security checklist for Flask applications.
+model: opus
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Security Review Skill

@@ -1,6 +1,7 @@
 ---
 name: composition-patterns
 description: Reference patterns for composing skills and commands. Use when designing new skills that delegate, chain, or orchestrate other skills.
+model: opus
 user-invocable: true
 ---
 

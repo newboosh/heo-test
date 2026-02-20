@@ -2,6 +2,8 @@
 name: agent-creator
 description: Create and update Claude Code subagents with proper structure, frontmatter, and conventions. Use when creating a new agent, updating an existing agent, or setting up specialized task handlers.
 argument-hint: [agent-name] [description]
+model: opus
+allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
 # Agent Creator

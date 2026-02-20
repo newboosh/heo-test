@@ -234,6 +234,18 @@ SENTINEL_PATTERNS: List[SentinelPattern] = [
         description="Disabled/skipped tests that may need attention",
     ),
 
+    # --- Rationalization Markers ---
+    SentinelPattern(
+        name="should_but_rationalization",
+        issue_type="deferred",
+        severity="important",
+        markers=[
+            r"\bI\s+should\s+.{1,80},\s*but\b",
+        ],
+        action="Do the thing or create a ticket — don't let it fade",
+        description="'I should ..., but' rationalization indicating deferred work",
+    ),
+
     # --- Disconnection Markers ---
     SentinelPattern(
         name="unused_import",

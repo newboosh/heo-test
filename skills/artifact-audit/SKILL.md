@@ -1,6 +1,8 @@
 ---
 name: artifact-audit
 description: Verify required artifacts exist (tests, docs, migrations). Used by QA Agent.
+model: opus
+allowed-tools: Read, Grep, Glob
 ---
 
 # Artifact Audit

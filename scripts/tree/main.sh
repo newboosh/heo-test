@@ -3,9 +3,9 @@
 # Script: main.sh (new modular tree.sh)
 # Purpose: Worktree management system for parallel development
 # Created: 2026-01-28
-# Modified: 2026-01-28
+# Modified: 2026-02-19
 # Usage: /tree <command> [options]
-# Commands: stage, list, build, close, closedone, status, conflict, help
+# Commands: stage, list, build, close, closedone, sync, status, conflict, help
 # Description: Complete worktree lifecycle management - modular version
 
 set -e
@@ -34,9 +34,6 @@ unset _GIT_COMMON_DIR
 
 # Standard paths
 TREES_DIR="$WORKSPACE_ROOT/.trees"
-COMPLETED_DIR="$TREES_DIR/.completed"
-INCOMPLETE_DIR="$TREES_DIR/.incomplete"
-ARCHIVED_DIR="$TREES_DIR/.archived"
 CONFLICT_BACKUP_DIR="$TREES_DIR/.conflict-backup"
 STAGED_FEATURES_FILE="$TREES_DIR/.staged-features.txt"
 BUILD_STATE_FILE="$TREES_DIR/.build_state.json"
@@ -45,8 +42,8 @@ GIT_OPERATION_LOG="$WORKSPACE_ROOT/.git/.git-operations.log"
 TREE_CONFIG_FILE="$WORKSPACE_ROOT/worktree-config.json"
 
 # Export for submodules
-export WORKSPACE_ROOT TREES_DIR COMPLETED_DIR INCOMPLETE_DIR ARCHIVED_DIR
-export CONFLICT_BACKUP_DIR STAGED_FEATURES_FILE BUILD_STATE_FILE
+export WORKSPACE_ROOT TREES_DIR CONFLICT_BACKUP_DIR
+export STAGED_FEATURES_FILE BUILD_STATE_FILE
 export GIT_OPERATION_LOCK GIT_OPERATION_LOG SCRIPT_DIR TREE_CONFIG_FILE
 
 #==============================================================================
@@ -81,7 +78,7 @@ fi
 
 # Source GitHub auth for push operations (worktree-aware)
 if [[ -f "$PARENT_SCRIPT_DIR/github-auth.sh" ]]; then
-    source "$PARENT_SCRIPT_DIR/github-auth.sh"
+    source "$PARENT_SCRIPT_DIR/github-auth.sh" || true
 fi
 
 #==============================================================================
@@ -146,10 +143,13 @@ case "$COMMAND" in
         esac
         ;;
 
+    sync)
+        load_command "sync"
+        tree_sync "$@"
+        ;;
+
     closedone)
         load_command "closedone"
-        # Load stage for auto-staging incomplete features
-        load_command "stage"
         closedone_main "$@"
         ;;
 

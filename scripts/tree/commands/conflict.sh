@@ -18,8 +18,7 @@ tree_scope_conflicts() {
 
     # Find all worktrees with scope files
     for worktree_dir in "$TREES_DIR"/*; do
-        if [ -d "$worktree_dir" ] && [[ "$worktree_dir" != *"/.completed"* ]] && \
-           [[ "$worktree_dir" != *"/.incomplete"* ]] && [[ "$worktree_dir" != *"/.archived"* ]]; then
+        if [ -d "$worktree_dir" ] && [[ "$(basename "$worktree_dir")" != ".conflict-backup" ]]; then
             local scope_file="$worktree_dir/.worktree-scope.json"
             if [ -f "$scope_file" ]; then
                 scope_files+=("$scope_file")

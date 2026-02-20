@@ -1,6 +1,8 @@
 ---
 name: plan-context
 description: Gather current plan, todo list, and meta-plan context. Used by Context Agent to understand the bigger picture before work begins.
+model: opus
+allowed-tools: Read, Grep, Glob
 ---
 
 # Plan Context

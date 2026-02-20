@@ -1,6 +1,8 @@
 ---
 name: verification-loop
 description: A comprehensive verification system for Claude Code sessions. Run after completing features or before creating PRs.
+model: sonnet
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # Verification Loop Skill

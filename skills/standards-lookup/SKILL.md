@@ -1,6 +1,8 @@
 ---
 name: standards-lookup
 description: Canonical standards reference for Context Agent and QA Agent. Checks project-standards.yaml first, then falls back to defaults. Ensures both agents give consistent answers.
+model: haiku
+allowed-tools: Read, Grep, Glob
 ---
 
 # Standards Lookup

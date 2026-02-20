@@ -44,6 +44,30 @@ tools:
 - `test:` - Test additions/changes
 - `chore:` - Maintenance tasks
 
+**Co-author trailers (REQUIRED on every commit):**
+
+Every commit message MUST end with these co-author lines, separated from the body by a blank line:
+
+```
+Co-Authored-By: Steve Glen <therealstevenglen@gmail.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+```
+
+Use a HEREDOC to pass the commit message to ensure correct formatting:
+
+```bash
+git commit -m "$(cat <<'EOF'
+feat: add login form validation
+
+Validates email format and password strength on the client side
+before submitting to the API.
+
+Co-Authored-By: Steve Glen <therealstevenglen@gmail.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+```
+
 ### When to PUSH (Remote)
 
 **Push sparingly** - remote pushes trigger GitHub Actions and count against limits:
@@ -182,6 +206,61 @@ detect_push_command() {
 # 3. detect_push_command → /push-new
 # 4. After first push:
 # 5. detect_push_command → /push
+```
+
+---
+
+## Worktree Sync from source/main
+
+**Remote:** This repo uses `source` (not `origin`). Always use `source` when pulling/fetching main.
+
+### When to sync
+
+- Start of session: before beginning new work in any worktree
+- After a PR is merged to main on the remote
+- When a worktree's branch is behind `main`
+- When the user asks to "pull main" or "update worktrees"
+
+### Sync commands
+
+| Scenario | User is in | Command |
+|---|---|---|
+| Update a single worktree | Inside `.trees/<name>` | `/tree sync` |
+| Update all worktrees | Repo root | `/tree sync --all` |
+
+### How it works
+
+1. Fetches `source/main`
+2. Updates local `main` ref (fast-forward if possible)
+3. Per worktree:
+   - **Untracked files**: reported, then stashed alongside tracked changes (`--include-untracked`) and restored after rebase for review
+   - **Uncommitted changes**: auto-stashed before rebase, restored after
+   - **Rebase**: replays branch commits on top of new `main` — keeps history linear
+   - **Detached HEAD**: skipped with an explanation; user must attach a branch first
+
+### Reviewing untracked files after sync
+
+After sync, untracked files are restored from the stash alongside any tracked changes. Review them in context of what came in from main:
+```bash
+git -C .trees/<worktree> status
+git -C .trees/<worktree> diff
+```
+- Generated build artifacts that conflict with new main files → may need to be deleted
+- In-progress work that overlaps with merged changes → flag to user for review
+- Leftover debug/temp files → can be deleted safely
+
+### Detached HEAD recovery
+
+If a worktree is detached and has commits worth keeping:
+```bash
+git -C .trees/<worktree> checkout -b <branch-name>
+# then sync
+/tree sync  # from inside the worktree
+```
+
+If it's at a stale commit with no unique work, the worktree can be removed:
+```bash
+git worktree remove .trees/<worktree>
 ```
 
 ---
