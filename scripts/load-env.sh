@@ -1,8 +1,13 @@
 #!/bin/bash
-# Load environment from project root
+# Load environment using a local-first fallback chain
 #
-# This script finds and sources .env.local from the project root,
-# which may be in a parent directory (especially for worktrees).
+# Searches for .env.local starting from the current directory and walking
+# up toward the filesystem root. This means:
+#   1. A local .env.local in the current directory (or worktree) is used first
+#   2. If not found, falls back to parent directories up to the project root
+#
+# This works correctly from any git worktree: the worktree's own .env.local
+# takes precedence; if absent, the main project root's .env.local is used.
 #
 # Usage:
 #   source /path/to/load-env.sh

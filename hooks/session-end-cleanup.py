@@ -70,7 +70,6 @@ def main():
 
     # 2. Write session-end marker for next-session awareness
     # This lets the next session know when the last session ended
-    # and whether learning extraction happened
     claude_dir = project_dir / ".claude"
     if claude_dir.is_dir():
         marker = claude_dir / "last-session.json"

@@ -73,6 +73,12 @@ agents/development/
 # Sentinel ephemeral working data (per-cycle, not source code)
 .sentinel/
 
+# Context pressure monitoring (ephemeral session data)
+.context/hook-state.json
+.context/hook-config.json
+.context/agent-log.json
+.context/checkpoints/
+
 # Pilot measurement results (generated, not tracked)
 .dev/pilot/results/
 !.dev/pilot/results/.gitkeep

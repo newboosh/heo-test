@@ -6,7 +6,6 @@
 FEATURE="${1:-all}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 # Colors
 RED='\033[0;31m'
@@ -14,12 +13,11 @@ YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-# Try to load .env.local from project root
-if [ -f "$PROJECT_ROOT/.env.local" ]; then
-    set -a
-    source "$PROJECT_ROOT/.env.local"
-    set +a
-fi
+# Load .env.local using local-first fallback chain:
+# checks the current directory first, then walks up to the project root.
+# This works correctly from any git worktree.
+# shellcheck source=scripts/load-env.sh
+source "$SCRIPT_DIR/load-env.sh"
 
 check_production() {
     local missing=()
