@@ -1,3 +1,8 @@
+---
+description: Look up the correct standard for any work type, respecting project choices.
+help-usage: '`/standards <work type>`'
+---
+
 # Standards Lookup
 
 Look up the correct standard for any work type, respecting project choices.

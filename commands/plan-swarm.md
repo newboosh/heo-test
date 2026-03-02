@@ -1,3 +1,8 @@
+---
+description: Parallel sprint planning (Phases 2-5)
+help-usage: '`/plan-swarm [attended | status]`'
+---
+
 # Plan Swarm
 
 Parallelize sprint planning (Phases 2-5) using a specialist team. After Phase 1 (human intake), specialists fan out to gather data simultaneously, then converge to produce the standard handoff files. Enhancement to the sequential `skills/sprint/SKILL.md`, not a replacement.

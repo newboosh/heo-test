@@ -61,6 +61,7 @@ Explanation of why the error occurs.
 
 ### Fix Applied
 ```python
+
 # Before
 code_that_was_wrong()
 

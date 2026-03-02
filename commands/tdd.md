@@ -1,5 +1,6 @@
 ---
-description: Enforce test-driven development workflow. Write tests FIRST, then implement minimal code to pass. Ensure 80%+ coverage.
+description: Test-driven development workflow
+help-usage: '`/tdd [target]`'
 ---
 
 # TDD Command
@@ -70,6 +71,7 @@ Agent (tdd-guide):
 ## Step 1: Define Interface
 
 ```python
+
 # app/utils/validators.py
 def is_valid_email(email: str) -> bool:
     """Validate email address format."""
@@ -79,6 +81,7 @@ def is_valid_email(email: str) -> bool:
 ## Step 2: Write Failing Test (RED)
 
 ```python
+
 # tests/unit/test_validators.py
 import pytest
 from app.utils.validators import is_valid_email
@@ -119,6 +122,7 @@ NotImplementedError
 ## Step 4: Implement Minimal Code (GREEN)
 
 ```python
+
 # app/utils/validators.py
 import re
 

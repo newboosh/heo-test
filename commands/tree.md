@@ -3,13 +3,20 @@ title: Tree Worktree Management Command
 type: reference
 component: development-tools
 created: 2024-10-15
-updated: 2026-02-19
+updated: 2026-02-20
 status: active
 related:
   - scripts/tree.sh
-  - docs/worktree-scope-detection.md
 tags: [worktree, git, automation, development-workflow]
 description: Manage git worktrees with intelligent automation for parallel development
+help-usage: '`/tree stage <desc>`, `/tree list`, `/tree clear`, `/tree build`, `/tree sync [--all]`, `/tree status`, `/tree restore`, `/tree refresh`, `/tree conflict`, `/tree scope-conflicts`, `/tree help`'
+help-extra-rows:
+  - name: tree reset
+    description: Complete task + reset
+    usage: '`/tree reset`, `/tree reset incomplete`, `/tree reset --all [--force]`, `/tree reset --rename "name"`, `/tree reset --mechanical-only`, `/tree reset --force`'
+  - name: tree closedone
+    description: Remove all worktrees
+    usage: '`/tree closedone [--dry-run]`'
 ---
 
 Execute the tree worktree management script from this plugin.
@@ -26,7 +33,6 @@ Where `${PLUGIN_DIR}` is the heo plugin's installation path (e.g., `~/.claude/pl
 - `/tree list` - Show staged features
 - `/tree clear` - Clear all staged features
 - `/tree conflict` - Analyze conflicts and suggest merges
-- `/tree scope-conflicts` - Detect scope conflicts across worktrees
 - `/tree build` - Create worktrees from staged features (auto-launches Claude)
 - `/tree restore` - Restore terminals for existing worktrees
 - `/tree status` - Show worktree environment status
@@ -42,62 +48,45 @@ Where `${PLUGIN_DIR}` is the heo plugin's installation path (e.g., `~/.claude/pl
 2. Updates the local `main` ref
 3. For each target worktree:
    - Reports untracked files, then stashes them alongside any tracked changes (`--include-untracked`)
-   - Rebases the worktree branch onto `main` (linear history, no merge commits)
-   - Pops the stash — restoring your in-progress work so you can review it against what came in from main
+   - Resets the worktree branch to `main` (`git reset --hard main`)
+   - Pops the stash — restoring your in-progress work on top of main
 4. Detached HEAD worktrees are reported and skipped
-5. If rebase fails, the stash is preserved — pop it manually after resolving conflicts
+5. If reset fails, the stash is preserved — pop it manually after investigating
 
-**Conflict resolution** — if rebase fails:
-```bash
-cd .trees/<worktree>
-# fix conflicts, then:
-git rebase --continue
-# or to cancel:
-git rebase --abort
-```
+## Reset Commands
+- `/tree reset` - Complete task: ship it → AI wrapup → mechanical reset (full 6-step orchestration)
+- `/tree reset incomplete` - WIP save only: commit + push + synopsis (no wrapup, no reset)
+- `/tree reset --all` - Batch mechanical reset of all worktrees (no AI phases)
+- `/tree reset --all --force` - Batch reset discarding uncommitted changes
+- `/tree reset --rename "new-task"` - Mechanical reset + rename branch for reuse
+- `/tree reset --force` - Discard uncommitted changes, skip confirmations
+- `/tree reset --mechanical-only` - Skip ship-it, just git reset (used internally by SKILL.md step 6)
+
+**`/tree reset` 6-step sequence** (orchestrated by SKILL.md):
+1. **Ship It** (bash) — auto-commit, push, synopsis, PR creation
+2. **AI: Remember** — review work, persist knowledge to CLAUDE.md / rules / auto memory
+3. **AI: Learn** — detect self-improvement patterns, auto-apply to main worktree
+4. **Commit Learnings** (bash) — stage and commit learning files in main worktree
+5. **AI: Publish** — review for publishable content, draft if warranted
+6. **Mechanical Reset** (bash) — `git reset --hard origin/main` + `git clean -fd`
+
+**When to use reset vs sync:**
+- **After squash-merge PRs (full teardown):** Use `/tree reset` — ships the PR, runs AI wrapup phases, then resets the branch.
+- **Mid-task, pull in latest main:** Use `/tree sync` — stashes WIP, resets branch to main, restores stash.
+
+**When to use reset vs closedone:**
+- **Same worktree, new task:** Use `/tree reset --rename "new-task"` — instant, preserves the worktree directory
+- **Done with all worktrees:** Use `/tree closedone` — removes everything
 
 ## Cleanup Commands
-- `/tree close` - Full worktree close: verify merge into remote main, run AI
-  wrap-up phases (Remember, Learn, Publish), then remove worktree and delete
-  local branch. Branch must be merged first or close will abort.
-- `/tree close --force` - Skip merge verification (e.g., for abandoned branches).
-  AI phases are still run; only the merge gate is bypassed.
 - `/tree closedone` - Mechanical batch removal of all worktrees and branches
-  (no AI phases). For the full wrap-up flow, use `/tree close` individually.
+  (no AI phases). For the full wrap-up flow, use `/tree reset` individually.
 - `/tree closedone --dry-run` - Preview what would be removed
 
-## Worktree Scope Detection
+## Deprecated Commands
+- `/tree close` - **Deprecated.** Use `/tree reset` instead. Prints a deprecation warning and delegates to reset.
 
-Each worktree automatically gets file boundary detection based on its feature description:
-
-**How it works:**
-1. `/tree build` analyzes feature descriptions for keywords (email, database, dashboard, etc.)
-2. Generates `.worktree-scope.json` with file patterns for each worktree
-3. Installs pre-commit hook to warn about out-of-scope changes
-4. Creates special "librarian" worktree for documentation/tooling (inverse scope)
-
-**Example:**
-```bash
-/tree stage Email OAuth refresh token implementation
-/tree build
-
-# Generated scope includes:
-# - modules/email_integration/**
-# - modules/email_integration/*oauth*.py
-# - tests/test_*email_oauth_refresh*.py
-```
-
-**Enforcement modes:**
-- **Soft (default)**: Warns but allows out-of-scope commits
-- **Hard**: Blocks out-of-scope commits (edit `.worktree-scope.json`)
-- **None**: Disables scope checking
-
-**Librarian worktree:**
-- Automatically created with inverse scope
-- Works on docs, tooling, config files
-- Excludes all files claimed by feature worktrees
-
-For detailed documentation, see: `docs/worktree-scope-detection.md`
+> **Important:** Remote branches must NOT be deleted after merge. They serve as historical references for traceability and rollbacks. Only local branches and worktrees should be cleaned up.
 
 ## Typical Workflow
 
@@ -112,9 +101,20 @@ For detailed documentation, see: `docs/worktree-scope-detection.md`
 # PR review with CodeRabbit + Claude
 # Merge PR on GitHub
 
-# Cleanup:
-/tree close          # Full close: verify merge → AI phases → remove worktree
-/tree closedone      # Mechanical batch cleanup (no AI phases)
+# After task complete — full reset with AI wrapup:
+/tree reset              # Ship It → Remember → Learn → Publish → Mechanical Reset
+
+# Or save WIP and come back later:
+/tree reset incomplete   # Commit + push only, no wrapup
+
+# Or batch reset all worktrees mechanically:
+/tree reset --all        # git reset --hard all worktrees
+
+# Sync during active development (reset branch to latest main):
+/tree sync               # Reset onto latest main
+
+# Batch cleanup:
+/tree closedone          # Remove all worktrees at once
 ```
 
 **Note:** If `/tree` commands show "Unknown slash command" in worktrees:
@@ -122,5 +122,3 @@ For detailed documentation, see: `docs/worktree-scope-detection.md`
 - Workaround: Execute tree.sh directly from the plugin's scripts directory
 - Permanent fix: Restart Claude Code CLI session from the worktree directory
 
-For full documentation, see:
-- Scope detection: `docs/worktree-scope-detection.md`

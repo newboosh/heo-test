@@ -1,3 +1,8 @@
+---
+description: Push changes safely with automatic branch protection and PR creation.
+help-usage: '`/push [commit message]`'
+---
+
 # Smart Push Workflow
 
 Push changes safely with automatic branch protection and PR creation.
@@ -219,7 +224,6 @@ If `gh pr create` fails in Step 4:
 ## Arguments
 
 - `$ARGUMENTS` - Optional commit message. If not provided, prompt for one.
-
 
 
 ## Pre-PR Checklist

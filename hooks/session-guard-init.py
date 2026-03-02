@@ -68,9 +68,9 @@ CONTEXT_DETECTORS = {}
 # ============================================================================
 
 # Conflict groups registry.
-# Previously contained "session-end-learning" (wrap-up vs continuous-learning).
-# That group was removed when wrap-up and continuous-learning were consolidated
-# into /tree close AI phases. The infrastructure remains for future groups.
+# Previously contained "session-end-learning" (wrap-up vs /learn).
+# That group was removed when wrap-up and /learn were consolidated
+# into /tree reset AI phases. The infrastructure remains for future groups.
 CONFLICT_GROUPS = {}
 
 

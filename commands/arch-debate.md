@@ -1,3 +1,8 @@
+---
+description: Architecture debate with ADR output
+help-usage: '`/arch-debate <topic> [approaches "A,B,C" | from-sprint]`'
+---
+
 # Architecture Debate
 
 Spawn a structured debate among advocate agents to evaluate competing architectural approaches and produce an Architecture Decision Record (ADR). Three advocates each argue for a different approach, challenge each other's proposals, and the lead synthesizes a well-reasoned decision.

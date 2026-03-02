@@ -20,6 +20,7 @@ Check that all required artifacts accompany the code changes.
 
    Check `.claude/project-standards.yaml` for custom paths:
    ```yaml
+
    # Example project-standards.yaml
    artifacts:
      models_path: "src/models/**/*.py"      # Default: app/models/**/*.py
@@ -62,21 +63,27 @@ Check that all required artifacts accompany the code changes.
 
 2. **Check for corresponding tests**
    ```
+
    # For each source file, find matching test file
    app/services/user_service.py → tests/unit/test_user_service.py
    app/api/users.py → tests/integration/test_users_api.py
    ```
 
 3. **Check for migrations** (if models changed)
-   ```
+   ```bash
+
    # Compare model definitions to latest migration
+
    # Flag if schema change has no migration
    ```
 
 4. **Check documentation artifacts**
-   ```
+   ```bash
+
    # README updated if public API changed
+
    # CHANGELOG updated for features/fixes
+
    # ADR if architectural decision made
    ```
 

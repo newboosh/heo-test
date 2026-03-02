@@ -1,9 +1,10 @@
 ---
 name: testing-strategy
-description: Decision framework for choosing testing methods. Use when starting a new test suite, evaluating test quality, or deciding between TDD schools, property-based testing, mutation testing, or BDD.
+description: Test strategy decision framework
 argument-hint: [module-or-context]
 model: opus
 allowed-tools: Read, Grep, Glob
+help-usage: '`/testing-strategy`'
 ---
 
 # Testing Strategy Decision Framework

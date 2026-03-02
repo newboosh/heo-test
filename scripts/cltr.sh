@@ -21,38 +21,12 @@ if [ -z "$WORKTREE_ROOT" ]; then
 fi
 
 # Context file location
-CONTEXT_FILE="${WORKTREE_ROOT}/.claude-task-context.md"
+CONTEXT_FILE="${WORKTREE_ROOT}/PURPOSE.md"
 
 # Check if context file exists
 if [ ! -f "$CONTEXT_FILE" ]; then
-    echo -e "${YELLOW}Warning: No task context file found at ${CONTEXT_FILE}${NC}"
-    read -p "Would you like to create a task context file? (y/n): " create_context
-    
-    if [[ "$create_context" =~ ^[Yy]$ ]]; then
-        cat > "$CONTEXT_FILE" << TEMPLATE
-# Task Context for $(basename "$WORKTREE_ROOT") Worktree
-
-## Description
-[Provide a clear, concise description of the task or feature]
-
-## Objectives
-- [ ] Key Objective 1
-- [ ] Key Objective 2
-- [ ] Key Objective 3
-
-## Technical Requirements
-- 
-
-## Constraints
-- 
-
-## Additional Notes
-TEMPLATE
-        echo -e "${GREEN}Task context template created. Please edit ${CONTEXT_FILE}${NC}"
-        nano "$CONTEXT_FILE"
-    else
-        echo -e "${BLUE}Proceeding without context file...${NC}"
-    fi
+    echo -e "${YELLOW}Warning: No PURPOSE.md found at ${WORKTREE_ROOT}${NC}"
+    echo -e "${BLUE}Proceeding without context file...${NC}"
 fi
 
 # Detect worktree name
@@ -79,7 +53,7 @@ claude $PLUGIN_ARGS --dangerously-skip-permissions \
 
 Context loaded from: $CONTEXT_FILE
 
-IMPORTANT: Immediately read the .claude-task-context.md file to understand the full task details, then ask 1-3 clarifying questions to ensure you understand the scope and requirements before beginning implementation. Focus on:
+IMPORTANT: Immediately read CLAUDE.md and PURPOSE.md to understand the full task details, then ask 1-3 clarifying questions to ensure you understand the requirements before beginning implementation. Focus on:
 1. Ambiguous requirements that need clarification
 2. Technical decisions that aren't specified
 3. Edge cases or error handling expectations

@@ -1,5 +1,6 @@
 ---
-description: Generate and run end-to-end tests with Playwright. Creates test journeys, runs tests, captures screenshots/videos/traces.
+description: End-to-end tests with Playwright
+help-usage: '`/e2e <test description>`'
 ---
 
 # E2E Command
@@ -33,6 +34,7 @@ Agent (e2e-runner):
 ## Generated Test
 
 ```python
+
 # tests/e2e/test_login_flow.py
 import pytest
 from playwright.sync_api import Page, expect
@@ -40,6 +42,7 @@ from playwright.sync_api import Page, expect
 
 class TestLoginFlow:
     def test_user_can_login_and_view_dashboard(self, page: Page):
+
         # Navigate to login
         page.goto("/auth/login")
         expect(page).to_have_title("Login")

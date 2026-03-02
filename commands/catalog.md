@@ -1,5 +1,6 @@
 ---
 description: Build and query the file classification catalog. Helps AI agents navigate the codebase efficiently.
+help-usage: '`/catalog init`, `/catalog build [--incremental]`, `/catalog query [--category X | --file PATH | --depends-on PATH | --summary]`, `/catalog status`'
 ---
 
 # Catalog Command

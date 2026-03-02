@@ -1,3 +1,7 @@
+---
+description: Update architecture docs
+---
+
 # Update Codemaps
 
 Analyze the codebase structure and update architecture documentation.

@@ -5,10 +5,8 @@
 # Runs as FIRST hook in master pre-commit chain (highest priority)
 #
 # These files are generated per-worktree and must NEVER reach main:
-# - .claude-task-context.md (Claude task context)
 # - .claude-purpose-context.md (Purpose context)
 # - .claude-init.sh (Worktree launch script)
-# - .worktree-scope.json (Worktree scope manifest)
 # - PURPOSE.md (Worktree-specific purpose document)
 # - .pending-terminals.txt (Temporary pending state)
 # - .pending-* (Any temporary pending files)
@@ -28,10 +26,8 @@ NC='\033[0m'
 
 # Files that are worktree-local and should never be committed
 declare -a WORKTREE_LOCAL_FILES=(
-    ".claude-task-context.md"
     ".claude-purpose-context.md"
     ".claude-init.sh"
-    ".worktree-scope.json"
     "PURPOSE.md"
     ".pending-terminals.txt"
 )

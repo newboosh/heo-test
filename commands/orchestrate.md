@@ -1,3 +1,8 @@
+---
+description: Execute sprint phases 6-11 (implementation through merge)
+help-usage: '`/orchestrate sprint`, `/orchestrate phase <N>`'
+---
+
 # Orchestrate Command
 
 Execute Phases 6-11 of the sprint lifecycle: implementation through merge. Sequences agents, writes validated handoff files, and manages the revision cycle.

@@ -1,37 +1,35 @@
 #!/bin/bash
 #
 # Script: commands/sync.sh
-# Purpose: Sync worktrees from source/main via rebase
+# Purpose: Sync worktrees from origin/main via reset
 # Usage:
 #   /tree sync          - Sync current worktree only (run from inside a worktree)
 #   /tree sync --all    - Sync all worktrees (run from repo root)
 #
 # Strategy:
-#   1. Pull source/main into the main repo
+#   1. Pull origin/main into the main repo
 #   2. For each target worktree:
 #      a. Detect and report untracked files (stashed for review)
 #      b. Stash all changes including untracked
-#      c. Rebase branch onto main
-#      d. Pop stash so changes can be reviewed against post-rebase state
+#      c. Reset branch to main (git reset --hard main)
+#      d. Pop stash so changes can be reviewed against post-reset state
 #      e. Report result
 #
-# Detached HEAD worktrees are reported but skipped (cannot rebase without a branch).
+# Detached HEAD worktrees are reported but skipped (cannot reset without a branch).
 
 # Dependencies: lib/common.sh (print_* functions)
 # Required variables: WORKSPACE_ROOT, TREES_DIR
 
-# Detect which remote is available (prefer 'source', fall back to 'origin')
+# Detect which remote is available (prefer 'origin')
 _detect_remote() {
-    if git -C "$WORKSPACE_ROOT" remote get-url source &>/dev/null; then
-        echo "source"
-    elif git -C "$WORKSPACE_ROOT" remote get-url origin &>/dev/null; then
+    if git -C "$WORKSPACE_ROOT" remote get-url origin &>/dev/null; then
         echo "origin"
     else
         echo ""
     fi
 }
 
-# Pull source/main into the main repo. Updates the local main ref.
+# Pull origin/main into the main repo. Updates the local main ref.
 _pull_main() {
     local remote="$1"
 
@@ -84,7 +82,7 @@ _stash_changes() {
     dirty=$(git -C "$wt_path" status --porcelain 2>/dev/null)
     [ -z "$dirty" ] && echo "" && return 0
 
-    local stash_msg="tree-sync: pre-rebase stash $(date +%Y%m%d-%H%M%S)"
+    local stash_msg="tree-sync: pre-reset stash $(date +%Y%m%d-%H%M%S)"
     git -C "$wt_path" stash push --include-untracked -m "$stash_msg" --quiet 2>/dev/null || true
 
     # Verify a stash was actually created (git exits 0 even when nothing was stashed)
@@ -95,8 +93,8 @@ _stash_changes() {
     fi
 }
 
-# Rebase a single worktree branch onto main. Returns exit code of rebase.
-_rebase_worktree() {
+# Reset a single worktree branch to main. Returns exit code of reset.
+_reset_worktree() {
     local wt_path="$1"
     local wt_name
     wt_name="$(basename "$wt_path")"
@@ -105,27 +103,17 @@ _rebase_worktree() {
     branch=$(git -C "$wt_path" branch --show-current 2>/dev/null || echo "")
 
     if [ -z "$branch" ]; then
-        print_warning "  $wt_name: Detached HEAD — skipping (no branch to rebase)."
+        print_warning "  $wt_name: Detached HEAD — skipping (no branch to reset)."
         print_info "    Tip: run 'git -C $wt_path checkout -b <name>' to attach a branch."
         return 0
     fi
 
-    local ahead
-    ahead=$(git -C "$wt_path" rev-list --count main..HEAD 2>/dev/null || echo "0")
-
-    if [ "$ahead" = "0" ]; then
-        print_success "  $wt_name [$branch]: Already up to date."
-        return 0
-    fi
-
-    print_info "  $wt_name [$branch]: Rebasing $ahead commit(s) onto main..."
-    if git -C "$wt_path" rebase main --quiet 2>&1; then
-        print_success "  $wt_name [$branch]: Rebased successfully."
+    print_info "  $wt_name [$branch]: Resetting to main..."
+    if git -C "$wt_path" reset --hard main 2>&1; then
+        print_success "  $wt_name [$branch]: Reset to main successfully."
         return 0
     else
-        print_error "  $wt_name [$branch]: Rebase FAILED — conflicts need manual resolution."
-        print_info "    To fix: cd $wt_path && git rebase --abort  (to cancel)"
-        print_info "            cd $wt_path && git rebase --continue (after resolving)"
+        print_error "  $wt_name [$branch]: Reset FAILED."
         return 1
     fi
 }
@@ -148,25 +136,24 @@ _sync_one() {
         print_info "  Stashed uncommitted changes."
     fi
 
-    local rebase_ok=0
-    _rebase_worktree "$wt_path" || rebase_ok=1
+    local reset_ok=0
+    _reset_worktree "$wt_path" || reset_ok=1
 
     if [ -n "$stash_msg" ]; then
-        if [ $rebase_ok -eq 0 ]; then
-            # Rebase succeeded — restore stash
+        if [ $reset_ok -eq 0 ]; then
+            # Reset succeeded — restore stash
             if git -C "$wt_path" stash pop --quiet 2>/dev/null; then
                 print_success "  Stash restored."
             else
                 print_warning "  Could not auto-restore stash — run 'git stash pop' manually in $wt_name."
             fi
         else
-            # Rebase failed — leave stash intact to avoid polluting a conflicted tree
-            print_warning "  Stash preserved (rebase failed). After resolving conflicts, run:"
-            print_info "    cd $wt_path && git stash pop"
+            # Reset failed — leave stash intact
+            print_warning "  Stash preserved (reset failed). Run 'git stash pop' manually in $wt_name."
         fi
     fi
 
-    return $rebase_ok
+    return $reset_ok
 }
 
 # ─── Public Command Functions ──────────────────────────────────────────────────
@@ -183,12 +170,12 @@ tree_sync() {
         shift
     done
 
-    print_header "Worktree Sync from source/main"
+    print_header "Worktree Sync from origin/main"
 
     local remote
     remote=$(_detect_remote)
     if [ -z "$remote" ]; then
-        print_error "No usable remote found. Expected 'source' or 'origin'."
+        print_error "No usable remote found. Expected 'origin'."
         return 1
     fi
 
@@ -229,7 +216,7 @@ tree_sync() {
         elif [ $failed -eq 0 ]; then
             print_success "All $synced worktree(s) synced successfully."
         else
-            print_warning "$failed of $synced worktree(s) had rebase conflicts — resolve manually."
+            print_warning "$failed of $synced worktree(s) had reset errors — resolve manually."
         fi
 
     else

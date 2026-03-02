@@ -1,5 +1,6 @@
 ---
 description: Start the 4-phase task workflow (Discovery -> PRD → Tasks → Execution)
+help-usage: '`/task [template] [instructions]` — templates: `go`, `slow`, `communicate`, `analyze`, `research`'
 ---
 
 # /task Command - Hybrid Workflow System
@@ -28,8 +29,8 @@ description: Start the 4-phase task workflow (Discovery -> PRD → Tasks → Exe
 
 **Workflow:**
 1. Research phase (automatic)
-2. PRD creation 
-3. Task generation 
+2. PRD creation
+3. Task generation
 4. Execution
 
 **References:**

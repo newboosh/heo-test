@@ -1,9 +1,10 @@
 ---
 name: requirements-engineering
-description: Formal requirements elicitation, specification, and validation following IEEE 29148:2018. Use ONLY when explicitly invoked. Expects a defined problem (from /problem-definition or user-provided).
+description: Detailed requirements analysis
 argument-hint: [problem-statement or feature-name]
 model: opus
 disable-model-invocation: true
+help-usage: '`/requirements-engineering <description>`'
 ---
 
 # Requirements Engineering (IEEE 29148:2018)

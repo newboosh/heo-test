@@ -1,3 +1,8 @@
+---
+description: Run full CI locally
+help-usage: '`/ci [quick | tests]`'
+---
+
 # Local CI Validation
 
 Run the full CI validation suite locally before pushing.

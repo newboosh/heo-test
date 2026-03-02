@@ -8,8 +8,96 @@
 # Dependencies: lib/common.sh (print_* functions)
 # Required variables: WORKSPACE_ROOT, SCRIPT_DIR, TREES_DIR
 
-# Copy/symlink slash commands and scripts to worktree
-# Usage: copy_slash_commands_to_worktree /path/to/worktree
+# Ensure plugin is listed in project settings for worktree discoverability
+# Usage: ensure_enabled_plugins
+#
+# When Claude Code opens a session in a worktree (not via .claude-init.sh),
+# it needs enabledPlugins in .claude/settings.json to discover the plugin.
+# This function ensures that entry exists in the target project's settings.
+# All errors are non-fatal (returns 0 on any failure).
+ensure_enabled_plugins() {
+    local plugin_root
+    plugin_root="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+    # Read plugin identity from metadata files
+    local plugin_json="$plugin_root/.claude-plugin/plugin.json"
+    local marketplace_json="$plugin_root/.claude-plugin/marketplace.json"
+
+    if [ ! -f "$plugin_json" ] || [ ! -f "$marketplace_json" ]; then
+        print_warning "  Plugin metadata not found, skipping enabledPlugins check"
+        return 0
+    fi
+
+    local plugin_name marketplace_name
+    plugin_name=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['name'])" "$plugin_json" 2>/dev/null) || {
+        print_warning "  Could not read plugin name from plugin.json"
+        return 0
+    }
+    marketplace_name=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['name'])" "$marketplace_json" 2>/dev/null) || {
+        print_warning "  Could not read marketplace name from marketplace.json"
+        return 0
+    }
+
+    local plugin_id="${plugin_name}@${marketplace_name}"
+    local settings_file="$WORKSPACE_ROOT/.claude/settings.json"
+
+    # Ensure .claude directory exists
+    mkdir -p "$WORKSPACE_ROOT/.claude"
+
+    # Use python3 for safe JSON read/modify/write (jq may not be installed)
+    local result
+    result=$(python3 -c "
+import json, sys, os
+
+settings_file = sys.argv[1]
+plugin_id = sys.argv[2]
+
+settings = {}
+if os.path.isfile(settings_file):
+    try:
+        with open(settings_file) as f:
+            settings = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        settings = {}
+
+enabled = settings.get('enabledPlugins', {})
+
+if enabled.get(plugin_id) is True:
+    print('EXISTS')
+elif plugin_id in enabled and enabled[plugin_id] is False:
+    print('DISABLED')
+else:
+    enabled[plugin_id] = True
+    settings['enabledPlugins'] = enabled
+    with open(settings_file, 'w') as f:
+        json.dump(settings, f, indent=2)
+        f.write('\n')
+    print('ADDED')
+" "$settings_file" "$plugin_id" 2>/dev/null) || {
+        print_warning "  Could not update enabledPlugins in settings.json"
+        return 0
+    }
+
+    case "$result" in
+        EXISTS)
+            print_success "Plugin discoverable in worktrees (enabledPlugins already set)"
+            ;;
+        DISABLED)
+            print_warning "Plugin explicitly disabled in settings.json (enabledPlugins: false) — not overwriting"
+            ;;
+        ADDED)
+            print_success "Added ${plugin_id} to .claude/settings.json enabledPlugins"
+            ;;
+        *)
+            print_warning "  Unexpected result from enabledPlugins check: $result"
+            ;;
+    esac
+
+    return 0
+}
+
+# Set up .claude directory in worktree
+# Usage: setup_worktree_claude_dir /path/to/worktree
 #
 # SAFETY: Only creates symlinks if target exists and worktree doesn't already have content.
 # Never overwrites existing local directories - preserves user's customizations.
@@ -62,113 +150,6 @@ copy_slash_commands_to_worktree() {
             ln -sf "$WORKSPACE_ROOT/.claude/settings.json" "$worktree_path/.claude/settings.json"
         fi
     fi
-}
-
-# Install scope enforcement pre-commit hook in worktree
-# Usage: install_scope_hook /path/to/worktree
-install_scope_hook() {
-    local worktree_path=$1
-
-    # CRITICAL: In git worktrees, .git is a FILE (not a directory) that points to the actual git directory
-    # We must use 'git rev-parse --git-dir' to get the real git directory path for the worktree
-    local git_dir
-    git_dir=$(cd "$worktree_path" && git rev-parse --git-dir 2>/dev/null)
-
-    # Normalize git_dir to an absolute path (git rev-parse --git-dir can return
-    # relative paths like ".git" for worktrees, which breaks subsequent checks)
-    if [ -n "$git_dir" ] && [[ ! "$git_dir" = /* ]]; then
-        git_dir="$worktree_path/$git_dir"
-    fi
-
-    if [ -z "$git_dir" ] || [ ! -d "$git_dir" ]; then
-        print_warning "  Could not determine git directory for hooks, skipping hook installation"
-        return 1
-    fi
-
-    # Create hooks directory in the worktree-specific git directory
-    local hooks_dir="$git_dir/hooks"
-    mkdir -p "$hooks_dir"
-
-    # Create master pre-commit hook that runs all validation hooks
-    cat > "$hooks_dir/pre-commit" << 'EOF'
-#!/bin/bash
-
-# Master Pre-Commit Hook
-# Runs multiple validations in order of priority:
-# 1. Worktree guard - prevents worktree-local files from being committed
-# 2. Scope enforcement - ensures files match worktree scope
-# 3. Librarian frontmatter - validates file metadata/headers
-
-set -e
-EXIT_CODE=0
-
-# Find hook scripts in parent directory (same location as this git directory)
-HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PARENT_DIR="$(cd "$HOOKS_DIR/../../../" && pwd)"  # Go up to scripts/ directory
-HOOKS_SCRIPTS_DIR="$(cd "$(dirname "$PARENT_DIR")/scripts" && pwd)"
-
-echo ""
-echo "Running pre-commit validations..."
-echo ""
-
-# 1. Worktree Guard Hook - HIGHEST PRIORITY
-GUARD_HOOK="$HOOKS_SCRIPTS_DIR/worktree-commit-guard.sh"
-if [ -f "$GUARD_HOOK" ]; then
-    echo "-> Checking for worktree-local files..."
-    if bash "$GUARD_HOOK"; then
-        echo "[OK] Worktree guard passed"
-    else
-        echo "[FAIL] Worktree guard failed - worktree-local files detected"
-        EXIT_CODE=1
-    fi
-else
-    echo "[WARN] Worktree guard hook not found, skipping"
-fi
-
-echo ""
-
-# 2. Scope Enforcement Hook
-SCOPE_HOOK="$HOOKS_DIR/scope-enforcement-hook.sh"
-if [ -f "$SCOPE_HOOK" ]; then
-    echo "-> Checking scope boundaries..."
-    if bash "$SCOPE_HOOK"; then
-        echo "[OK] Scope validation passed"
-    else
-        echo "[FAIL] Scope validation failed"
-        EXIT_CODE=1
-    fi
-else
-    echo "[WARN] Scope enforcement hook not found, skipping"
-fi
-
-echo ""
-
-# 3. Librarian Frontmatter Hook
-FRONTMATTER_HOOK="$HOOKS_SCRIPTS_DIR/librarian-frontmatter-hook.sh"
-if [ -f "$FRONTMATTER_HOOK" ]; then
-    echo "-> Checking file frontmatter..."
-    if bash "$FRONTMATTER_HOOK"; then
-        echo "[OK] Frontmatter validation passed"
-    else
-        echo "[FAIL] Frontmatter validation failed"
-        EXIT_CODE=1
-    fi
-else
-    echo "[WARN] Frontmatter hook not found, skipping"
-fi
-
-echo ""
-
-if [ $EXIT_CODE -ne 0 ]; then
-    echo "[ERROR] Pre-commit validations failed. Fix errors before committing."
-    exit 1
-fi
-
-echo "[SUCCESS] All pre-commit validations passed!"
-exit 0
-EOF
-
-    chmod +x "$hooks_dir/pre-commit"
 }
 
 # Generate VS Code tasks and auto-execute them
@@ -300,9 +281,9 @@ INITSCRIPT
     chmod +x "$init_script"
 }
 
-# Generate .claude-task-context.md file with full task description
-# Usage: generate_task_context worktree_name description branch base_branch worktree_path
-generate_task_context() {
+# Generate CLAUDE.md for worktree (auto-read by Claude Code)
+# Usage: generate_worktree_claude_md worktree_name description branch base_branch worktree_path
+generate_worktree_claude_md() {
     local worktree_name=$1
     local description=$2
     local branch=$3
@@ -315,53 +296,6 @@ generate_task_context() {
     escaped_desc="${escaped_desc//\`/\\\`}"
     escaped_desc="${escaped_desc//\$/\\\$}"
 
-    cat > "$worktree_path/.claude-task-context.md" << EOF
-# Task Context for Claude Agent
-
-## Worktree Information
-- **Name**: $worktree_name
-- **Branch**: $branch
-- **Base Branch**: $base_branch
-- **Created**: $(date +"%Y-%m-%d %H:%M:%S")
-
-## Task Description
-
-$escaped_desc
-
-## Scope
-
-This worktree is dedicated to implementing the feature described above. Focus on:
-- Implementing the core functionality
-- Writing tests for new features
-- Updating documentation
-- Following project coding standards
-
-## Success Criteria
-
-- [ ] Core functionality implemented
-- [ ] Tests written and passing
-- [ ] Documentation updated
-- [ ] Code reviewed and approved
-- [ ] Ready to merge to base branch
-
-## Working in this Worktree
-
-Slash commands are available!
-
-After Claude starts, you can use:
-- \`/tree close\` - Remove this worktree when done
-- \`/tree status\` - Show worktree status
-- \`/tree restore\` - Restore terminals (if needed)
-
-## Notes
-
-- This worktree is isolated from main development
-- Commit frequently with descriptive messages
-- Run tests before marking task complete
-- Use \`/tree close\` when work is finished
-EOF
-
-    # Also create CLAUDE.md which Claude Code automatically reads
     cat > "$worktree_path/CLAUDE.md" << EOF
 # Worktree: ${worktree_name//-/ }
 
@@ -389,8 +323,6 @@ You are working in a dedicated git worktree for this specific task.
 ## Files
 
 - \`PURPOSE.md\` - Detailed task documentation
-- \`.claude-task-context.md\` - Full task context
-- \`.worktree-scope.json\` - Scope boundaries (auto-detected)
 
 ## When Complete
 

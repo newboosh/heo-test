@@ -386,6 +386,7 @@ def login():
 
 **Remediation:**
 ```python
+
 # GOOD: Secure implementation
 ```
 

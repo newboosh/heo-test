@@ -1,3 +1,8 @@
+---
+description: CodeRabbit review status
+help-usage: '`/coderabbit-status [PR_NUMBER]`'
+---
+
 # CodeRabbit Status Check
 
 Check the status of a PR for CodeRabbit review processing.

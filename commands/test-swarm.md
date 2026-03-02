@@ -1,3 +1,8 @@
+---
+description: Parallel test writing by domain
+help-usage: '`/test-swarm [sprint | <module-path>]`'
+---
+
 # Test Swarm
 
 Parallel test writing by domain using an Agent Team. Each writer owns a testing domain (unit, integration, e2e) and works simultaneously. A coverage monitor identifies gaps and dynamically creates tasks for the writers.

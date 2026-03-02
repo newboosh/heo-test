@@ -96,35 +96,6 @@ while IFS=':' read -r worktree_name description || [ -n "$worktree_name" ]; do
         echo -e "  ${GREEN}✓ Success${NC}"
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
 
-        # Create task README
-        cat > "$WORKTREE_PATH/PURPOSE.md" << EOF
-# Task: $description
-
-**Worktree:** $worktree_name
-**Branch:** $BRANCH_NAME
-**Base:** $BASE_BRANCH
-**Created:** $(date +"%Y-%m-%d %H:%M:%S")
-
-## Scope
-$description
-
-## Primary Files
-- (Add files as you work)
-
-## Conflict Warnings
-- (Note potential conflicts with other tasks)
-
-## Status
-- [ ] Planning
-- [ ] Development
-- [ ] Testing
-- [ ] Ready for merge
-
-## Notes
-(Add notes here)
-EOF
-        echo -e "  ${GREEN}✓ Created PURPOSE.md${NC}"
-
         # Create Claude task context file
         cat > "$WORKTREE_PATH/.claude-purpose-context.md" << EOF
 # Task $TASK_NUM: $description
@@ -137,11 +108,7 @@ EOF
 ## Objective
 $description
 
-## Scope
-Complete the following deliverables for this task. See PURPOSE.md for more details.
-
 ## Primary Files
-- PURPOSE.md (task documentation)
 - (Files will be listed here as work progresses)
 
 ## Success Criteria
@@ -154,7 +121,6 @@ Complete the following deliverables for this task. See PURPOSE.md for more detai
 ## Important Notes
 - This is worktree $TASK_NUM of a parallel development workflow
 - Branch: $BRANCH_NAME based on $BASE_BRANCH
-- Check PURPOSE.md for conflict warnings with other tasks
 - Use /tree status to see all worktree statuses
 
 ## Workflow Commands
@@ -206,7 +172,7 @@ $CONTEXT
 IMPORTANT:
 - You are in a dedicated worktree for this specific task
 - Focus exclusively on this task's objectives
-- Refer to .claude-purpose-context.md and PURPOSE.md for details
+- Refer to .claude-purpose-context.md for details
 - This is part of a parallel development workflow with multiple worktrees
 - Do not work on files outside this task's scope
 "

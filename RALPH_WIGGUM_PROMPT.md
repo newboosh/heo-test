@@ -314,4 +314,3 @@ git push https://${REPO_ORIGIN_PAT}@github.com/${GITHUB_REPO_OWNER}/${GITHUB_REP
 - Standards: `standards/DOCSTRING_STYLE.md`, `standards/TEST_NAMING.md`
 
 **Total budget**: ~108k tokens for Phase 1 (3 iterations × 36k tokens/iteration)
-

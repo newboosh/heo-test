@@ -3,6 +3,7 @@
 # Script: commands/help.sh
 # Purpose: Help command for tree worktree system
 # Created: 2026-01-28
+# Modified: 2026-02-20
 # Description: Display help and usage information
 
 # /tree help
@@ -15,12 +16,11 @@ Available commands:
   list                   - Show staged features
   clear                  - Clear all staged features
   conflict               - Analyze conflicts and suggest merges
-  scope-conflicts        - Detect scope conflicts across worktrees
   build [options]        - Create worktrees from staged features
   restore                - Restore terminals for existing worktrees
-  close                  - Remove the current worktree
+  sync [--all]           - Sync worktree(s) from origin/main via rebase
+  reset [options]        - Complete task: ship it, AI wrapup, reset
   closedone              - Prune all local worktrees
-  sync [--all]           - Sync worktree(s) from source/main via rebase
   status                 - Show worktree environment status
   refresh                - Check slash command availability
   help                   - Show this help
@@ -32,17 +32,27 @@ Available commands:
   --dry-run              Preview without creating
 
 /tree sync usage:
-  /tree sync               Sync current worktree from source/main (run from inside a worktree)
-  /tree sync --all         Sync all worktrees from source/main (run from repo root)
+  /tree sync               Sync current worktree from origin/main (run from inside a worktree)
+  /tree sync --all         Sync all worktrees from origin/main (run from repo root)
 
   Stashes all changes (including untracked files) before rebasing onto main,
   then pops the stash so you can review your work against what changed in main.
 
-/tree close usage:
-  /tree close
+/tree reset usage:
+  /tree reset              Full task completion (ship it -> AI wrapup -> reset)
+  /tree reset incomplete   Save WIP (commit + push only, no wrapup, no reset)
+  /tree reset --all        Batch mechanical reset of all worktrees
+  /tree reset --force      Discard uncommitted changes, skip confirmations
+  /tree reset --rename X   Rename branch after mechanical reset
+  /tree reset --mechanical-only  Skip ship-it, just git reset (used by SKILL.md)
 
-  Removes the current worktree and deletes the local branch.
-  Warns if there are uncommitted changes.
+  SHIP IT: /tree reset automatically:
+     1. Commits all uncommitted changes
+     2. Pushes branch to origin
+     3. Generates synopsis
+     4. Offers to create PR via gh CLI
+  Then SKILL.md orchestrates AI wrapup phases (Remember, Learn, Publish)
+  and finally performs the mechanical git reset.
 
 /tree closedone usage:
   /tree closedone [--dry-run]
@@ -59,11 +69,13 @@ Typical Workflow:
   2. /tree list                 # Review staged
   3. /tree build                # Create worktrees
   4. [work in worktrees]        # Implement
-  5. [commit, push, create PR]  # Ship via GitHub
+  5. /tree reset                # Ship it + AI wrapup + reset
   6. [PR review on GitHub]      # Code review
   7. [Merge PRs on GitHub]      # Merge via GitHub
-  8. /tree close                # Remove finished worktree
-  9. /tree closedone            # Or prune all at once
+  8. /tree closedone            # Prune local worktrees
+
+Deprecated:
+  /tree close              Use '/tree reset' instead
 
 Examples:
   /tree stage Add user preferences backend
@@ -72,7 +84,10 @@ Examples:
   /tree build --dry-run          # Preview
   /tree build                    # Create worktrees
   /tree build --resume           # Resume after failure
-  /tree close                    # Remove current worktree
+  /tree sync                     # Sync current worktree
+  /tree reset                    # Full task completion
+  /tree reset incomplete         # Save WIP progress
+  /tree reset --all --force      # Batch reset all worktrees
   /tree closedone                # Prune all worktrees
   /tree closedone --dry-run      # Preview pruning
 

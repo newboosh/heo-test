@@ -1,3 +1,8 @@
+---
+description: Hybrid context delivery (90/9/1)
+help-usage: '`/context-payload <task description>`'
+---
+
 # Context Payload (Hybrid Context Delivery)
 
 Explicitly invoke the Context Agent to produce a **hybrid context payload** — a tiered document with 90% raw content, 9% linked references, and 1% summary.

@@ -5,7 +5,7 @@
 # Created: 2026-01-28
 # Description: Save and restore build state for interrupted operations
 
-# Dependencies: lib/common.sh (print_* functions)
+# Dependencies: lib/common.sh (print_* functions), jq
 # Required variables: BUILD_STATE_FILE
 
 # Save current build state to JSON file
@@ -19,25 +19,30 @@ save_build_state() {
 
     mkdir -p "$(dirname "$BUILD_STATE_FILE")"
 
-    # Use Python for proper JSON serialization to handle special characters
-    DEV_BRANCH="$dev_branch" \
-    TOTAL_FEATURES="$total_features" \
-    COMPLETED_JSON="$completed_worktrees_json" \
-    FAILED_WORKTREE="$failed_worktree" \
-    REMAINING_JSON="$remaining_features_json" \
-    python3 - <<'PY' > "$BUILD_STATE_FILE"
-import json, os, time
-data = {
-    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    "dev_branch": os.environ["DEV_BRANCH"],
-    "total_features": int(os.environ["TOTAL_FEATURES"]),
-    "completed_worktrees": json.loads(os.environ["COMPLETED_JSON"] or "[]"),
-    "failed_worktree": os.environ["FAILED_WORKTREE"],
-    "remaining_features": json.loads(os.environ["REMAINING_JSON"] or "[]"),
-}
-print(json.dumps(data, indent=2))
-PY
+    # Use jq with --slurpfile for safe JSON handling (avoids bash expansion issues
+    # with special characters in feature names that --argjson would have)
+    local tmp_completed tmp_remaining
+    tmp_completed=$(mktemp)
+    tmp_remaining=$(mktemp)
+    trap 'rm -f "$tmp_completed" "$tmp_remaining"' RETURN
+    echo "${completed_worktrees_json:-[]}" > "$tmp_completed"
+    echo "${remaining_features_json:-[]}" > "$tmp_remaining"
 
+    jq -n \
+        --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg db "$dev_branch" \
+        --argjson tf "$total_features" \
+        --slurpfile cw "$tmp_completed" \
+        --arg fw "$failed_worktree" \
+        --slurpfile rf "$tmp_remaining" \
+        '{
+            timestamp: $ts,
+            dev_branch: $db,
+            total_features: $tf,
+            completed_worktrees: $cw[0],
+            failed_worktree: $fw,
+            remaining_features: $rf[0]
+        }' > "$BUILD_STATE_FILE"
     return $?
 }
 
@@ -49,8 +54,8 @@ load_build_state() {
         return 1
     fi
 
-    # Validate JSON structure using Python
-    if ! python3 -c "import json; json.load(open('$BUILD_STATE_FILE'))" 2>/dev/null; then
+    # Validate JSON structure
+    if ! jq empty "$BUILD_STATE_FILE" 2>/dev/null; then
         print_warning "Build state file is corrupted"
 
         if confirm_prompt "Would you like to delete it and start fresh?" "y"; then
@@ -63,7 +68,7 @@ load_build_state() {
     # Check if dev branch still exists (declare and assign separately)
     # Use refs/heads/ prefix to verify only local branches, not tags or commits
     local saved_branch
-    saved_branch=$(python3 -c "import json; print(json.load(open('$BUILD_STATE_FILE'))['dev_branch'])" 2>/dev/null)
+    saved_branch=$(jq -r '.dev_branch' "$BUILD_STATE_FILE" 2>/dev/null)
     if [ -n "$saved_branch" ] && ! git rev-parse --verify "refs/heads/$saved_branch" &>/dev/null; then
         print_warning "Saved dev branch no longer exists: $saved_branch"
 
@@ -86,7 +91,7 @@ get_build_state_value() {
         return 1
     fi
 
-    python3 -c "import json; print(json.load(open('$BUILD_STATE_FILE')).get('$key', ''))" 2>/dev/null
+    jq -r --arg k "$key" '.[$k] // empty' "$BUILD_STATE_FILE" 2>/dev/null
 }
 
 # Get completed worktrees from build state as array
@@ -96,12 +101,7 @@ get_build_state_completed() {
         return 1
     fi
 
-    python3 -c "
-import json
-data = json.load(open('$BUILD_STATE_FILE'))
-for wt in data.get('completed_worktrees', []):
-    print(wt)
-" 2>/dev/null
+    jq -r '.completed_worktrees[]' "$BUILD_STATE_FILE" 2>/dev/null
 }
 
 # Get remaining features from build state as array
@@ -111,12 +111,7 @@ get_build_state_remaining() {
         return 1
     fi
 
-    python3 -c "
-import json
-data = json.load(open('$BUILD_STATE_FILE'))
-for feat in data.get('remaining_features', []):
-    print(feat)
-" 2>/dev/null
+    jq -r '.remaining_features[]' "$BUILD_STATE_FILE" 2>/dev/null
 }
 
 # Clear build state file after successful completion

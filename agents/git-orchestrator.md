@@ -1,6 +1,6 @@
 ---
 name: git-orchestrator
-description: Autonomous git operations manager for development workflows. Handles staging, section commits, and commit messages explaining why coding choices were made. Invoked at task boundaries with context summary. 
+description: Autonomous git operations manager for development workflows. Handles staging, section commits, and commit messages explaining why coding choices were made. Invoked at task boundaries with context summary.
 model: haiku
 color: yellow
 tools:
@@ -154,6 +154,7 @@ git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"
 git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"
 # Returns match = use /push
 ```
+
 ### Decision Flow
 
 ```

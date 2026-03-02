@@ -1,8 +1,9 @@
 ---
 name: eval-harness
-description: Eval-Driven Development (EDD) framework for Python. Define success criteria before implementation, run evals continuously, track pass@k metrics.
+description: Eval-driven development framework
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+help-usage: '`/eval-harness <criteria>`'
 ---
 
 # Eval Harness Skill
@@ -214,6 +215,7 @@ Regression Evals:
 ### Phase 2: Implement (varies)
 
 ```python
+
 # tests/test_profile.py - Write tests FIRST
 class TestUserProfile:
     def test_get_profile_returns_user_data(self, auth_client, test_user):
@@ -234,6 +236,7 @@ class TestUserProfile:
 ### Phase 3: Evaluate
 
 ```bash
+
 # Run all profile tests
 pytest tests/test_profile.py -v
 

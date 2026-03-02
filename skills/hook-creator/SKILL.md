@@ -1,9 +1,10 @@
 ---
 name: hook-creator
-description: Create and update Claude Code hooks for automation, validation, and workflow customization.
-argument-hint: [hook-type] [description]
+description: Create a new hook
+argument-hint: '<hook-type> [description]'
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+help-usage: '`/hook-creator <name> "description"`'
 ---
 
 # Hook Creator
@@ -176,6 +177,7 @@ Create `.claude/hooks/script-name.sh`:
 
 ```bash
 #!/bin/bash
+
 # Script content
 ```
 

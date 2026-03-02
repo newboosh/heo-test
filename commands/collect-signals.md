@@ -1,3 +1,8 @@
+---
+description: Post-merge signal gathering from CI/CD and tests
+help-usage: '`/collect-signals`'
+---
+
 # Collect Signals
 
 Gather real post-merge signals from CI/CD systems, test history, and dependency audits. Writes `.sprint/monitoring-report.yaml` with measurable data only — no subjective assessments.

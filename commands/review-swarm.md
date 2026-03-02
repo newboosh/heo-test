@@ -1,3 +1,8 @@
+---
+description: Multi-perspective code review with agent team
+help-usage: '`/review-swarm [sprint]`'
+---
+
 # Review Swarm
 
 Multi-perspective code review using an Agent Team. Three reviewers (code quality, QA compliance, security) work as independent teammates who CAN collaborate — challenge findings, cross-reference issues, debate severity. Replaces separate Phase 7 + Phase 9 with a single concurrent pass.

@@ -1,3 +1,8 @@
+---
+description: Parallel codebase health audit
+help-usage: '`/health-check [dependencies | quick | integrate]`'
+---
+
 # Health Check
 
 Run a parallel codebase health audit across four dimensions: dependencies, dead code, test coverage, and standards drift. Four specialist teammates audit simultaneously, correlate findings across concerns, and produce a unified health report with prioritized action items.

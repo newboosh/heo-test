@@ -9,7 +9,7 @@
 #
 # Usage:
 #   source "${CLAUDE_PLUGIN_ROOT}/scripts/session-guard.sh"
-#   check_session_guard "session-end-learning" "continuous-learning" || exit 0
+#   check_session_guard "group-name" "skill-id" || exit 0
 
 check_session_guard() {
     local group_name="$1"

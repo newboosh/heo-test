@@ -80,13 +80,15 @@ BLOCKED_PATTERNS = [
      "Never force-push to main/master."),
 
     # Destructive operations - with optional path and flags
+    # Note: git reset --hard targeting main is allowed via ALLOWED_PATTERNS below.
     (_GIT_PREFIX + r"reset\s+--hard",
      "git reset --hard is destructive. Use git stash or git checkout <file> instead.",
      "git reset --hard was blocked because it permanently discards uncommitted changes. "
      "Safe alternatives:\n"
      "- git stash (saves changes, retrievable later)\n"
      "- git checkout <specific-file> (reverts one file)\n"
-     "- git reset --soft HEAD~1 (undo commit, keep changes staged)"),
+     "- git reset --soft HEAD~1 (undo commit, keep changes staged)\n"
+     "- /tree reset (safe worktree reset to main with dirty-state checks)"),
 
     (_GIT_PREFIX + r"clean\s+-\w*f",
      "git clean -f is destructive. Review untracked files manually.",
@@ -106,6 +108,19 @@ BLOCKED_PATTERNS = [
 ]
 
 
+# Safe patterns that override BLOCKED_PATTERNS when matched.
+# Checked BEFORE block patterns — if a command matches an allow pattern,
+# it passes even if it would also match a block pattern.
+#
+# Use case: "git reset --hard origin/main" is a deliberate "move to known ref"
+# operation (used by /tree reset), not arbitrary data loss.
+ALLOWED_PATTERNS = [
+    # git reset --hard targeting main/origin/main/source/main
+    # Allows optional flags (--quiet, etc.) between --hard and the ref
+    _GIT_PREFIX + r"reset\s+--hard(?:\s+--\w+)*\s+(?:origin/|source/)?main(?:\s|$)",
+]
+
+
 def check_command(command: str):
     """
     Check if a command is allowed.
@@ -114,6 +129,11 @@ def check_command(command: str):
         (allowed, message, context) - allowed=False means block,
         message explains why (stderr), context provides model-visible guidance
     """
+    # Check allow-list first — safe patterns that would otherwise be blocked
+    for pattern in ALLOWED_PATTERNS:
+        if re.search(pattern, command, re.IGNORECASE):
+            return True, "", ""
+
     for pattern, message, context in BLOCKED_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
             return False, message, context

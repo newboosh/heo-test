@@ -218,7 +218,7 @@ Save context summary before compact operation.
 
 ## Stop Hook: Pattern Extraction
 
-Extract learned patterns at end of response (see continuous-learning skill).
+Extract learned patterns at end of response (see `/learn` command).
 
 ### Configuration
 

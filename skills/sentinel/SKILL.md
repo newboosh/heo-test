@@ -5,6 +5,7 @@ argument-hint: [report|log|check|clear|export-issues]
 model: sonnet
 context: fork
 allowed-tools: Read, Grep, Glob, Bash(*), Write, Edit, Task
+help-usage: '`/sentinel [report | log | check | clear | export-issues]`'
 ---
 
 # Sentinel — Emerging Issues Tracker
@@ -82,12 +83,14 @@ Quickly append an observation to `.sentinel/observations.md`. This is the low-fr
 1. Create `.sentinel/` directory if it doesn't exist
 2. Create or verify `.sentinel/observations.md` has a header:
    ```markdown
+
    # Sentinel Observations
 
    _Logged by the primary agent during work. Reviewed by sentinel at end-of-cycle._
    ```
 3. Append the observation with timestamp:
    ```markdown
+
    ### [YYYY-MM-DD HH:MM] | During: [current task/branch]
    $ARGUMENTS (everything after "log")
    ```

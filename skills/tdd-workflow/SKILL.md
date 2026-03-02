@@ -1,6 +1,6 @@
 ---
 name: tdd-workflow
-description: Use this skill when writing new features, fixing bugs, or refactoring code. Enforces test-driven development with pytest and 80%+ coverage.
+description: TDD cycle enforcement skill
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---

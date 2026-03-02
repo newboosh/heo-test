@@ -1,9 +1,10 @@
 ---
 name: bug-investigate
-description: Hypothesis-driven bug investigation with evidence provenance. Use when debugging non-trivial bugs that resist a quick fix, or when a fix attempt has already failed once. Enforces problem-definition-first, single-variable testing, and prevention sweep.
+description: Detailed investigation skill
 argument-hint: [bug description or error message]
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+help-usage: '`/bug-investigate <description>`'
 ---
 
 # Bug Investigation Skill
@@ -222,7 +223,7 @@ Prevention:    <How many similar patterns found. How many fixed.>
 Learned:       <One sentence: what principle was violated? What should be checked in future?>
 ```
 
-**Integration with continuous-learning:** If the "Learned" insight is reusable, consider saving it via `/learn` for future sessions.
+**Integration with `/learn`:** If the "Learned" insight is reusable, consider saving it via `/learn` for future sessions.
 
 ## What This Skill Does NOT Do
 
@@ -243,5 +244,5 @@ bug-investigate (this skill)
     |   +-- /verify (quality gate after fix)
     |   +-- /tdd-workflow (if regression test needed)
     +-- Phase 5: Uses find-patterns skill for prevention sweep
-    +-- Phase 6: Optionally feeds continuous-learning skill via /learn
+    +-- Phase 6: Optionally saves patterns via /learn
 ```

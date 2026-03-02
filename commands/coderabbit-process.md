@@ -1,3 +1,8 @@
+---
+description: Fetch and fix CodeRabbit comments
+help-usage: '`/coderabbit-process [PR_NUMBER] [--no-resolve | --no-push | --iteration N]`'
+---
+
 # CodeRabbit Process Comments
 
 Fetch, process, and fix CodeRabbit review comments for a PR.
@@ -102,7 +107,7 @@ Use the Edit tool. Follow these principles:
 
 #### 2.5 Verify Locally
 
-Run quality checks (see common-patterns.md):
+Run quality checks:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/scripts/run-quality-checks.sh
 ```

@@ -1,3 +1,7 @@
+---
+description: Dead code cleanup and consolidation
+---
+
 # Refactor Clean
 
 Safely identify and remove dead code with test verification.
@@ -6,6 +10,7 @@ Safely identify and remove dead code with test verification.
 
 1. Run dead code analysis tools:
    ```bash
+
    # Find unused code
    vulture app/ --min-confidence 80
 

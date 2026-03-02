@@ -1,3 +1,8 @@
+---
+description: Branch name helper
+help-usage: '`/branch`, `/branch <description>`, `/branch create <type/scope/name>`'
+---
+
 # Branch Helper
 
 Create and validate branch names following `<type>/<scope>/<description>` convention.

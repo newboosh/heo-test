@@ -1,3 +1,8 @@
+---
+description: Extract reusable patterns from session
+help-usage: '`/learn`'
+---
+
 # /learn - Extract Reusable Patterns
 
 Analyze the current session and extract any patterns worth saving as skills.
@@ -51,6 +56,7 @@ Create a skill file at `.claude/skills/learned/[pattern-name].md`:
 
 ## Example
 ```python
+
 # Code example
 ```
 

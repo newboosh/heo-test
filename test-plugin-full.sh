@@ -1198,12 +1198,6 @@ test_commands() {
         "(pr|status|pull.request|no.*pr|not.*found|branch|merge)" \
         "$DEFAULT_TIMEOUT"
 
-    # --- Common Patterns (reference doc) ---
-    run_test_if command common-patterns "command" "common-patterns" \
-        "Run /common-patterns — Show common reusable patterns available in this plugin." \
-        "(pattern|github|auth|quality|check|pr|detect|reusable)" \
-        "$DEFAULT_TIMEOUT"
-
     # --- Worktree ---
 
     # /tree status
@@ -1331,12 +1325,6 @@ test_skills() {
         "(tree|worktree|stage|build|close|branch|parallel)" \
         "$DEFAULT_TIMEOUT"
 
-    # worktree-management
-    run_test_if skill worktree-management "skill" "worktree-management" \
-        "Use the worktree-management skill to explain parallel development with git worktrees." \
-        "(worktree|parallel|development|branch|git|manage)" \
-        "$DEFAULT_TIMEOUT"
-
     # --- Agent-only skills (test that they're referenceable) ---
 
     # artifact-audit
@@ -1355,12 +1343,6 @@ test_skills() {
     run_test_if skill compliance-check "skill" "compliance-check" \
         "Use the compliance-check skill to describe what standards it checks code against." \
         "(compliance|check|standard|code|quality|rule|enforce)" \
-        "$DEFAULT_TIMEOUT"
-
-    # continuous-learning
-    run_test_if skill continuous-learning "skill" "continuous-learning" \
-        "Use the continuous-learning skill to explain how reusable patterns are extracted from sessions." \
-        "(continuous|learning|pattern|extract|reusable|session|save)" \
         "$DEFAULT_TIMEOUT"
 
     # diff-review

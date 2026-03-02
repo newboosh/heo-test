@@ -1,3 +1,8 @@
+---
+description: Parallel bug investigation with agent team
+help-usage: '`/bug-swarm <bug description> [--hypotheses 3]`'
+---
+
 # Bug Swarm
 
 Hypothesis-driven bug investigation using an Agent Team. Follows the 6-phase `skills/bug-investigate/SKILL.md` methodology but parallelizes Phase 3 (Hypothesize & Test) across 2-3 investigators who pursue different hypotheses simultaneously and actively challenge each other's theories.

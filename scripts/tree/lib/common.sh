@@ -82,9 +82,15 @@ is_interactive() {
 # Usage: confirm_prompt "Proceed with action?" "n"
 # First arg: prompt text
 # Second arg: default answer for non-interactive mode (y/n), defaults to "n"
+# Set TREE_YES=1 to auto-confirm all prompts (useful for CI/scripted/Claude Code usage)
 confirm_prompt() {
     local prompt="${1:-Continue?}"
     local default="${2:-n}"
+
+    # TREE_YES overrides everything — auto-confirm
+    if [ "${TREE_YES:-}" = "1" ] || [ "${TREE_YES:-}" = "true" ]; then
+        return 0
+    fi
 
     if ! is_interactive; then
         # Non-interactive mode - use default
@@ -106,6 +112,11 @@ confirm_prompt() {
 # Usage: confirm_prompt_yes "Proceed with action?"
 confirm_prompt_yes() {
     local prompt="${1:-Continue?}"
+
+    # TREE_YES overrides everything — auto-confirm
+    if [ "${TREE_YES:-}" = "1" ] || [ "${TREE_YES:-}" = "true" ]; then
+        return 0
+    fi
 
     if ! is_interactive; then
         return 0  # Default yes in non-interactive

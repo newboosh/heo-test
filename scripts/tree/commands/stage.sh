@@ -122,9 +122,27 @@ tree_list() {
     echo "  - /tree build - Create all worktrees"
 }
 
-# /tree clear
+# /tree clear [options]
 # Clear all staged features
 tree_clear() {
+    # Parse options
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --yes|-y)
+                TREE_YES=1
+                shift
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                echo "Usage: /tree clear [--yes|-y]"
+                echo ""
+                echo "Clears all staged features."
+                echo "Use --yes/-y to skip confirmation (for CI/scripted usage)."
+                return 1
+                ;;
+        esac
+    done
+
     if [ ! -f "$STAGED_FEATURES_FILE" ]; then
         print_info "No staged features to clear"
         return 0

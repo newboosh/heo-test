@@ -1,9 +1,10 @@
 ---
 name: sprint
-description: Full sprint lifecycle — from developer requirements through planning, implementation, review, CI/CD, monitoring, and retrospective. Entry point for automated development cycles.
+description: Sprint phases 1-5 only
 argument-hint: [what to build]
 model: opus
 disable-model-invocation: true
+help-usage: '`/sprint <requirements>`'
 ---
 
 # Sprint Skill

@@ -1,3 +1,8 @@
+---
+description: Loop until CodeRabbit approves
+help-usage: '`/coderabbitloop [PR_NUMBER] [--no-resolve | --max-iterations N]`'
+---
+
 # CodeRabbit Loop
 
 Loop on a PR until CodeRabbit approves all changes. Automatically checks status, fixes comments, resolves conflicts, pushes, and waits for re-review — repeating until the PR is clean or max iterations (8) are reached.

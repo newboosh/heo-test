@@ -72,7 +72,7 @@ tree_status() {
     echo "Actions:"
     echo "  - /tree stage [description] - Stage new feature"
     echo "  - /tree build - Create worktrees from staged features"
-    echo "  - /tree close - Remove current worktree"
+    echo "  - /tree reset - Complete task and reset worktree"
     echo "  - /tree closedone - Prune all worktrees"
 }
 
@@ -114,8 +114,7 @@ tree_restore() {
         else
             print_warning "  [!] $name - Missing init script, regenerating..."
             # Regenerate init script
-            local desc=$(head -1 "$path/PURPOSE.md" 2>/dev/null | sed 's/# Purpose: //' || echo "Worktree task")
-            generate_init_script "$name" "$desc" "$path"
+            generate_init_script "$name" "$name" "$path"
             needs_terminal+=("$path")
         fi
     done

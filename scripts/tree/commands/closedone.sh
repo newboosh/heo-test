@@ -20,12 +20,17 @@ closedone_main() {
                 dry_run=true
                 shift
                 ;;
+            --yes|-y)
+                TREE_YES=1
+                shift
+                ;;
             *)
                 print_error "Unknown option: $1"
-                echo "Usage: /tree closedone [--dry-run]"
+                echo "Usage: /tree closedone [--dry-run] [--yes|-y]"
                 echo ""
                 echo "Removes all local worktrees and cleans up branches."
                 echo "Use --dry-run to preview without making changes."
+                echo "Use --yes/-y to skip confirmation (for CI/scripted usage)."
                 return 1
                 ;;
         esac

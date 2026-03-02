@@ -1,4 +1,9 @@
-# CodeRabbit Review Management
+---
+description: Single CodeRabbit review iteration
+help-usage: '`/coderabbit [PR_NUMBER] [--no-resolve | --no-push | --iteration N]`'
+---
+
+# CodeRabbit PR Review Bot
 
 Run a single iteration of CodeRabbit PR review processing: check status, fix comments, resolve conflicts.
 

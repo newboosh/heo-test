@@ -1,8 +1,9 @@
 ---
 name: learned
-description: Store and retrieve reusable patterns learned across sessions
+description: Retrieve stored patterns
 model: sonnet
 agent_only: true
+help-usage: '`/learned [topic]`'
 ---
 
 # Learned Patterns

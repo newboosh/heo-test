@@ -31,10 +31,8 @@ echo ""
 
 # Files that should never be merged to main
 declare -a FORBIDDEN_FILES=(
-    ".claude-task-context.md"
     ".claude-purpose-context.md"
     ".claude-init.sh"
-    ".worktree-scope.json"
     ".pending-terminals.txt"
     ".pending-*"
 )

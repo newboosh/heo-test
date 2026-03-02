@@ -90,15 +90,14 @@ def git_info(project_dir):
                 if y in "MADRCT":
                     modified_count += 1
 
-            # Detect worktree name from heo task context
-            # Only .claude-task-context.md is authoritative (created by /tree)
+            # Detect worktree name from PURPOSE.md (created by /tree build)
             worktree_name = ""
-            task_ctx = os.path.join(project_dir, ".claude-task-context.md")
-            if os.path.exists(task_ctx):
+            purpose_file = os.path.join(project_dir, "PURPOSE.md")
+            if os.path.exists(purpose_file):
                 try:
-                    with open(task_ctx, encoding="utf-8") as f:
+                    with open(purpose_file, encoding="utf-8") as f:
                         for line in f:
-                            if line.startswith("- **Name**:"):
+                            if line.startswith("**Worktree:**"):
                                 worktree_name = line.split(":", 1)[1].strip()
                                 break
                 except OSError:
@@ -113,7 +112,7 @@ def git_info(project_dir):
 
     try:
         with open(cache_file, encoding="utf-8") as f:
-            parts = f.read().strip().split("\t")
+            parts = f.read().split("\t")
         if len(parts) == 4:
             return parts[0], int(parts[1] or 0), int(parts[2] or 0), parts[3]
     except (OSError, ValueError):

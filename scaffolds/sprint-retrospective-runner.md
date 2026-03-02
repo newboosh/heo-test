@@ -102,8 +102,7 @@ new_intake_items:
 
 | Existing Asset | Relationship |
 |---------------|-------------|
-| `skills/continuous-learning/` | Feeds into pattern extraction |
-| `commands/learn.md` (retired) | Pattern extraction concept absorbed here |
+| `commands/learn.md` | Pattern extraction via `/learn` command |
 | Feedback Synthesizer | Consumes this output to generate next sprint intake |
 
 ## Open Questions (Resolved)

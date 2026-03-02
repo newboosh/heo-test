@@ -1,0 +1,131 @@
+# help-guide.yaml — Category mapping and config for generate-help.py
+#
+# Each category defines:
+#   name:     Section heading in help.md
+#   compact:  true → 2-column table (Skill | Description), false → 3-column (Command | Description | Usage)
+#   hidden:   true → category exists only to suppress "orphan" warnings (e.g., help itself)
+#   commands: list of command basenames (without .md) in display order
+
+categories:
+  - name: Worktree & Git
+    commands:
+      - tree
+      - branch
+      - push
+
+  - name: Planning & Context
+    commands:
+      - plan
+      - task
+      - context
+      - context-payload
+      - standards
+      - standards-lookup
+      - catalog
+      - problem-definition
+      - requirements-engineering
+      - prereq-check
+
+  - name: Development
+    commands:
+      - tdd
+      - tdd-workflow
+      - build-fix
+      - refactor-clean
+      - e2e
+      - project-skeleton
+
+  - name: Testing & Quality
+    commands:
+      - test-coverage
+      - verify
+      - ci
+      - code-review
+      - qa
+      - test-plugin
+      - compliance-check
+      - diff-review
+      - security-review
+      - eval-harness
+      - testing-strategy
+
+  - name: Pull Request & CodeRabbit
+    commands:
+      - pr-status
+      - coderabbit
+      - coderabbit-status
+      - coderabbit-process
+      - coderabbit-conflicts
+      - coderabbitloop
+
+  - name: Bug Investigation
+    commands:
+      - bug
+      - bug-investigate
+
+  - name: Team Swarms
+    commands:
+      - arch-debate
+      - bug-swarm
+      - plan-swarm
+      - review-swarm
+      - test-swarm
+      - health-check
+
+  - name: Sprint & Orchestration
+    commands:
+      - sprint-run
+      - sprint
+      - orchestrate
+      - collect-signals
+      - checkpoint
+      - sprint-retrospective
+      - gate-decision
+
+  - name: Documentation & Knowledge
+    commands:
+      - update-docs
+      - update-codemaps
+      - learn
+      - librarian
+      - gather-docs
+      - find-patterns
+
+  - name: Ralph Loop (Iterative Agent)
+    commands:
+      - build-ralph-prompt
+      - ralph-loop
+      - cancel-ralph
+
+  - name: Creation & Tooling
+    commands:
+      - skill-creator
+      - agent-creator
+      - hook-creator
+      - setup
+      - tool-design
+
+  - name: Agent Support Skills (used by agents, also callable)
+    compact: true
+    commands:
+      - sentinel
+      - verification-loop
+      - strategic-compact
+      - feedback-synthesizer
+      - process-map
+      - boundary-critique
+      - token-budget
+      - sub-agent-dispatch
+      - artifact-audit
+      - plan-context
+      - ack-protocol
+      - hybrid-payload
+      - payload-consumer
+      - backend-patterns
+      - composition-patterns
+      - team-patterns
+
+# Commands hidden from the guide (still registered, not orphans)
+hidden:
+  - help
+  - learned  # agent_only: true in frontmatter

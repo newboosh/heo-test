@@ -1,3 +1,8 @@
+---
+description: Security and quality review
+help-usage: '`/code-review`'
+---
+
 # Code Review
 
 Comprehensive security and quality review of uncommitted changes.

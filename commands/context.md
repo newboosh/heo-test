@@ -1,3 +1,8 @@
+---
+description: Gather comprehensive context
+help-usage: '`/context <task description>`'
+---
+
 # Context (Context Preparation)
 
 Explicitly invoke the Context Agent to prepare comprehensive context before starting work.

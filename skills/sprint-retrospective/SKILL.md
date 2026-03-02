@@ -1,6 +1,6 @@
 ---
 name: sprint-retrospective
-description: Analysis methodology for completed sprints. Read all sprint phase handoffs, evaluate what worked, what didn't, review effectiveness, estimation accuracy, and extract reusable patterns. Used by the Sprint Runner at Phase 13.
+description: Sprint retrospective analysis
 model: opus
 allowed-tools: Read, Write, Grep, Glob
 ---
@@ -272,4 +272,4 @@ If this is the first sprint (no previous retrospective data):
 - **Pattern:** Pipeline (reads monitoring → produces retrospective)
 - **Consumed by:** `commands/sprint-run.md` (Phase 13)
 - **Feeds into:** `skills/feedback-synthesizer/` (same phase, runs after)
-- **Related:** `skills/continuous-learning/` (complementary pattern extraction)
+- **Related:** `commands/learn.md` (complementary pattern extraction via `/learn`)

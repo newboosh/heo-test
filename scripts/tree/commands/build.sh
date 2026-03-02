@@ -3,9 +3,9 @@
 # Script: commands/build.sh
 # Purpose: Worktree build command
 # Created: 2026-01-28
-# Description: Create worktrees from staged features with scope detection
+# Description: Create worktrees from staged features
 
-# Dependencies: lib/common.sh, lib/git-safety.sh, lib/validation.sh, lib/state.sh, lib/setup.sh, scope-detector.sh
+# Dependencies: lib/common.sh, lib/git-safety.sh, lib/validation.sh, lib/state.sh, lib/setup.sh, jq
 # Required variables: TREES_DIR, STAGED_FEATURES_FILE, WORKSPACE_ROOT, BUILD_STATE_FILE, SCRIPT_DIR
 
 # /tree build [options]
@@ -135,6 +135,12 @@ tree_build() {
 
         cleanup_orphaned_worktrees
     fi
+
+    if [ "$dry_run" = true ]; then
+        print_info "[DRY RUN] Would ensure enabledPlugins in settings.json"
+    else
+        ensure_enabled_plugins
+    fi
     echo ""
 
     echo "============================================================"
@@ -199,7 +205,6 @@ tree_build() {
 
     # Create development branch
     if ! git rev-parse --verify "$dev_branch" &>/dev/null; then
-        wait_for_git_lock || return 1
         # Capture output and exit code separately to avoid masking errors
         local checkout_output
         local checkout_exit
@@ -225,12 +230,12 @@ tree_build() {
     local success_count=0
     local failed_count=0
     local build_start=$(date +%s)
+    local bg_pids=()
 
     # Save initial build state
     if [ "$resume_mode" != "true" ]; then
-        # Use Python for safe JSON encoding to handle special characters
         local all_features_json
-        all_features_json=$(printf '%s\n' "${features[@]}" | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+        all_features_json=$(printf '%s\n' "${features[@]}" | jq -Rs '[split("\n")[] | select(length > 0)]')
         save_build_state "$dev_branch" "${#features[@]}" "[]" "" "$all_features_json"
     fi
 
@@ -262,11 +267,11 @@ tree_build() {
             print_error "  [FAIL] Pre-flight validation failed"
             failed_count=$((failed_count + 1))
 
-            # Save failure state (use Python for safe JSON encoding)
+            # Save failure state
             local completed_names_json
-            completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+            completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | jq -Rs '[split("\n")[] | select(length > 0)]')
             local remaining_features_json
-            remaining_features_json=$(printf '%s\n' "${features[@]:$i}" | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+            remaining_features_json=$(printf '%s\n' "${features[@]:$i}" | jq -Rs '[split("\n")[] | select(length > 0)]')
             save_build_state "$dev_branch" "${#features[@]}" "$completed_names_json" "$name" "$remaining_features_json"
             print_info "To resume from this point, run: /tree build --resume"
 
@@ -277,24 +282,15 @@ tree_build() {
             return 1
         fi
 
-        # Create worktree
-        wait_for_git_lock || {
-            print_error "  [FAIL] Failed to acquire git lock"
-            failed_count=$((failed_count + 1))
-            if [ ${#created_worktrees[@]} -gt 0 ]; then
-                rollback_build "${created_worktrees[@]}"
-            fi
-            return 1
-        }
-
+        # Create worktree (safe_git handles git lock internally)
         if ! safe_git worktree add -b "$branch" "$worktree_path" "$dev_branch" &>/dev/null; then
             print_error "  [FAIL] Failed to create worktree: $branch"
             failed_count=$((failed_count + 1))
 
             local completed_names_json
-            completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+            completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | jq -Rs '[split("\n")[] | select(length > 0)]')
             local remaining_features_json
-            remaining_features_json=$(printf '%s\n' "${features[@]:$i}" | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+            remaining_features_json=$(printf '%s\n' "${features[@]:$i}" | jq -Rs '[split("\n")[] | select(length > 0)]')
             save_build_state "$dev_branch" "${#features[@]}" "$completed_names_json" "$name" "$remaining_features_json"
             print_info "To resume from this point, run: /tree build --resume"
 
@@ -306,24 +302,15 @@ tree_build() {
 
         created_worktrees+=("$worktree_path|||$branch")
 
-        # Generate scope manifest
-        if type detect_scope_from_description &>/dev/null; then
-            local scope_manifest=$(detect_scope_from_description "$desc" "$name")
-            echo "$scope_manifest" > "$worktree_path/.worktree-scope.json"
-        else
-            echo '{"scope":{"include":["**/*"],"exclude":[]},"enforcement":"soft"}' > "$worktree_path/.worktree-scope.json"
-        fi
+        # Spawn file generation as background job (overlaps with next git worktree add)
+        (
+            set +e  # Don't abort on individual failures — partial setup is better than none
 
-        # Create PURPOSE.md
-        local scope_patterns="- **/*"
-        if [ -f "$worktree_path/.worktree-scope.json" ] && command -v python3 &>/dev/null; then
-            scope_patterns=$(cat "$worktree_path/.worktree-scope.json" | python3 -c "import sys, json; data=json.load(sys.stdin); print('\n'.join(['- ' + p for p in data.get('scope',{}).get('include',['**/*'])[:5]]))" 2>/dev/null || echo "- **/*")
-        fi
+            # Create PURPOSE.md
+            cat > "$worktree_path/PURPOSE.md" << PURPOSEEOF
+# Purpose: ${worktree_name//-/ }
 
-        cat > "$worktree_path/PURPOSE.md" << EOF
-# Purpose: ${name//-/ }
-
-**Worktree:** $name
+**Worktree:** $worktree_name
 **Branch:** $branch
 **Base Branch:** $dev_branch
 **Created:** $(date +"%Y-%m-%d %H:%M:%S")
@@ -331,21 +318,6 @@ tree_build() {
 ## Objective
 
 $desc
-
-## Scope
-
-**Automatically detected scope patterns:**
-
-$scope_patterns
-
-**Full scope details:** See \`.worktree-scope.json\`
-
-**Enforcement:** Soft (warnings only)
-
-## Out of Scope
-
-Files outside the detected patterns will generate warnings but are not blocked.
-For hard enforcement, see \`.worktree-scope.json\` and modify \`enforcement\` setting.
 
 ## Slash Command Usage
 
@@ -370,28 +342,37 @@ Restart Claude Code CLI session from this directory.
 ## Notes
 
 [Add implementation notes, decisions, or concerns here]
-EOF
+PURPOSEEOF
 
-        # Generate context files and setup
-        generate_task_context "$name" "$desc" "$branch" "$dev_branch" "$worktree_path"
-        copy_slash_commands_to_worktree "$worktree_path"
-        install_scope_hook "$worktree_path"
-        generate_init_script "$name" "$desc" "$worktree_path"
+            # Generate context files and setup
+            generate_worktree_claude_md "$worktree_name" "$desc" "$branch" "$dev_branch" "$worktree_path"
+            copy_slash_commands_to_worktree "$worktree_path"
+            generate_init_script "$worktree_name" "$desc" "$worktree_path"
+        ) &
+        bg_pids+=($!)
 
-        local worktree_end=$(date +%s)
+        local worktree_end
+        worktree_end=$(date +%s)
         local worktree_duration=$((worktree_end - worktree_start))
         print_success "  [OK] Created in ${worktree_duration}s"
         success_count=$((success_count + 1))
 
-        # Update build state (use Python for safe JSON encoding)
+        # Update build state for resume tracking
         local completed_names_json
-        completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+        completed_names_json=$(for wt in "${created_worktrees[@]}"; do basename "${wt%%|||*}"; done | jq -Rs '[split("\n")[] | select(length > 0)]')
         local remaining_features_json
-        remaining_features_json=$(printf '%s\n' "${features[@]:$((i+1))}" | python3 -c 'import sys, json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+        remaining_features_json=$(printf '%s\n' "${features[@]:$((i+1))}" | jq -Rs '[split("\n")[] | select(length > 0)]')
         save_build_state "$dev_branch" "${#features[@]}" "$completed_names_json" "" "$remaining_features_json"
 
         echo "$worktree_path" >> "$TREES_DIR/.pending-terminals.txt"
     done
+
+    # Wait for all background file generation jobs to finish
+    if [ ${#bg_pids[@]} -gt 0 ]; then
+        for pid in "${bg_pids[@]}"; do
+            wait "$pid" 2>/dev/null || print_warning "Background setup for a worktree had issues"
+        done
+    fi
 
     # Create librarian worktree
     if [ $success_count -gt 0 ]; then
@@ -402,22 +383,7 @@ EOF
         local librarian_branch="task/00-librarian"
         local librarian_path="$TREES_DIR/$librarian_name"
 
-        wait_for_git_lock || true
         if safe_git worktree add -b "$librarian_branch" "$librarian_path" "$dev_branch" &>/dev/null; then
-            # Generate librarian scope
-            if type calculate_librarian_scope &>/dev/null; then
-                local scope_files=()
-                for worktree_dir in "$TREES_DIR"/*; do
-                    if [ -d "$worktree_dir" ] && [ -f "$worktree_dir/.worktree-scope.json" ]; then
-                        scope_files+=("$worktree_dir/.worktree-scope.json")
-                    fi
-                done
-                local librarian_scope=$(calculate_librarian_scope "${scope_files[@]}")
-                echo "$librarian_scope" > "$librarian_path/.worktree-scope.json"
-            else
-                echo '{"scope":{"include":["docs/**","*.md","scripts/**",".claude/**"],"exclude":[]},"enforcement":"soft"}' > "$librarian_path/.worktree-scope.json"
-            fi
-
             cat > "$librarian_path/PURPOSE.md" << EOF
 # Purpose: Librarian - Documentation & Tooling
 
@@ -431,28 +397,15 @@ EOF
 
 Manage documentation, tooling, and project organization files that are not specific to any feature worktree.
 
-## Scope
-
-This worktree can work on files NOT claimed by feature worktrees, including:
-- Documentation files (docs/**, *.md)
-- Tooling and scripts (.claude/**, tools/**, scripts/**)
-- Configuration files (*.toml, *.yaml, *.json)
-- GitHub workflows (.github/**)
-
 ## Success Criteria
 
 - [ ] Documentation updated and consistent
 - [ ] Tooling improvements implemented
 - [ ] Project organization enhanced
-
-## Notes
-
-The librarian worktree has inverse scope - it automatically excludes all files that feature worktrees are working on.
 EOF
 
             copy_slash_commands_to_worktree "$librarian_path"
-            install_scope_hook "$librarian_path"
-            generate_task_context "$librarian_name" "Documentation, tooling, and project organization" "$librarian_branch" "$dev_branch" "$librarian_path"
+            generate_worktree_claude_md "$librarian_name" "Documentation, tooling, and project organization" "$librarian_branch" "$dev_branch" "$librarian_path"
             generate_init_script "$librarian_name" "Manage documentation and tooling" "$librarian_path"
 
             print_success "  [OK] Created librarian worktree"
@@ -501,7 +454,5 @@ EOF
 
         clear_build_state
 
-        echo ""
-        tree_scope_conflicts 2>/dev/null || true
     fi
 }

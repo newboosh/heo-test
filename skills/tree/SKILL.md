@@ -7,6 +7,22 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 # Tree Worktree Management
 
+## CRITICAL: Execution Rules
+
+**Execute ONLY the exact command the user requested.** Do not:
+- Remove, clean up, or modify worktrees unless the user explicitly invokes `/tree reset`, `/tree closedone`, etc.
+- Add "helpful" pre-steps like cleaning up old worktrees before staging
+- Reorganize, rename, or consolidate worktrees without being asked
+- Take any action beyond running the requested bash command and reporting its output
+
+If the user runs `/tree stage login page not working`, execute:
+```bash
+bash "${PLUGIN_DIR}/scripts/tree.sh" stage login page not working
+```
+Nothing more. Do not "prepare" the environment first.
+
+---
+
 Execute the tree worktree management script located in this plugin's `scripts/tree.sh`.
 
 ## Script Location
@@ -27,42 +43,60 @@ Where `${PLUGIN_DIR}` is the heo plugin's installation directory (contains `.cla
 - `/tree list` - Show staged features
 - `/tree clear` - Clear all staged features
 - `/tree conflict` - Analyze conflicts and suggest merges
-- `/tree scope-conflicts` - Detect scope conflicts across worktrees
 - `/tree build` - Create worktrees from staged features (auto-launches Claude)
 - `/tree restore` - Restore terminals for existing worktrees
 - `/tree status` - Show worktree environment status
 - `/tree refresh` - Check slash command availability and get session reload guidance
 - `/tree help` - Show detailed help
 
+### Sync Commands
+- `/tree sync` - Sync current worktree from source/main via rebase
+- `/tree sync --all` - Sync all worktrees from source/main via rebase
+
+### Reset Commands
+- `/tree reset` - Complete task: ship it → AI wrapup → mechanical reset (orchestrated below)
+- `/tree reset incomplete` - WIP save only: commit + push + synopsis (no wrapup, no reset)
+- `/tree reset --all` - Batch mechanical reset of all worktrees (no AI phases)
+- `/tree reset --all --force` - Batch reset discarding uncommitted changes
+- `/tree reset --rename "new-task"` - Mechanical reset + rename branch for reuse
+- `/tree reset --mechanical-only` - Skip ship-it, just git reset (used internally by step 6)
+
 ### Cleanup Commands
-- `/tree close` - Verify merge, run AI wrap-up phases, then remove worktree
-- `/tree close --force` - Skip merge verification (e.g., for abandoned branches)
 - `/tree closedone` - Mechanical batch removal of all worktrees (no AI phases)
 - `/tree closedone --dry-run` - Preview what would be removed
 
-## `/tree close` — Full Worktree Close
+### Deprecated
+- `/tree close` - **Deprecated.** Use `/tree reset` instead.
 
-When the user invokes `/tree close`, follow this sequence exactly:
+---
 
-### Step 1: Merge Verification
+## `/tree reset` — Full Orchestration (Single Worktree)
 
-Run the merge check:
+When the user invokes `/tree reset` (without `--all`, `incomplete`, or `--mechanical-only`),
+follow this **6-step sequence exactly**:
+
+### Step 1: Ship It (bash)
+
+Run the reset script to auto-commit, push, generate synopsis, and offer PR creation:
+
 ```bash
-bash "${PLUGIN_DIR}/scripts/tree.sh" close --check-only
+bash "${PLUGIN_DIR}/scripts/tree.sh" reset
 ```
 
-If the script exits non-zero (branch not merged), stop. The script already
-printed the warning — do not proceed further.
+This runs `tree_reset_ship_it()` which:
+- Detects the worktree (must be inside `.trees/`)
+- Auto-commits all uncommitted changes
+- Pushes branch to origin
+- Generates synopsis to `.trees/.completed/`
+- Offers to create PR via `gh`
 
-If the script exits zero (branch is merged), continue to the AI phases below.
-
-Also capture the **main worktree path** and **worktree name** for later use:
+After this command completes, capture context for the AI phases:
 ```bash
 MAIN_WORKTREE=$(git worktree list --porcelain | head -1 | sed 's/^worktree //')
 WORKTREE_NAME=$(basename "$(git rev-parse --show-toplevel)")
 ```
 
-### Step 2: AI Phase 1 — Remember
+### Step 2: AI Phase — Remember
 
 Review what was learned during this worktree's work. Gather context by
 examining the worktree's git log (`git log main..HEAD --oneline`), diffs,
@@ -89,7 +123,7 @@ Decide where each piece of knowledge belongs in the memory hierarchy:
 - Personal/ephemeral context? → `CLAUDE.local.md`
 - Duplicating content from another file? → Use `@import` instead
 
-### Step 3: AI Phase 2 — Learn
+### Step 3: AI Phase — Learn
 
 Analyze the worktree's work for self-improvement findings. If the work was
 routine with nothing notable, say "Nothing to improve" and skip to Step 5.
@@ -133,7 +167,7 @@ No action needed:
    Already documented in CLAUDE.md
 ```
 
-### Step 4: Commit Learnings
+### Step 4: Commit Learnings (bash)
 
 Commit only the learning-related files that were modified in the main worktree.
 Do **not** use `git add -A`. Stage specific paths only:
@@ -141,14 +175,14 @@ Do **not** use `git add -A`. Stage specific paths only:
 ```bash
 cd "${MAIN_WORKTREE}"
 git add CLAUDE.md CLAUDE.local.md .claude/rules/ .claude/skills/learned/ 2>/dev/null
-git diff --cached --quiet || git commit -m "chore: apply learnings from worktree close (${WORKTREE_NAME})"
+git diff --cached --quiet || git commit -m "chore: apply learnings from worktree reset (${WORKTREE_NAME})"
 git push
 ```
 
 If there are no staged changes, skip this step. Auto memory files are outside
 the git repo and need no commit.
 
-### Step 5: AI Phase 3 — Publish
+### Step 5: AI Phase — Publish
 
 Review the work done in this worktree for publishable material. Look for:
 
@@ -179,28 +213,34 @@ Review the work done in this worktree for publishable material. Look for:
 **If no publishable material exists:**
 Say "Nothing worth publishing from this worktree" and move on.
 
-### Step 6: Mechanical Close
+### Step 6: Mechanical Reset (bash)
 
-Run the close script with `--force` to skip the redundant merge re-check:
+Run the reset script with `--mechanical-only` to perform the actual git reset:
+
 ```bash
-bash "${PLUGIN_DIR}/scripts/tree.sh" close --force
+bash "${PLUGIN_DIR}/scripts/tree.sh" reset --mechanical-only --force
 ```
 
-This removes the worktree directory and deletes the local branch.
+This performs `git reset --hard origin/main` + `git clean -fd`, making the
+worktree fresh and ready for a new task.
 
-## Worktree Scope Detection
+---
 
-Each worktree automatically gets file boundary detection based on its feature description:
+## `/tree reset --all` — Batch Mechanical Reset
 
-1. `/tree build` analyzes feature descriptions for keywords
-2. Generates `.worktree-scope.json` with file patterns for each worktree
-3. Installs pre-commit hook to warn about out-of-scope changes
-4. Creates special "librarian" worktree for documentation/tooling
+Just call the bash script directly (mechanical only, no AI phases):
 
-**Enforcement modes:**
-- **Soft (default)**: Warns but allows out-of-scope commits
-- **Hard**: Blocks out-of-scope commits
-- **None**: Disables scope checking
+```bash
+bash "${PLUGIN_DIR}/scripts/tree.sh" reset --all [--force]
+```
+
+## `/tree reset incomplete` — WIP Save
+
+Just call the bash script directly (commit + push + incomplete synopsis, no wrapup, no reset):
+
+```bash
+bash "${PLUGIN_DIR}/scripts/tree.sh" reset incomplete
+```
 
 ## Typical Workflow
 
@@ -215,9 +255,21 @@ Each worktree automatically gets file boundary detection based on its feature de
 # PR review with CodeRabbit + Claude
 # Merge PR on GitHub
 
-# Full close (with AI wrap-up):
-/tree close          # Verify merge → Remember → Learn → Publish → Remove
+# After task complete — full reset with AI wrapup:
+/tree reset              # Ship It → Remember → Learn → Publish → Mechanical Reset
 
-# Batch mechanical cleanup (no AI phases):
-/tree closedone      # Remove all worktrees at once
+# Or save WIP and come back later:
+/tree reset incomplete   # Commit + push only, no wrapup
+
+# Or batch reset all worktrees mechanically:
+/tree reset --all        # git reset --hard all worktrees
+
+# Or reset + rename for reuse:
+/tree reset --rename "new-feature-name"
+
+# Sync during active development:
+/tree sync               # Rebase onto latest main
+
+# Batch cleanup (after GitHub PR merges):
+/tree closedone          # Remove all worktrees at once
 ```

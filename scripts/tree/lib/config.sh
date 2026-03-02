@@ -93,16 +93,38 @@ get_config_value() {
 # Usage: get_config_bool "path.to.key" "default_value"
 # Returns 0 for true, 1 for false
 get_config_bool() {
-    local value
-    value=$(get_config_value "$1" "$2")
+    local key_path="$1"
+    local default_value="${2:-false}"
 
-    case "$value" in
-        true|True|TRUE|yes|Yes|YES|1)
-            return 0
-            ;;
-        *)
-            return 1
-            ;;
+    # Check for environment variable override first
+    local env_var_name="TREE_CONFIG_$(echo "$key_path" | tr '.' '_' | tr '[:lower:]' '[:upper:]')"
+    local env_value="${!env_var_name:-}"
+    if [ -n "$env_value" ]; then
+        case "$env_value" in
+            true|True|TRUE|yes|Yes|YES|1) return 0 ;;
+            *) return 1 ;;
+        esac
+    fi
+
+    # Use jq directly to distinguish JSON false from null/missing.
+    # get_config_value uses '// empty' which treats false the same as null.
+    load_config
+    if command -v jq &>/dev/null && [ -n "$_TREE_CONFIG_CACHE" ] && [ "$_TREE_CONFIG_CACHE" != "{}" ]; then
+        local jq_path=".$(echo "$key_path" | sed 's/\././g')"
+        local raw_value
+        raw_value=$(echo "$_TREE_CONFIG_CACHE" | jq -r "$jq_path | if . == null then \"__NULL__\" else tostring end" 2>/dev/null)
+        if [ "$raw_value" != "__NULL__" ] && [ -n "$raw_value" ]; then
+            case "$raw_value" in
+                true|True|TRUE|yes|Yes|YES|1) return 0 ;;
+                *) return 1 ;;
+            esac
+        fi
+    fi
+
+    # Fall back to default
+    case "$default_value" in
+        true|True|TRUE|yes|Yes|YES|1) return 0 ;;
+        *) return 1 ;;
     esac
 }
 
@@ -139,19 +161,6 @@ get_config_array() {
     echo "$_TREE_CONFIG_CACHE" | jq -r "$jq_path[]? // empty" 2>/dev/null
 }
 
-# Get scope patterns for a keyword from config
-# Usage: get_scope_patterns "email"
-get_scope_patterns() {
-    local keyword="$1"
-    local patterns
-
-    patterns=$(get_config_array "scope_patterns.$keyword")
-
-    if [ -n "$patterns" ]; then
-        echo "$patterns"
-    fi
-}
-
 # Reload configuration (clear cache and reload)
 reload_config() {
     _TREE_CONFIG_CACHE=""
@@ -175,19 +184,9 @@ print_default_config() {
   "naming_convention": "kebab-case",
   "auto_create_prd": true,
   "prd_location": "tasks/",
-  "scope_patterns": {
-    "email": ["modules/email_integration/**", "**/email*.py"],
-    "database": ["modules/database/**", "**/db*.py"],
-    "api": ["modules/api/**", "**/api*.py"],
-    "dashboard": ["modules/dashboard/**", "**/dashboard*.py"],
-    "auth": ["modules/auth/**", "**/auth*.py"],
-    "test": ["tests/**"],
-    "doc": ["docs/**", "*.md"]
-  },
   "behavior": {
     "auto_commit_on_close": true,
     "auto_push_on_close": true,
-    "scope_enforcement": "soft",
     "git_lock_timeout": 30,
     "stale_lock_threshold_seconds": 60
   },

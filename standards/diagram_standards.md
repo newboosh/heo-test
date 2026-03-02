@@ -138,9 +138,29 @@ Canonical specifications for all diagrams. Each section references the authorita
 
 ---
 
+## Staleness Detection
+
+Diagrams declare their source files in `docs/DIAGRAM_SOURCES.yaml`. When a source file is committed without its associated diagram, `scripts/diagram-staleness-check.sh` prints a non-blocking warning.
+
+**When adding or modifying a diagram:**
+1. Update the diagram itself
+2. Add or update the entry in `docs/DIAGRAM_SOURCES.yaml` listing all source files the diagram is derived from
+3. The Claude Code hook will warn automatically on `git commit`
+
+> **Note:** The staleness check runs as a Claude Code `PreToolUse` hook, so it only fires inside Claude Code sessions. For commits made from the terminal or CI, run the script manually or add it to your CI pipeline.
+
+**Running manually (terminal or CI):**
+```bash
+scripts/diagram-staleness-check.sh         # check staged files
+scripts/diagram-staleness-check.sh --all   # check all changes vs HEAD
+```
+
+---
+
 ## Verification Checklist
 
 - [ ] Correct notation for diagram type
 - [ ] All elements labeled
 - [ ] No notation anti-patterns
 - [ ] Appropriate detail level
+- [ ] Source files listed in `docs/DIAGRAM_SOURCES.yaml`

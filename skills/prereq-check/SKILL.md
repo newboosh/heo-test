@@ -1,6 +1,6 @@
 ---
 name: prereq-check
-description: Verify prerequisites and dependencies before starting work. Used by Context Agent.
+description: Verify prerequisites before starting
 model: haiku
 allowed-tools: Read, Bash, Grep, Glob
 ---
@@ -39,6 +39,7 @@ Verify that required setup, dependencies, and configurations are in place.
 2. **Check dependencies**
    ```
    Read: "requirements.txt" or "pyproject.toml"
+
    # Verify required packages are listed
    ```
 

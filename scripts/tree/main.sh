@@ -3,9 +3,9 @@
 # Script: main.sh (new modular tree.sh)
 # Purpose: Worktree management system for parallel development
 # Created: 2026-01-28
-# Modified: 2026-02-19
+# Modified: 2026-02-20
 # Usage: /tree <command> [options]
-# Commands: stage, list, build, close, closedone, sync, status, conflict, help
+# Commands: stage, list, build, close, closedone, sync, reset, status, conflict, help
 # Description: Complete worktree lifecycle management - modular version
 
 set -e
@@ -61,20 +61,7 @@ source "$LIB_DIR/setup.sh"
 # Load config (may fail gracefully if jq not installed)
 load_config || true
 
-# Source scope detection utilities (requires bash 4+ for associative arrays)
 PARENT_SCRIPT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-if [[ "${BASH_VERSINFO[0]}" -ge 4 ]] && [ -f "$PARENT_SCRIPT_DIR/scope-detector.sh" ]; then
-    source "$PARENT_SCRIPT_DIR/scope-detector.sh"
-else
-    # Stub functions for macOS bash 3.x compatibility
-    detect_scope() { echo "[]"; }
-    detect_scope_from_description() { echo '{"scope":{"include":["**/*"],"exclude":[]},"enforcement":"soft"}'; }
-    calculate_librarian_scope() { echo '{"scope":{"include":["docs/**","*.md","scripts/**"],"exclude":[]},"enforcement":"soft"}'; }
-    detect_scope_conflicts() { return 0; }
-    if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-        debug "Note: Scope detection requires bash 4+. Running in compatibility mode."
-    fi
-fi
 
 # Source GitHub auth for push operations (worktree-aware)
 if [[ -f "$PARENT_SCRIPT_DIR/github-auth.sh" ]]; then
@@ -116,12 +103,9 @@ case "$COMMAND" in
         esac
         ;;
 
-    conflict|scope-conflicts)
+    conflict)
         load_command "conflict"
-        case "$COMMAND" in
-            conflict) tree_conflict "$@" ;;
-            scope-conflicts) tree_scope_conflicts "$@" ;;
-        esac
+        tree_conflict "$@"
         ;;
 
     build)
@@ -130,8 +114,10 @@ case "$COMMAND" in
         ;;
 
     close)
-        load_command "close"
-        tree_close "$@"
+        print_warning "'/tree close' is deprecated. Use '/tree reset' instead."
+        echo ""
+        load_command "reset"
+        tree_reset "$@"
         ;;
 
     status|restore|refresh)
@@ -146,6 +132,11 @@ case "$COMMAND" in
     sync)
         load_command "sync"
         tree_sync "$@"
+        ;;
+
+    reset)
+        load_command "reset"
+        tree_reset "$@"
         ;;
 
     closedone)

@@ -1,3 +1,7 @@
+---
+description: Analyze test coverage gaps
+---
+
 # Test Coverage
 
 Analyze test coverage and return a prioritized gap list. This is the **gap analysis** skill used by `/tdd` as Step 0.

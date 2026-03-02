@@ -1,3 +1,8 @@
+---
+description: Full 13-phase sprint lifecycle
+help-usage: '`/sprint-run [autonomous | attended | team] <requirements>`, `/sprint-run from <phase> <requirements>`, `/sprint-run resume`, `/sprint-run status`'
+---
+
 # Sprint Runner
 
 Run the full 13-phase sprint lifecycle. The developer provides requirements once; the system auto-detects the appropriate velocity mode (or accepts an explicit override), then sequences all 13 phases.

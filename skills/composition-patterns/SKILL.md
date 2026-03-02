@@ -144,11 +144,11 @@ fi
 
 ### Reference, Don't Repeat
 
-Instead of duplicating patterns, reference shared documentation:
+Instead of duplicating patterns, reference shared scripts directly:
 
 ```markdown
 # Good
-Run quality checks (see `common-patterns.md`):
+Run quality checks:
 ` ` `bash
 "${CLAUDE_PLUGIN_ROOT}/scripts/run-quality-checks.sh"
 ` ` `

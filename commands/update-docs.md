@@ -1,3 +1,7 @@
+---
+description: Sync docs from source-of-truth
+---
+
 # Update Documentation
 
 Sync documentation from source-of-truth.

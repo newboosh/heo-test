@@ -1,3 +1,8 @@
+---
+description: Start a systematic, hypothesis-driven bug investigation.
+help-usage: '`/bug <description>`'
+---
+
 # Bug Investigation
 
 Start a systematic, hypothesis-driven bug investigation.

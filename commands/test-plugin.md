@@ -1,6 +1,11 @@
+---
+description: Run the plugin test suite
+help-usage: '`/test-plugin [--only hooks | structure | --skip-scaffold | --dry-run]`'
+---
+
 # Test Plugin
 
-Run the comprehensive heo plugin test suite to verify that agents, commands, skills, and hooks are properly installed and working.
+Run the comprehensive plugin test suite to verify that agents, commands, skills, and hooks are properly installed and working.
 
 ## Usage
 

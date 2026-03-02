@@ -1,3 +1,8 @@
+---
+description: Types, lint, tests, security check
+help-usage: '`/verify [quick | full | pre-commit | pre-pr]`'
+---
+
 # Verification Command
 
 Run comprehensive verification on current codebase state.

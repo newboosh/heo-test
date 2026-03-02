@@ -1,3 +1,7 @@
+---
+description: Fix type and lint errors iteratively
+---
+
 # Build and Fix
 
 Incrementally fix Python type and lint errors by running `/verify quick` and fixing issues one at a time.

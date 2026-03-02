@@ -1,3 +1,8 @@
+---
+description: QA agent review
+help-usage: '`/qa [file | directory] [--staged | --branch]`'
+---
+
 # QA (Quality Assurance Review)
 
 Explicitly invoke the QA Agent to review completed work.

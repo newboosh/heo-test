@@ -1,3 +1,8 @@
+---
+description: Resolve merge conflicts
+help-usage: '`/coderabbit-conflicts [PR_NUMBER]`'
+---
+
 # CodeRabbit Resolve Conflicts
 
 Resolve merge conflicts for a PR after CodeRabbit comments have been processed.

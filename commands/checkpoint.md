@@ -1,3 +1,8 @@
+---
+description: Create or verify a checkpoint in your workflow.
+help-usage: '`/checkpoint create [name]`, `/checkpoint verify [name]`, `/checkpoint list`'
+---
+
 # Checkpoint Command
 
 Create or verify a checkpoint in your workflow.

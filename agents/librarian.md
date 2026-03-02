@@ -72,58 +72,6 @@ When invoked with fix tasks, read `docs/indexes/fix_report.json` and fix each is
 # Fix: Change `User` to `app.models.User` or `app/models/user.py::User`
 ```
 
-## Worktree Scope Awareness
-
-**CRITICAL: Always detect worktree context FIRST to prevent work loss**
-
-### Detecting Worktree Context
-
-```bash
-# Check if in worktree
-git rev-parse --show-toplevel
-# If output contains ".trees/" → IN A WORKTREE
-
-# Read worktree scope
-cat .worktree-scope.json
-cat PURPOSE.md
-```
-
-### Worktree Boundary Rules
-
-**Rule 1: Worktree-Scoped Files (MUST stay in worktree)**
-- Implementation files for worktree feature
-- Tests specific to worktree feature
-- Temporary documentation/notes
-- Work-in-progress files
-- Feature-specific configuration
-
-**Rule 2: Shared Documentation (CAN be in main workspace)**
-- Architecture documents (if they affect whole system)
-- API specifications (if they're project-wide)
-- Standards and guides (if they're reusable)
-
-**Rule 3: Work Loss Prevention**
-- NEVER recommend placing worktree-specific work in main workspace
-- ALWAYS warn if agent is about to save outside worktree scope
-- ALWAYS validate against `.worktree-scope.json` patterns
-
-### Location Decision Process
-
-1. Detect worktree context (first priority)
-2. Check `.worktree-scope.json` patterns (if in worktree)
-3. Consult documentation index (`docs/indexes/documentation-index.json`)
-4. Analyze file purpose and type
-5. Cross-reference with index to ensure consistency
-
-### Warning System
-
-Use this hierarchy when recommending file placement:
-
-- 🚨 **CRITICAL WARNING:** File will be saved outside worktree scope - work will be LOST
-- ⚠️ **WARNING:** File location may cause merge conflicts or duplication
-- ℹ️ **INFO:** Consider alternative placement for better organization
-- ✅ **SAFE:** Recommended location is within worktree scope
-
 ## Secondary Responsibilities
 
 ### Audit Mode

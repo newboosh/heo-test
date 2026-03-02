@@ -66,8 +66,6 @@ claude-heo-tree() {
         return 1
     fi
 
-    local context_file="$worktree_root/.claude-task-context.md"
-    local purpose_file="$worktree_root/.claude-purpose-context.md"
     local worktree_name
     worktree_name=$(basename "$worktree_root")
 
@@ -76,14 +74,10 @@ claude-heo-tree() {
 
     # Build system prompt from context files
     local system_prompt=""
-    if [[ -f "$context_file" ]]; then
-        system_prompt="You are working in a git worktree. Read .claude-task-context.md for full details.
+    if [[ -f "$worktree_root/CLAUDE.md" ]]; then
+        system_prompt="You are working in a git worktree. Read CLAUDE.md and PURPOSE.md for full details.
 
 IMPORTANT: Ask 1-3 clarifying questions before starting implementation."
-    elif [[ -f "$purpose_file" ]]; then
-        system_prompt="You are working in a git worktree. Read .claude-purpose-context.md for full details.
-
-IMPORTANT: Focus on this worktree's specific purpose."
     fi
 
     # Launch with context

@@ -1,3 +1,8 @@
+---
+description: Check PR status
+help-usage: '`/pr-status [PR_NUMBER]`'
+---
+
 # PR Status Check
 
 Check the status of a Pull Request including merge conflicts, CI status, and CodeRabbit threads.

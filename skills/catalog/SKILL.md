@@ -4,6 +4,7 @@ description: File classification and dependency tracking for AI agents. Build an
 argument-hint: <command> [options]
 model: haiku
 allowed-tools: Read, Bash, Grep, Glob
+help-usage: '`/catalog init`, `/catalog build [--incremental]`, `/catalog query [--category X | --file PATH | --depends-on PATH | --summary]`, `/catalog status`'
 ---
 
 # Catalog Commands

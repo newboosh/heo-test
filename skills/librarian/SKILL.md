@@ -4,6 +4,7 @@ description: Documentation management commands for auditing, scanning, and findi
 argument-hint: <command> [args]
 model: sonnet
 allowed-tools: Read, Grep, Glob, Bash, Edit
+help-usage: '`/librarian audit [full | app | tests | docs]`, `/librarian find "query"`, `/librarian place "desc"`, `/librarian stale [days]`, `/librarian coverage`, `/librarian orphans`'
 ---
 
 # Librarian Commands

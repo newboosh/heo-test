@@ -1,6 +1,6 @@
 ---
 name: compliance-check
-description: Check code against applicable standards. Used by QA Agent.
+description: Check code against standards
 model: opus
 allowed-tools: Read, Grep, Glob
 ---
@@ -33,15 +33,21 @@ Verify code complies with project standards.
 
 3. **Check test structure** (for test files)
    ```
+
    # Verify AAA pattern
+
    # Check for meaningful assertions
+
    # Check for edge case coverage
    ```
 
 4. **Check API compliance** (for API files)
    ```
+
    # Verify response format
+
    # Check HTTP methods
+
    # Verify error handling
    ```
 

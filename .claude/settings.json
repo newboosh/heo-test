@@ -3,7 +3,7 @@
   "permissions": {},
   "attribution": {
     "commit": "Co-Authored-By: Steve Glen <therealstevenglen@gmail.com>\nCo-Authored-By: Claude Code <noreply@anthropic.com>",
-    "pr": "Co-Authored-By: Steve Glen <therealstevenglen@gmail.com>\nCo-Authored-By: Claude Code <noreply@anthropic.com>"
+    "pr": "Co-authored-by: Steve Glen <therealstevenglen@gmail.com>\nCo-authored-by: Claude Code <noreply@anthropic.com>"
   },
   "statusLine": {
     "type": "command",

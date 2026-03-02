@@ -1,6 +1,6 @@
 ---
 name: diff-review
-description: Review changed files and identify what to check. Used by QA Agent.
+description: Review changed files
 model: opus
 allowed-tools: Read, Grep, Glob, Bash
 ---
@@ -53,6 +53,7 @@ git rev-parse --verify develop 2>/dev/null && echo "develop"
 
 2. **Categorize changes**
    ```markdown
+
    ### By Type
    - **Added:** New files
    - **Modified:** Changed files

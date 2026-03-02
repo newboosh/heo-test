@@ -3,59 +3,10 @@
 # Script: commands/conflict.sh
 # Purpose: Conflict detection commands for worktree system
 # Created: 2026-01-28
-# Description: Analyze scope and feature conflicts across worktrees
+# Description: Analyze feature conflicts across worktrees
 
-# Dependencies: lib/common.sh (print_* functions), scope-detector.sh
+# Dependencies: lib/common.sh (print_* functions)
 # Required variables: TREES_DIR, STAGED_FEATURES_FILE
-
-# /tree scope-conflicts
-# Detect scope conflicts across all active worktrees
-tree_scope_conflicts() {
-    print_header "Scope Conflict Detection"
-
-    local scope_files=()
-    local worktree_count=0
-
-    # Find all worktrees with scope files
-    for worktree_dir in "$TREES_DIR"/*; do
-        if [ -d "$worktree_dir" ] && [[ "$(basename "$worktree_dir")" != ".conflict-backup" ]]; then
-            local scope_file="$worktree_dir/.worktree-scope.json"
-            if [ -f "$scope_file" ]; then
-                scope_files+=("$scope_file")
-                worktree_count=$((worktree_count + 1))
-            fi
-        fi
-    done
-
-    if [ $worktree_count -eq 0 ]; then
-        print_info "No active worktrees with scope files found"
-        return 0
-    fi
-
-    echo "Analyzing scope conflicts across $worktree_count worktree(s)..."
-    echo ""
-
-    # Call scope detection utility if available
-    if type detect_scope_conflicts &>/dev/null; then
-        if detect_scope_conflicts "${scope_files[@]}"; then
-            print_success "No scope conflicts detected"
-            echo ""
-            print_info "All worktrees have non-overlapping scopes"
-        else
-            print_warning "Scope conflicts detected - see above for details"
-            echo ""
-            print_info "Resolution options:"
-            echo "  1. Adjust scope patterns in .worktree-scope.json files"
-            echo "  2. Merge related worktrees"
-            echo "  3. Use enforcement: 'hard' to block conflicting commits"
-            return 1
-        fi
-    else
-        print_warning "Scope detection function not available"
-        print_info "Ensure scope-detector.sh is sourced correctly"
-        return 1
-    fi
-}
 
 # /tree conflict
 # Analyze conflicts between staged features
