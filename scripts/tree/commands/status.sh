@@ -3,9 +3,9 @@
 # Script: commands/status.sh
 # Purpose: Status and diagnostics commands for worktree system
 # Created: 2026-01-28
-# Description: Show worktree status, restore terminals, refresh session
+# Description: Show worktree status and diagnostics
 
-# Dependencies: lib/common.sh (print_* functions), lib/setup.sh (generate_* functions)
+# Dependencies: lib/common.sh (print_* functions)
 # Required variables: TREES_DIR, STAGED_FEATURES_FILE, SCRIPT_DIR
 
 # /tree status
@@ -74,68 +74,6 @@ tree_status() {
     echo "  - /tree build - Create worktrees from staged features"
     echo "  - /tree reset - Complete task and reset worktree"
     echo "  - /tree closedone - Prune all worktrees"
-}
-
-# /tree restore
-# Restore terminals for worktrees without active shells
-tree_restore() {
-    print_header "Reconnecting Worktree Terminals"
-
-    # Find all existing worktrees
-    local worktrees=()
-    if [ -d "$TREES_DIR" ]; then
-        for dir in "$TREES_DIR"/*/ ; do
-            if [ -d "$dir/.git" ] || [ -f "$dir/.git" ]; then
-                local name=$(basename "$dir")
-                worktrees+=("$name|||$dir")
-            fi
-        done
-    fi
-
-    if [ ${#worktrees[@]} -eq 0 ]; then
-        print_warning "No worktrees found"
-        echo "Create worktrees first: /tree build"
-        return 0
-    fi
-
-    print_info "Found ${#worktrees[@]} worktree(s)"
-    echo ""
-
-    # Filter worktrees that need terminals
-    local needs_terminal=()
-    for worktree_info in "${worktrees[@]}"; do
-        local name="${worktree_info%%|||*}"
-        local path="${worktree_info#*|||}"
-
-        # Check if init script exists
-        if [ -f "$path/.claude-init.sh" ]; then
-            print_warning "  [!] $name - Needs terminal"
-            needs_terminal+=("$path")
-        else
-            print_warning "  [!] $name - Missing init script, regenerating..."
-            # Regenerate init script
-            generate_init_script "$name" "$name" "$path"
-            needs_terminal+=("$path")
-        fi
-    done
-
-    echo ""
-
-    if [ ${#needs_terminal[@]} -eq 0 ]; then
-        print_success "All worktrees have init scripts"
-        return 0
-    fi
-
-    # Create pending terminals file
-    rm -f "$TREES_DIR/.pending-terminals.txt"
-    for path in "${needs_terminal[@]}"; do
-        echo "$path" >> "$TREES_DIR/.pending-terminals.txt"
-    done
-
-    print_header "Launching Terminals"
-    generate_and_run_vscode_tasks
-
-    print_success "Terminal reconnection complete"
 }
 
 # /tree refresh

@@ -52,6 +52,7 @@ Parse the result and determine the state:
 | State | Condition | Action |
 |-------|-----------|--------|
 | **REVIEWING** | CodeRabbit review in progress | **WAIT** — sleep 60 seconds, re-check (up to 15 times) |
+| **PAUSED** | Reviews auto-paused | **RESUME** — post `@coderabbitai review`, then wait for re-review (same as Step 4 Phase 1 → Phase 2) |
 | **CLEAN** | No unresolved comments, no conflicts | **STOP — SUCCESS** |
 | **MERGED** | PR was merged | **STOP — SUCCESS** |
 | **CLOSED** | PR was closed without merge | **STOP — report closure** |
@@ -64,6 +65,12 @@ If REVIEWING, wait and re-check:
 sleep 60
 ```
 Re-run the status check. If still REVIEWING after 15 waits (15 minutes), report "CodeRabbit is still reviewing — try again later" and stop.
+
+If PAUSED, resume the review and then wait for re-review:
+```bash
+gh pr comment $PR_NUMBER --body "@coderabbitai review"
+```
+After posting, follow the same wait flow as Step 4 (Phase 1 → Phase 2) to wait for CodeRabbit to pick up and complete the review, then re-check status in Step 1.
 
 ---
 

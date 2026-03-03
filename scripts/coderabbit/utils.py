@@ -311,6 +311,21 @@ def gh_api_graphql_paginated(
     return {"nodes": all_nodes, "totalCount": len(all_nodes)}
 
 
+def resume_coderabbit_review(pr_number: int) -> bool:
+    """Resume a paused CodeRabbit review by posting @coderabbitai review.
+
+    Returns True if the comment was posted successfully, False otherwise.
+    """
+    try:
+        run_gh_command(
+            ["pr", "comment", str(pr_number), "--body", "@coderabbitai review"]
+        )
+        return True
+    except subprocess.CalledProcessError as e:
+        eprint(f"[utils] Failed to resume CodeRabbit review on PR #{pr_number}: {e}")
+        return False
+
+
 def get_current_branch() -> str:
     """Get the current git branch name."""
     result = subprocess.run(

@@ -1,0 +1,38 @@
+# TaskHive Project Standards
+# This file is referenced by the compliance-check skill.
+# It may be updated by /setup during scenario 00.
+
+project:
+  name: TaskHive
+  language: python
+  framework: flask
+
+naming:
+  files: snake_case
+  classes: PascalCase
+  functions: snake_case
+  constants: UPPER_SNAKE_CASE
+  test_pattern: "test_<subject>_<preposition>_<scenario>"
+
+structure:
+  source_dir: src/taskhive
+  test_dir: tests
+  routes_dir: src/taskhive/routes
+  models_dir: src/taskhive/models
+  services_dir: src/taskhive/services
+
+style:
+  max_line_length: 88
+  formatter: ruff
+  linter: ruff
+  type_checker: mypy
+
+testing:
+  framework: pytest
+  min_coverage: 80
+  require_tests_for_new_modules: true
+
+security:
+  no_hardcoded_secrets: true
+  require_env_for_secrets: true
+  password_min_length: 8

@@ -11,7 +11,7 @@
 # Ensure plugin is listed in project settings for worktree discoverability
 # Usage: ensure_enabled_plugins
 #
-# When Claude Code opens a session in a worktree (not via .claude-init.sh),
+# When Claude Code opens a session in a worktree,
 # it needs enabledPlugins in .claude/settings.json to discover the plugin.
 # This function ensures that entry exists in the target project's settings.
 # All errors are non-fatal (returns 0 on any failure).
@@ -150,135 +150,6 @@ copy_slash_commands_to_worktree() {
             ln -sf "$WORKSPACE_ROOT/.claude/settings.json" "$worktree_path/.claude/settings.json"
         fi
     fi
-}
-
-# Generate VS Code tasks and auto-execute them
-# Usage: generate_and_run_vscode_tasks
-generate_and_run_vscode_tasks() {
-    local pending_file="$TREES_DIR/.pending-terminals.txt"
-
-    if [ ! -f "$pending_file" ]; then
-        return 0
-    fi
-
-    print_info "Terminal initialization instructions:"
-    echo ""
-    echo "To launch Claude in each worktree, you can either:"
-    echo ""
-    echo "Option 1 - Manual launch (recommended for control):"
-    echo "  - Open terminal for each worktree"
-    echo "  - Run: cd <worktree-path> && bash .claude-init.sh"
-    echo ""
-    echo "Option 2 - Automatic launch:"
-
-    local terminal_num=1
-    while IFS= read -r worktree_path; do
-        local wt_name=$(basename "$worktree_path")
-        echo "  - Worktree $terminal_num: $wt_name"
-        echo "    cd \"$worktree_path\" && bash .claude-init.sh"
-        terminal_num=$((terminal_num + 1))
-    done < "$pending_file"
-
-    echo ""
-    print_warning "Note: Automated terminal launch disabled to prevent unwanted editor tabs"
-    print_info "The .claude-init.sh script in each worktree will launch Claude with task context"
-
-    rm -f "$pending_file"
-}
-
-# Generate .claude-init.sh script for Claude auto-launch
-# Usage: generate_init_script worktree_name description worktree_path
-generate_init_script() {
-    local worktree_name=$1
-    local description=$2
-    local worktree_path=$3
-    local init_script="$worktree_path/.claude-init.sh"
-
-    # Get plugin directory (parent of SCRIPT_DIR)
-    local plugin_dir="$(cd "$SCRIPT_DIR/.." && pwd)"
-
-    # Escape description for safe embedding in script
-    # Order matters: escape backslashes first, then backticks, then quotes and dollar signs
-    local escaped_desc="${description//\\/\\\\}"
-    escaped_desc="${escaped_desc//\`/\\\`}"
-    escaped_desc="${escaped_desc//\"/\\\"}"
-    escaped_desc="${escaped_desc//\$/\\\$}"
-
-    cat > "$init_script" << INITSCRIPT
-#!/bin/bash
-# Auto-generated Claude initialization script
-# Launches Claude with heo plugin and auto-sends task description
-
-WORKTREE_ROOT="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-cd "\$WORKTREE_ROOT"
-
-# Heo plugin location (embedded at build time)
-HEO_PLUGIN_DIR="$plugin_dir"
-
-# Task details (embedded at build time)
-WORKTREE_NAME="$worktree_name"
-TASK_DESCRIPTION="$escaped_desc"
-
-# Display banner
-echo ""
-echo "================================================================"
-echo "Worktree: \$WORKTREE_NAME"
-echo "================================================================"
-echo ""
-echo "Task: \$TASK_DESCRIPTION"
-echo ""
-echo "================================================================"
-echo ""
-echo "Launching Claude Code with heo plugin..."
-echo "   Plugin: \$HEO_PLUGIN_DIR"
-echo "   Permissions: auto-approved (--dangerously-skip-permissions)"
-echo "   First prompt: auto-sent with task description"
-echo ""
-
-# Check if Claude is available
-if ! command -v claude &> /dev/null; then
-    echo "Error: Claude Code not found in PATH"
-    echo "Install: https://docs.anthropic.com/en/docs/claude-code"
-    exec bash
-    exit 1
-fi
-
-# Verify plugin exists
-# Use array to safely handle paths with spaces
-PLUGIN_ARGS=()
-if [ -f "\$HEO_PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
-    PLUGIN_ARGS=(--add-dir "\$HEO_PLUGIN_DIR")
-else
-    echo "Warning: Heo plugin not found at \$HEO_PLUGIN_DIR"
-    echo "Launching without plugin..."
-fi
-
-# Build the initial prompt
-INITIAL_PROMPT="I'm starting work on this worktree task:
-
-## Task Description
-\$TASK_DESCRIPTION
-
-## Worktree Info
-- **Name**: \$WORKTREE_NAME
-- **Branch**: \$(git branch --show-current 2>/dev/null || echo 'unknown')
-
-## Your Instructions
-1. Read the CLAUDE.md and PURPOSE.md files to understand the full context
-2. Review the codebase to understand what exists
-3. Ask me 2-3 clarifying questions about:
-   - Any ambiguous requirements
-   - Technical decisions I should make
-   - Integration points with existing code
-   - Testing expectations
-
-Please ask your clarifying questions now. I'll answer them before you start implementing."
-
-# Launch Claude (use array expansion to handle spaces in paths)
-exec claude "\${PLUGIN_ARGS[@]}" --dangerously-skip-permissions -p "\$INITIAL_PROMPT"
-INITSCRIPT
-
-    chmod +x "$init_script"
 }
 
 # Generate CLAUDE.md for worktree (auto-read by Claude Code)

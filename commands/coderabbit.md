@@ -49,11 +49,17 @@ Based on the result:
 | State | Condition | Action |
 |-------|-----------|--------|
 | **REVIEWING** | CodeRabbit review in progress | **STOP** — Report "Review in progress, try again later" |
+| **PAUSED** | Reviews paused | Resume review and **STOP** — report "Reviews were paused, requested resume — try again after CodeRabbit starts reviewing" |
 | **CLEAN** | No unresolved comments, no conflicts | **STOP** — Report "PR is clean" |
 | **MERGED** | PR was merged | **STOP** — Report success |
 | **COMMENTS** | Has unresolved comments | Go to Step 3 |
 | **CONFLICTS_BLOCKED** | Has both comments and conflicts | Go to Step 3, then Step 4 |
 | **CONFLICTS_ONLY** | Has conflicts, no comments | Skip to Step 4 |
+
+If PAUSED, resume the review and stop:
+```bash
+gh pr comment $PR_NUMBER --body "@coderabbitai review"
+```
 
 ---
 

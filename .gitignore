@@ -34,10 +34,8 @@ __pycache__/
 venv/
 
 # Worktree-local files (NEVER commit these)
-CLAUDE.md
 PURPOSE.md
 .claude-purpose-context.md
-.claude-init.sh
 .pending-terminals.txt
 .pending-*
 

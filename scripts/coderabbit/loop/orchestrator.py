@@ -128,6 +128,7 @@ class LoopState(str, Enum):
     READY = "ready"           # Ready to process
     FIXING = "fixing"         # Waiting for Claude Code to apply fixes
     WAITING = "waiting"       # Waiting for CodeRabbit response
+    PAUSED = "paused"         # CodeRabbit auto-reviews paused
     CONFLICTS = "conflicts"   # Has merge conflicts to resolve
     CLEAN = "clean"           # PR is clean, awaiting CodeRabbit merge
     MERGED = "merged"         # PR has been merged - SUCCESS EXIT
@@ -297,6 +298,21 @@ def process_pr(pr_number: int, branch: str, iteration: int) -> PRState:
                 error=None,
             )
 
+        # Check if CodeRabbit reviews are paused
+        if status.get("coderabbit_paused"):
+            return PRState(
+                pr_number=pr_number,
+                branch=branch,
+                state=LoopState.PAUSED,
+                iteration=iteration,
+                comments=[],
+                general_comments=[],
+                has_conflicts=has_conflicts,
+                conflict_resolution=conflict_resolution,
+                last_cr_response=None,
+                error=status.get("coderabbit_paused_reason"),
+            )
+
         # Fetch comments if there are unresolved threads OR CodeRabbit feedback
         has_coderabbit_feedback = (
             status.get("coderabbit_inline_comments", 0) > 0 or
@@ -371,6 +387,10 @@ def determine_next_action(pr_states: list[PRState]) -> tuple[str, str]:
     errors = [pr for pr in pr_states if pr.state == LoopState.ERROR]
     if errors:
         return "investigate_error", f"Error in PR #{errors[0].pr_number}: {errors[0].error}"
+
+    paused = [pr for pr in pr_states if pr.state == LoopState.PAUSED]
+    if paused:
+        return "resume_review", f"PR #{paused[0].pr_number} has paused CodeRabbit reviews — resuming"
 
     conflicts = [pr for pr in pr_states if pr.state == LoopState.CONFLICTS]
     if conflicts:
@@ -542,6 +562,7 @@ def print_status(output: LoopOutput):
             LoopState.CLOSED: "[CLOSED]",
             LoopState.FIXING: "[FIX]",
             LoopState.WAITING: "[WAIT]",
+            LoopState.PAUSED: "[PAUSED]",
             LoopState.CONFLICTS: "[CONFLICT]",
             LoopState.ERROR: "[ERR]",
             LoopState.MAX_ITER: "[MAX]",
@@ -616,6 +637,7 @@ Examples:
             "escalate": 16,        # Max iterations
             "investigate_error": 17,  # Error occurred
             "closed": 18,          # PR closed without merge
+            "resume_review": 19,   # Reviews paused, needs resume
             "none": 0,
             "unknown": 1,
         }

@@ -42,6 +42,7 @@ Parse the output and report one of these states:
 | **COMMENTS** | Has unresolved comments | Run `/coderabbit process` |
 | **CONFLICTS_BLOCKED** | Has conflicts AND comments | Run `/coderabbit process`, then `/coderabbit conflicts` |
 | **CONFLICTS_ONLY** | Has conflicts, no comments | Run `/coderabbit conflicts` |
+| **PAUSED** | Reviews auto-paused | Post `@coderabbitai review` to resume |
 | **CLEAN** | No comments, no conflicts | PR is ready |
 
 ### 4. Output Format

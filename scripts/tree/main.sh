@@ -120,11 +120,10 @@ case "$COMMAND" in
         tree_reset "$@"
         ;;
 
-    status|restore|refresh)
+    status|refresh)
         load_command "status"
         case "$COMMAND" in
             status) tree_status "$@" ;;
-            restore) tree_restore "$@" ;;
             refresh) tree_refresh "$@" ;;
         esac
         ;;

@@ -66,10 +66,6 @@ When the user runs `/setup`:
        The heo plugin is installed with "local" scope, which means it will NOT be
        automatically discovered by Claude Code in worktrees created by /tree build.
 
-       Worktrees launched via .claude-init.sh (--add-dir) are unaffected, but if you
-       open a new Claude session directly in a worktree directory, the plugin will be
-       missing.
-
        To fix this:
          1. Uninstall the plugin:  claude plugin remove heo@heo-marketplace
          2. Reinstall and choose "project" scope when prompted

@@ -837,7 +837,7 @@ ENVEOF
 # ============================================================================
 test_agents() {
     if $SKIP_AGENTS; then return; fi
-    log_sect "PHASE 1: Agent Tests (up to 14 agents)"
+    log_sect "PHASE 1: Agent Tests (up to 15 agents)"
 
     # 1. planner
     run_test_if agent planner "agent" "planner" \
@@ -921,6 +921,12 @@ test_agents() {
     run_test_if agent e2e-runner "agent" "e2e-runner" \
         "You are testing the e2e-runner agent. Use the e2e-runner agent to describe what E2E tests would be needed for the /api/health and /api/items endpoints. Do NOT write any files." \
         "(e2e|end.to.end|test|endpoint|health|item|playwright|journey)" \
+        "$DEFAULT_TIMEOUT"
+
+    # 15. context-monitor
+    run_test_if agent context-monitor "agent" "context-monitor" \
+        "You are testing the context-monitor agent. Use the context-monitor agent to check the current context pressure state and report any checkpoints or recommendations. Do NOT modify files." \
+        "(context|pressure|state|monitor|checkpoint)" \
         "$DEFAULT_TIMEOUT"
 }
 
@@ -1537,6 +1543,34 @@ test_hooks() {
         "test -f hooks/post-jinja2-check.sh && echo 'EXISTS'" \
         "EXISTS"
 
+    run_local_test_if_hook "pre-cross-worktree-warning.py" "hook-file" "pre-cross-worktree-warning" \
+        "test -f hooks/pre-cross-worktree-warning.py && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "session-guard-init.py" "hook-file" "session-guard-init" \
+        "test -f hooks/session-guard-init.py && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "session-end-cleanup.py" "hook-file" "session-end-cleanup" \
+        "test -f hooks/session-end-cleanup.py && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "sentinel-task-context.py" "hook-file" "sentinel-task-context" \
+        "test -f hooks/sentinel-task-context.py && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "context-pressure.py" "hook-file" "context-pressure" \
+        "test -f hooks/context-pressure.py && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "capture-query.sh" "hook-file" "capture-query" \
+        "test -f hooks/capture-query.sh && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test_if_hook "recap-on-stop.sh" "hook-file" "recap-on-stop" \
+        "test -f hooks/recap-on-stop.sh && echo 'EXISTS'" \
+        "EXISTS"
+
     # --- Check hooks.json is valid JSON (required in all tiers) ---
     run_local_test "hook-config" "hooks-json-valid" \
         "python3 -c \"import json; json.load(open('hooks/hooks.json')); print('VALID_JSON')\"" \
@@ -1575,6 +1609,36 @@ print(f'FOUND_{len(entries)}_POST_TOOL_HOOKS')
 \"" \
         "FOUND_[0-9]"
 
+    run_local_test "hook-config" "has-user-prompt-submit-hooks" \
+        "python3 -c \"
+import json
+data = json.load(open('hooks/hooks.json'))
+hooks = data.get('hooks', data)
+entries = hooks.get('UserPromptSubmit', [])
+print(f'FOUND_{len(entries)}_USER_PROMPT_SUBMIT_HOOKS')
+\"" \
+        "FOUND_[0-9]"
+
+    run_local_test "hook-config" "has-stop-hooks" \
+        "python3 -c \"
+import json
+data = json.load(open('hooks/hooks.json'))
+hooks = data.get('hooks', data)
+entries = hooks.get('Stop', [])
+print(f'FOUND_{len(entries)}_STOP_HOOKS')
+\"" \
+        "FOUND_[0-9]"
+
+    run_local_test "hook-config" "has-session-end-hooks" \
+        "python3 -c \"
+import json
+data = json.load(open('hooks/hooks.json'))
+hooks = data.get('hooks', data)
+entries = hooks.get('SessionEnd', [])
+print(f'FOUND_{len(entries)}_SESSION_END_HOOKS')
+\"" \
+        "FOUND_[0-9]"
+
     # --- Check hook library modules (guarded) ---
     run_local_test_if_hook "lib/hook_utils.py" "hook-lib" "hook-utils-importable" \
         "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import hook_utils; print('IMPORTABLE')\"" \
@@ -1586,6 +1650,34 @@ print(f'FOUND_{len(entries)}_POST_TOOL_HOOKS')
 
     run_local_test_if_hook "lib/sentinel_patterns.py" "hook-lib" "sentinel-patterns-importable" \
         "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import sentinel_patterns; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/context_state.py" "hook-lib" "context-state-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import context_state; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/fallbacks.py" "hook-lib" "fallbacks-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import fallbacks; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/git_hooks_manager.py" "hook-lib" "git-hooks-manager-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import git_hooks_manager; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/github_auth.py" "hook-lib" "github-auth-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import github_auth; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/reasoning.py" "hook-lib" "reasoning-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import reasoning; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/tool_requirements.py" "hook-lib" "tool-requirements-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import tool_requirements; print('IMPORTABLE')\"" \
+        "IMPORTABLE"
+
+    run_local_test_if_hook "lib/venv_runner.py" "hook-lib" "venv-runner-importable" \
+        "python3 -c \"import sys; sys.path.insert(0,'hooks/lib'); import venv_runner; print('IMPORTABLE')\"" \
         "IMPORTABLE"
 
     # --- Functional: pre-git-safety-check blocks dangerous commands ---
@@ -1671,6 +1763,34 @@ print(f'FOUND_{len(entries)}_POST_TOOL_HOOKS')
 
     run_local_test_if_hook "post-jinja2-check.sh" "hook-syntax" "post-jinja2-check-syntax" \
         "bash -n hooks/post-jinja2-check.sh && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "pre-cross-worktree-warning.py" "hook-syntax" "pre-cross-worktree-warning-syntax" \
+        "python3 -m py_compile hooks/pre-cross-worktree-warning.py && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "session-guard-init.py" "hook-syntax" "session-guard-init-syntax" \
+        "python3 -m py_compile hooks/session-guard-init.py && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "session-end-cleanup.py" "hook-syntax" "session-end-cleanup-syntax" \
+        "python3 -m py_compile hooks/session-end-cleanup.py && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "sentinel-task-context.py" "hook-syntax" "sentinel-task-context-syntax" \
+        "python3 -m py_compile hooks/sentinel-task-context.py && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "context-pressure.py" "hook-syntax" "context-pressure-syntax" \
+        "python3 -m py_compile hooks/context-pressure.py && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "capture-query.sh" "hook-syntax" "capture-query-syntax" \
+        "bash -n hooks/capture-query.sh && echo 'SYNTAX_OK'" \
+        "SYNTAX_OK"
+
+    run_local_test_if_hook "recap-on-stop.sh" "hook-syntax" "recap-on-stop-syntax" \
+        "bash -n hooks/recap-on-stop.sh && echo 'SYNTAX_OK'" \
         "SYNTAX_OK"
 }
 
@@ -1795,6 +1915,56 @@ test_structure() {
             "missing=0; for d in skills/*/; do test -f \"\${d}SKILL.md\" || { echo \"MISSING: \$d\"; missing=1; }; done; echo 'CHECK_DONE'; exit \$missing" \
             "CHECK_DONE"
     fi
+
+    # --- Script syntax validation (guarded with recorded skips) ---
+    if [[ -f scripts/generate-help.py ]]; then
+        run_local_test "structure" "generate-help-syntax" \
+            "python3 -m py_compile scripts/generate-help.py && echo 'SYNTAX_OK'" \
+            "SYNTAX_OK"
+    else
+        TOTAL=$((TOTAL + 1)); SKIPPED=$((SKIPPED + 1))
+        log_skip "structure::generate-help-syntax (file not present)"
+        record_result "structure" "generate-help-syntax" "SKIPPED" "0" "File not found: scripts/generate-help.py"
+    fi
+
+    if [[ -f scripts/backfill-frontmatter.py ]]; then
+        run_local_test "structure" "backfill-frontmatter-syntax" \
+            "python3 -m py_compile scripts/backfill-frontmatter.py && echo 'SYNTAX_OK'" \
+            "SYNTAX_OK"
+    else
+        TOTAL=$((TOTAL + 1)); SKIPPED=$((SKIPPED + 1))
+        log_skip "structure::backfill-frontmatter-syntax (file not present)"
+        record_result "structure" "backfill-frontmatter-syntax" "SKIPPED" "0" "File not found: scripts/backfill-frontmatter.py"
+    fi
+
+    if [[ -f scripts/diagram-staleness-check.sh ]]; then
+        run_local_test "structure" "diagram-staleness-check-syntax" \
+            "bash -n scripts/diagram-staleness-check.sh && echo 'SYNTAX_OK'" \
+            "SYNTAX_OK"
+    else
+        TOTAL=$((TOTAL + 1)); SKIPPED=$((SKIPPED + 1))
+        log_skip "structure::diagram-staleness-check-syntax (file not present)"
+        record_result "structure" "diagram-staleness-check-syntax" "SKIPPED" "0" "File not found: scripts/diagram-staleness-check.sh"
+    fi
+
+    if [[ -f scripts/tree/commands/reset.sh ]]; then
+        run_local_test "structure" "tree-reset-syntax" \
+            "bash -n scripts/tree/commands/reset.sh && echo 'SYNTAX_OK'" \
+            "SYNTAX_OK"
+    else
+        TOTAL=$((TOTAL + 1)); SKIPPED=$((SKIPPED + 1))
+        log_skip "structure::tree-reset-syntax (file not present)"
+        record_result "structure" "tree-reset-syntax" "SKIPPED" "0" "File not found: scripts/tree/commands/reset.sh"
+    fi
+
+    # --- Template existence validation (unconditional — missing = FAIL) ---
+    run_local_test "structure" "help-header-template-exists" \
+        "test -f templates/help-header.md && echo 'EXISTS'" \
+        "EXISTS"
+
+    run_local_test "structure" "help-footer-template-exists" \
+        "test -f templates/help-footer.md && echo 'EXISTS'" \
+        "EXISTS"
 }
 
 

@@ -43,8 +43,7 @@ Where `${PLUGIN_DIR}` is the heo plugin's installation directory (contains `.cla
 - `/tree list` - Show staged features
 - `/tree clear` - Clear all staged features
 - `/tree conflict` - Analyze conflicts and suggest merges
-- `/tree build` - Create worktrees from staged features (auto-launches Claude)
-- `/tree restore` - Restore terminals for existing worktrees
+- `/tree build` - Create worktrees from staged features
 - `/tree status` - Show worktree environment status
 - `/tree refresh` - Check slash command availability and get session reload guidance
 - `/tree help` - Show detailed help

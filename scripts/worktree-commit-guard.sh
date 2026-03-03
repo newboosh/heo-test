@@ -6,7 +6,6 @@
 #
 # These files are generated per-worktree and must NEVER reach main:
 # - .claude-purpose-context.md (Purpose context)
-# - .claude-init.sh (Worktree launch script)
 # - PURPOSE.md (Worktree-specific purpose document)
 # - .pending-terminals.txt (Temporary pending state)
 # - .pending-* (Any temporary pending files)
@@ -27,7 +26,6 @@ NC='\033[0m'
 # Files that are worktree-local and should never be committed
 declare -a WORKTREE_LOCAL_FILES=(
     ".claude-purpose-context.md"
-    ".claude-init.sh"
     "PURPOSE.md"
     ".pending-terminals.txt"
 )

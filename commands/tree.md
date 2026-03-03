@@ -9,7 +9,7 @@ related:
   - scripts/tree.sh
 tags: [worktree, git, automation, development-workflow]
 description: Manage git worktrees with intelligent automation for parallel development
-help-usage: '`/tree stage <desc>`, `/tree list`, `/tree clear`, `/tree build`, `/tree sync [--all]`, `/tree status`, `/tree restore`, `/tree refresh`, `/tree conflict`, `/tree scope-conflicts`, `/tree help`'
+help-usage: '`/tree stage <desc>`, `/tree list`, `/tree clear`, `/tree build`, `/tree sync [--all]`, `/tree status`, `/tree refresh`, `/tree conflict`, `/tree scope-conflicts`, `/tree help`'
 help-extra-rows:
   - name: tree reset
     description: Complete task + reset
@@ -33,8 +33,7 @@ Where `${PLUGIN_DIR}` is the heo plugin's installation path (e.g., `~/.claude/pl
 - `/tree list` - Show staged features
 - `/tree clear` - Clear all staged features
 - `/tree conflict` - Analyze conflicts and suggest merges
-- `/tree build` - Create worktrees from staged features (auto-launches Claude)
-- `/tree restore` - Restore terminals for existing worktrees
+- `/tree build` - Create worktrees from staged features
 - `/tree status` - Show worktree environment status
 - `/tree refresh` - Check slash command availability and get session reload guidance
 - `/tree help` - Show detailed help

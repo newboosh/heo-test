@@ -347,7 +347,6 @@ PURPOSEEOF
             # Generate context files and setup
             generate_worktree_claude_md "$worktree_name" "$desc" "$branch" "$dev_branch" "$worktree_path"
             copy_slash_commands_to_worktree "$worktree_path"
-            generate_init_script "$worktree_name" "$desc" "$worktree_path"
         ) &
         bg_pids+=($!)
 
@@ -363,8 +362,6 @@ PURPOSEEOF
         local remaining_features_json
         remaining_features_json=$(printf '%s\n' "${features[@]:$((i+1))}" | jq -Rs '[split("\n")[] | select(length > 0)]')
         save_build_state "$dev_branch" "${#features[@]}" "$completed_names_json" "" "$remaining_features_json"
-
-        echo "$worktree_path" >> "$TREES_DIR/.pending-terminals.txt"
     done
 
     # Wait for all background file generation jobs to finish
@@ -382,6 +379,9 @@ PURPOSEEOF
         local librarian_name="librarian"
         local librarian_branch="task/00-librarian"
         local librarian_path="$TREES_DIR/$librarian_name"
+
+        validate_and_cleanup_worktree_path "$librarian_path" "$librarian_branch" || \
+            print_warning "  [!] Librarian pre-flight validation failed (non-critical)"
 
         if safe_git worktree add -b "$librarian_branch" "$librarian_path" "$dev_branch" &>/dev/null; then
             cat > "$librarian_path/PURPOSE.md" << EOF
@@ -406,10 +406,8 @@ EOF
 
             copy_slash_commands_to_worktree "$librarian_path"
             generate_worktree_claude_md "$librarian_name" "Documentation, tooling, and project organization" "$librarian_branch" "$dev_branch" "$librarian_path"
-            generate_init_script "$librarian_name" "Manage documentation and tooling" "$librarian_path"
 
             print_success "  [OK] Created librarian worktree"
-            echo "$librarian_path" >> "$TREES_DIR/.pending-terminals.txt"
             success_count=$((success_count + 1))
         else
             print_warning "  [!] Failed to create librarian worktree (non-critical)"
@@ -439,18 +437,13 @@ EOF
 
     if [ $success_count -gt 0 ]; then
         echo ""
-        print_header "Terminal Launch Instructions"
-        generate_and_run_vscode_tasks
-
-        echo ""
         print_success "All worktrees ready!"
         echo ""
         print_info "Next Steps:"
-        echo "  1. Open terminal for each worktree"
-        echo "  2. Navigate: cd <worktree-path>"
-        echo "  3. Launch Claude: bash .claude-init.sh"
-        echo "  4. When done: /tree close"
-        echo "  5. Merge all: /tree closedone"
+        echo "  1. cd into a worktree directory"
+        echo "  2. Launch Claude Code"
+        echo "  3. When done: /tree reset"
+        echo "  4. Prune all: /tree closedone"
 
         clear_build_state
 

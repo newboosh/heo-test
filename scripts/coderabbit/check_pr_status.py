@@ -24,6 +24,15 @@ from coderabbit.utils import (
 # CodeRabbit bot login variants (GitHub Apps appear as user[bot])
 CODERABBIT_LOGINS = {"coderabbitai", "coderabbitai[bot]", "coderabbit"}
 
+# Phrases CodeRabbit uses when auto-pausing reviews
+PAUSE_INDICATORS = [
+    "auto reviews paused",
+    "automatic reviews paused",
+    "reviews paused",
+    "paused due to",
+    "review is paused",
+]
+
 
 def is_coderabbit_user(login: str) -> bool:
     """Check if a login belongs to CodeRabbit bot."""
@@ -137,14 +146,47 @@ def get_pr_status(pr_number: int) -> dict:
                     }
                 )
 
-    # Check if CodeRabbit is currently reviewing
+    # Check if CodeRabbit is currently reviewing OR paused.
+    # Both flags are tracked chronologically so that a later state overrides
+    # an earlier one (e.g. a "paused" comment after a "reviewing" comment
+    # clears the reviewing flag, and vice versa).
     reviewing = False
-    for comment in general_comments:
+    paused = False
+    paused_reason = None
+    last_cr_comment_idx = None
+    for idx, comment in enumerate(general_comments):
         author = comment.get("author", {}).get("login", "")
-        body = comment.get("body", "").lower()
         if is_coderabbit_user(author):
-            if "reviewing" in body or "analyzing" in body:
+            body_lower = comment.get("body", "").lower()
+            # Skip walkthrough/summary comments — not actionable
+            if any(skip in body_lower for skip in ["walkthrough", "summary by coderabbit"]):
+                continue
+            # Check if this CodeRabbit comment indicates a pause
+            is_pause = any(phrase in body_lower for phrase in PAUSE_INDICATORS)
+            if is_pause:
+                paused = True
+                paused_reason = comment.get("body", "")[:200]
+                last_cr_comment_idx = idx
+                reviewing = False  # pause overrides prior reviewing
+            elif "reviewing" in body_lower or "analyzing" in body_lower:
                 reviewing = True
+                paused = False  # active review overrides prior pause
+                paused_reason = None
+            elif last_cr_comment_idx is not None:
+                # A non-pause, non-reviewing CodeRabbit comment clears pause
+                paused = False
+                paused_reason = None
+
+    # If paused, check for a subsequent non-bot "@coderabbitai review" that resumed it
+    if paused and last_cr_comment_idx is not None:
+        for comment in general_comments[last_cr_comment_idx + 1:]:
+            author = comment.get("author", {}).get("login", "")
+            if not is_coderabbit_user(author):
+                body_lower = comment.get("body", "").lower()
+                if "@coderabbitai review" in body_lower:
+                    paused = False
+                    paused_reason = None
+                    break
 
     # Determine PR state based on CodeRabbit feedback specifically
     mergeable = pr_data.get("mergeable", "UNKNOWN")
@@ -155,6 +197,9 @@ def get_pr_status(pr_number: int) -> dict:
     if reviewing:
         state = "SKIP"
         state_reason = "CodeRabbit review in progress"
+    elif paused:
+        state = "PAUSED"
+        state_reason = "CodeRabbit automatic reviews are paused"
     elif has_coderabbit_feedback and has_conflicts:
         state = "CONFLICTS_BLOCKED"
         state_reason = "Has merge conflicts AND unresolved CodeRabbit comments - resolve comments first"
@@ -184,6 +229,8 @@ def get_pr_status(pr_number: int) -> dict:
         "unresolved_threads": len(unresolved_threads),
         "total_threads": len(review_threads),
         "coderabbit_reviewing": reviewing,
+        "coderabbit_paused": paused,
+        "coderabbit_paused_reason": paused_reason,
         "coderabbit_inline_comments": len(coderabbit_comments),
         "coderabbit_general_comments": len(coderabbit_general),
         "coderabbit_comments": coderabbit_comments,
@@ -206,6 +253,12 @@ def print_human_readable(status: dict):
 
     if status["coderabbit_reviewing"]:
         print("\nCodeRabbit is currently reviewing...")
+
+    if status["coderabbit_paused"]:
+        print("\nCodeRabbit reviews are PAUSED!")
+        if status["coderabbit_paused_reason"]:
+            print(f"  Reason: {status['coderabbit_paused_reason']}")
+        print("  Resume with: @coderabbitai review")
 
     if status["coderabbit_inline_comments"]:
         print(f"\nCodeRabbit inline comments ({status['coderabbit_inline_comments']}):")

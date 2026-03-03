@@ -1,0 +1,3 @@
+Database migrations for TaskHive.
+Run `flask --app taskhive.app:create_app db init` to initialize Alembic,
+then `flask --app taskhive.app:create_app db migrate -m "initial"` to generate.

@@ -17,7 +17,6 @@ Available commands:
   clear                  - Clear all staged features
   conflict               - Analyze conflicts and suggest merges
   build [options]        - Create worktrees from staged features
-  restore                - Restore terminals for existing worktrees
   sync [--all]           - Sync worktree(s) from origin/main via rebase
   reset [options]        - Complete task: ship it, AI wrapup, reset
   closedone              - Prune all local worktrees
