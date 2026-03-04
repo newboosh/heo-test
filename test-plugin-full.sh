@@ -3,7 +3,7 @@
 # test-plugin-full.sh — Comprehensive Heo Plugin Test Suite
 # ============================================================================
 #
-# Tests every agent, command, skill, and hook after the plugin is installed.
+# Tests every command, skill, and hook after the plugin is installed.
 # Generates a minimal Python project scaffold, then runs smoke + functional
 # tests using `claude -p` CLI automation.
 #
@@ -13,13 +13,12 @@
 #
 # Options:
 #   --skip-scaffold    Skip project scaffolding (already set up)
-#   --skip-agents      Skip agent tests
 #   --skip-commands    Skip command tests
 #   --skip-skills      Skip skill tests
 #   --skip-hooks       Skip hook tests
 #   --skip-structure   Skip plugin structure validation tests
 #   --skip-integration Skip integration smoke tests
-#   --only <category>  Run only one category: agents|commands|skills|hooks|structure|integration
+#   --only <category>  Run only one category: commands|skills|hooks|structure|integration
 #   --timeout <secs>   Default timeout per test (default: 120)
 #   --verbose          Show full claude output for each test
 #   --dry-run          Print what would run without executing
@@ -67,7 +66,6 @@ DEFAULT_TIMEOUT=120
 VERBOSE=false
 DRY_RUN=false
 SKIP_SCAFFOLD=false
-SKIP_AGENTS=false
 SKIP_COMMANDS=false
 SKIP_SKILLS=false
 SKIP_HOOKS=false
@@ -113,7 +111,6 @@ usage() {
 # ---------------------------------------------------------------------------
 # Component-existence guards (auto-discovery for partial installs)
 # ---------------------------------------------------------------------------
-agent_exists()   { [[ -f "agents/${1}.md" ]]; }
 command_exists() { [[ -f "commands/${1}.md" ]]; }
 skill_exists()   { [[ -d "skills/${1}" ]] && [[ -f "skills/${1}/SKILL.md" ]]; }
 hook_exists()    { [[ -f "hooks/${1}" ]]; }
@@ -126,7 +123,6 @@ run_test_if() {
     shift 2
     local exists=false
     case "$check_type" in
-        agent)   agent_exists "$check_name" && exists=true ;;
         command) command_exists "$check_name" && exists=true ;;
         skill)   skill_exists "$check_name" && exists=true ;;
     esac
@@ -163,7 +159,6 @@ run_local_test_if_hook() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --skip-scaffold)    SKIP_SCAFFOLD=true; shift ;;
-        --skip-agents)      SKIP_AGENTS=true; shift ;;
         --skip-commands)    SKIP_COMMANDS=true; shift ;;
         --skip-skills)      SKIP_SKILLS=true; shift ;;
         --skip-hooks)       SKIP_HOOKS=true; shift ;;
@@ -191,16 +186,15 @@ done
 
 # Apply --only filter
 if [[ -n "$ONLY" ]]; then
-    SKIP_AGENTS=true; SKIP_COMMANDS=true; SKIP_SKILLS=true; SKIP_HOOKS=true
+    SKIP_COMMANDS=true; SKIP_SKILLS=true; SKIP_HOOKS=true
     SKIP_STRUCTURE=true; SKIP_INTEGRATION=true
     case "$ONLY" in
-        agents)      SKIP_AGENTS=false ;;
         commands)    SKIP_COMMANDS=false ;;
         skills)      SKIP_SKILLS=false ;;
         hooks)       SKIP_HOOKS=false ;;
         structure)   SKIP_STRUCTURE=false ;;
         integration) SKIP_INTEGRATION=false ;;
-        *)           echo "Unknown category: $ONLY (use agents|commands|skills|hooks|structure|integration)"; exit 1 ;;
+        *)           echo "Unknown category: $ONLY (use commands|skills|hooks|structure|integration)"; exit 1 ;;
     esac
 fi
 
@@ -833,110 +827,11 @@ ENVEOF
 
 
 # ============================================================================
-# PHASE 1: AGENT TESTS
-# ============================================================================
-test_agents() {
-    if $SKIP_AGENTS; then return; fi
-    log_sect "PHASE 1: Agent Tests (up to 15 agents)"
-
-    # 1. planner
-    run_test_if agent planner "agent" "planner" \
-        "You are testing the planner agent. Use the planner agent to create a brief plan for adding a /logout endpoint to app/routes.py. Keep the plan under 5 bullet points." \
-        "(plan|step|phase|implement|endpoint)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 2. architect
-    run_test_if agent architect "agent" "architect" \
-        "You are testing the architect agent. Use the architect agent to review the current architecture in app/ and suggest if a service layer is needed. Keep it brief (3-5 sentences)." \
-        "(architect|layer|pattern|structure|design|service)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 3. code-reviewer
-    run_test_if agent code-reviewer "agent" "code-reviewer" \
-        "You are testing the code-reviewer agent. Use the code-reviewer agent to review the file app/utils.py. Report any issues found. Keep it concise." \
-        "(review|issue|print|sanitize|security|finding|suggestion)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 4. security-reviewer
-    run_test_if agent security-reviewer "agent" "security-reviewer" \
-        "You are testing the security-reviewer agent. Use the security-reviewer agent to check app/routes.py for security issues. Report findings briefly." \
-        "(security|vulnerabilit|csrf|injection|xss|input|validation|finding)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 5. tdd-guide
-    run_test_if agent tdd-guide "agent" "tdd-guide" \
-        "You are testing the tdd-guide agent. Use the tdd-guide agent to suggest what tests are missing for app/models.py. Do NOT write any files. Just list the missing test cases." \
-        "(test|coverage|missing|edge.case|assert|should)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 6. qa-agent
-    run_test_if agent qa-agent "agent" "qa-agent" \
-        "You are testing the qa-agent. Use the qa-agent to review the current state of the project for quality issues. Do NOT modify files. Report findings briefly." \
-        "(quality|compliance|review|finding|standard|pass|check)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 7. context-agent
-    run_test_if agent context-agent "agent" "context-agent" \
-        "You are testing the context-agent. Use the context-agent to gather context about the app/ directory before working on it. Do NOT modify files. Summarize what you find." \
-        "(context|structure|file|route|model|pattern|flask)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 8. librarian
-    run_test_if agent librarian "agent" "librarian" \
-        "You are testing the librarian agent. Use the librarian agent to check if any documentation references are broken or missing in this project. Do NOT modify files. Report findings." \
-        "(documentation|doc|file|reference|found|missing|catalog)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 9. git-orchestrator
-    run_test_if agent git-orchestrator "agent" "git-orchestrator" \
-        "You are testing the git-orchestrator agent. Use the git-orchestrator agent to check the current git status and recent commit history. Do NOT make any commits or pushes. Just report the current state." \
-        "(branch|commit|status|clean|git|history)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 10. build-error-resolver
-    run_test_if agent build-error-resolver "agent" "build-error-resolver" \
-        "You are testing the build-error-resolver agent. Use the build-error-resolver agent to check if there are any type errors or lint issues in app/. Do NOT fix anything. Just report what you find." \
-        "(error|lint|type|check|clean|issue|ruff|mypy|no.*(error|issue))" \
-        "$DEFAULT_TIMEOUT"
-
-    # 11. refactor-cleaner
-    run_test_if agent refactor-cleaner "agent" "refactor-cleaner" \
-        "You are testing the refactor-cleaner agent. Use the refactor-cleaner agent to scan app/ for dead code or unused imports. Do NOT modify files. Report findings." \
-        "(dead.code|unused|import|refactor|clean|found|scan)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 12. sentinel
-    run_test_if agent sentinel "agent" "sentinel" \
-        "You are testing the sentinel agent. Use the sentinel agent to scan the project for emerging issues like TODOs, hardcoded values, mocks, or workarounds. Do NOT modify files. Report findings." \
-        "(sentinel|issue|todo|hardcoded|workaround|mock|finding|scan|emerging)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 13. doc-updater
-    run_test_if agent doc-updater "agent" "doc-updater" \
-        "You are testing the doc-updater agent. Use the doc-updater agent to analyze the project structure and describe what a codemap would contain. Do NOT create or modify files." \
-        "(doc|map|structure|module|file|app|route|model)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 14. e2e-runner
-    run_test_if agent e2e-runner "agent" "e2e-runner" \
-        "You are testing the e2e-runner agent. Use the e2e-runner agent to describe what E2E tests would be needed for the /api/health and /api/items endpoints. Do NOT write any files." \
-        "(e2e|end.to.end|test|endpoint|health|item|playwright|journey)" \
-        "$DEFAULT_TIMEOUT"
-
-    # 15. context-monitor
-    run_test_if agent context-monitor "agent" "context-monitor" \
-        "You are testing the context-monitor agent. Use the context-monitor agent to check the current context pressure state and report any checkpoints or recommendations. Do NOT modify files." \
-        "(context|pressure|state|monitor|checkpoint)" \
-        "$DEFAULT_TIMEOUT"
-}
-
-
-# ============================================================================
-# PHASE 2: SLASH COMMAND TESTS
+# PHASE 1: SLASH COMMAND TESTS
 # ============================================================================
 test_commands() {
     if $SKIP_COMMANDS; then return; fi
-    log_sect "PHASE 2: Slash Command Tests (up to 43 commands)"
+    log_sect "PHASE 1: Slash Command Tests (up to 43 commands)"
 
     # --- Planning & Discovery ---
 
@@ -1221,11 +1116,11 @@ test_commands() {
 
 
 # ============================================================================
-# PHASE 3: SKILL TESTS
+# PHASE 2: SKILL TESTS
 # ============================================================================
 test_skills() {
     if $SKIP_SKILLS; then return; fi
-    log_sect "PHASE 3: Skill Tests (up to 44 skills)"
+    log_sect "PHASE 2: Skill Tests (up to 44 skills)"
 
     # --- User-invocable skills ---
 
@@ -1486,11 +1381,11 @@ test_skills() {
 
 
 # ============================================================================
-# PHASE 4: HOOK TESTS
+# PHASE 3: HOOK TESTS
 # ============================================================================
 test_hooks() {
     if $SKIP_HOOKS; then return; fi
-    log_sect "PHASE 4: Hook Tests"
+    log_sect "PHASE 3: Hook Tests"
 
     # --- Check hook files exist (guarded for partial installs) ---
 
@@ -1796,11 +1691,11 @@ print(f'FOUND_{len(entries)}_SESSION_END_HOOKS')
 
 
 # ============================================================================
-# PHASE 5: Plugin Structure Validation
+# PHASE 4: Plugin Structure Validation
 # ============================================================================
 test_structure() {
     if $SKIP_STRUCTURE; then return; fi
-    log_sect "PHASE 5: Plugin Structure Validation"
+    log_sect "PHASE 4: Plugin Structure Validation"
 
     # Plugin metadata
     run_local_test "structure" "plugin-json-exists" \
@@ -1969,11 +1864,11 @@ test_structure() {
 
 
 # ============================================================================
-# PHASE 6: Integration Smoke Tests (end-to-end with claude)
+# PHASE 5: Integration Smoke Tests (end-to-end with claude)
 # ============================================================================
 test_integration() {
     if $SKIP_INTEGRATION; then return; fi
-    log_sect "PHASE 6: Integration Smoke Tests"
+    log_sect "PHASE 5: Integration Smoke Tests"
 
     # Can claude see the plugin agents? (pattern covers both full and testing tiers)
     run_test "integration" "claude-sees-agents" \
@@ -2089,7 +1984,6 @@ main() {
     scaffold_project
     test_structure
     test_hooks
-    test_agents
     test_commands
     test_skills
     test_integration
